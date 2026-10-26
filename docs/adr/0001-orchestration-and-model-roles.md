@@ -15,6 +15,7 @@
   - dsh で使う DeepSeek は `deepseek/deepseek-v4.1-flash`（利用者の指定。公式の latest が 1017 版であることを利用者が確認済み）。MiMo は `xiaomi/mimo-v2.6-pro`。
   - Orca から dsh を起動すると、プロンプトが入力欄に入ったまま送信されないことがある（2回とも起きた）。起動後に `orca terminal send --terminal <handle> --enter` で送信する。読み込み中（画面下に「Checking…」が出ている間）の Enter は効かないので、モデル名の行に `Full access` が出てから送り、画面で送信されたことを確かめる。
   - Codex CLI の更新案内（`agent-update-prompt`）が出ると、Orca からの起動が止まる。`~/.codex/version.json` の `dismissed_version` を最新版にすると出なくなる（案内で「スキップ」を選ぶのと同じ）。
+  - コーディネーターの端末は、一度に1つの Run にしか結び付かない。`run-create` で新しい Run を作ると、古い Run の受信箱は `consumer_fenced` で読めなくなる（`run-use` で付け替えはできる）。生きているワーカーがいる間は Run を増やさず、1つの Run に Task を足していく。
   - dsh-tui の headless 実行（`dsh-tui run`）は手元で失敗した（`TASK_FAILED: DSH exited unsuccessfully (1)`）。Orca の TUI 経由で使う。
 - 試走（`experiments/model-probe/RESULTS.md`）:
   - 3モデルとも、色の計算の正しさ・60fps・reduced motion・点滅なしの要件を満たした。
