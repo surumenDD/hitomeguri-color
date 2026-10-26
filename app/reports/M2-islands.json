@@ -1,0 +1,354 @@
+{
+  "oasis": {
+    "diagnostics": [
+      {
+        "seconds": 0,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 4.2,
+        "clampedPixels": 1
+      },
+      {
+        "seconds": 7.2,
+        "clampedPixels": 2
+      },
+      {
+        "seconds": 11.4,
+        "clampedPixels": 2
+      },
+      {
+        "seconds": 14.6,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 17.2,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 20,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 23.6,
+        "clampedPixels": 0
+      }
+    ],
+    "islands": [
+      {
+        "id": "base-0",
+        "base": 0,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-1",
+        "base": 1,
+        "role": "shadow",
+        "gates": []
+      },
+      {
+        "id": "base-2",
+        "base": 2,
+        "role": "middle",
+        "gates": []
+      },
+      {
+        "id": "base-3",
+        "base": 3,
+        "role": "shadow",
+        "gates": []
+      },
+      {
+        "id": "base-4",
+        "base": 4,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-5-out",
+        "base": 5,
+        "role": "sky",
+        "gates": [
+          {
+            "kind": "rect",
+            "bounds": [0.06, 0.42, 0.38, 0.6],
+            "invert": true,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-5-in",
+        "base": 5,
+        "role": "light",
+        "gates": [
+          {
+            "kind": "rect",
+            "bounds": [0.06, 0.42, 0.38, 0.6],
+            "invert": false,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-6",
+        "base": 6,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-7-out",
+        "base": 7,
+        "role": "sky",
+        "gates": [
+          {
+            "kind": "rect",
+            "bounds": [0.06, 0.42, 0.38, 0.6],
+            "invert": true,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-7-in",
+        "base": 7,
+        "role": "light",
+        "gates": [
+          {
+            "kind": "rect",
+            "bounds": [0.06, 0.42, 0.38, 0.6],
+            "invert": false,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-8",
+        "base": 8,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-9",
+        "base": 9,
+        "role": "shadow",
+        "gates": []
+      },
+      {
+        "id": "base-10",
+        "base": 10,
+        "role": "middle",
+        "gates": []
+      },
+      {
+        "id": "base-11-out",
+        "base": 11,
+        "role": "middle",
+        "gates": [
+          {
+            "kind": "rect",
+            "bounds": [0.06, 0.42, 0.38, 0.6],
+            "invert": true,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-11-in",
+        "base": 11,
+        "role": "light",
+        "gates": [
+          {
+            "kind": "rect",
+            "bounds": [0.06, 0.42, 0.38, 0.6],
+            "invert": false,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-12",
+        "base": 12,
+        "role": "water",
+        "gates": []
+      },
+      {
+        "id": "base-13",
+        "base": 13,
+        "role": "light",
+        "gates": []
+      },
+      {
+        "id": "base-14",
+        "base": 14,
+        "role": "celestial",
+        "gates": []
+      },
+      {
+        "id": "base-15",
+        "base": 15,
+        "role": "celestial",
+        "gates": []
+      }
+    ],
+    "maxSumError": 5.970650818198919e-8,
+    "outsideRegionWeight": 0
+  },
+  "flat": {
+    "diagnostics": [
+      {
+        "seconds": 0,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 4.2,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 7.2,
+        "clampedPixels": 1
+      },
+      {
+        "seconds": 11.4,
+        "clampedPixels": 1
+      },
+      {
+        "seconds": 14.6,
+        "clampedPixels": 1
+      },
+      {
+        "seconds": 17.2,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 20,
+        "clampedPixels": 0
+      },
+      {
+        "seconds": 23.6,
+        "clampedPixels": 0
+      }
+    ],
+    "islands": [
+      {
+        "id": "base-0-out",
+        "base": 0,
+        "role": "sky",
+        "gates": [
+          {
+            "kind": "line",
+            "bounds": [0, 0.5, 1, 1],
+            "invert": true,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-0-in",
+        "base": 0,
+        "role": "water",
+        "gates": [
+          {
+            "kind": "line",
+            "bounds": [0, 0.5, 1, 1],
+            "invert": false,
+            "feather": 3
+          }
+        ]
+      },
+      {
+        "id": "base-1",
+        "base": 1,
+        "role": "shadow",
+        "gates": []
+      },
+      {
+        "id": "base-2",
+        "base": 2,
+        "role": "water",
+        "gates": []
+      },
+      {
+        "id": "base-3",
+        "base": 3,
+        "role": "water",
+        "gates": []
+      },
+      {
+        "id": "base-4",
+        "base": 4,
+        "role": "water",
+        "gates": []
+      },
+      {
+        "id": "base-5",
+        "base": 5,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-6",
+        "base": 6,
+        "role": "shadow",
+        "gates": []
+      },
+      {
+        "id": "base-7",
+        "base": 7,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-8",
+        "base": 8,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-9",
+        "base": 9,
+        "role": "sky",
+        "gates": []
+      },
+      {
+        "id": "base-10",
+        "base": 10,
+        "role": "light",
+        "gates": []
+      },
+      {
+        "id": "base-11",
+        "base": 11,
+        "role": "light",
+        "gates": []
+      },
+      {
+        "id": "base-12",
+        "base": 12,
+        "role": "water",
+        "gates": []
+      },
+      {
+        "id": "base-13",
+        "base": 13,
+        "role": "water",
+        "gates": []
+      },
+      {
+        "id": "base-14",
+        "base": 14,
+        "role": "celestial",
+        "gates": []
+      },
+      {
+        "id": "base-15",
+        "base": 15,
+        "role": "middle",
+        "gates": []
+      }
+    ],
+    "maxSumError": 5.9099237503801305e-8,
+    "outsideRegionWeight": 0
+  }
+}

@@ -21,7 +21,11 @@ for (const [location, pkg] of Object.entries(lock.packages)) {
   if (!location) continue;
   licenses.set(pkg.license, (licenses.get(pkg.license) ?? 0) + 1);
   if (!allowed.has(pkg.license))
-    invalid.push({ location, version: pkg.version, license: pkg.license });
+    if (
+      !(pkg.license === 'OFL-1.1' && location.includes('@fontsource/')) &&
+      !(pkg.dev && ['MPL-2.0', 'CC-BY-4.0'].includes(pkg.license))
+    )
+      invalid.push({ location, version: pkg.version, license: pkg.license });
 }
 console.log(
   JSON.stringify(

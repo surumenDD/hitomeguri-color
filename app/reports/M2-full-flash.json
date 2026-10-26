@@ -1,0 +1,56 @@
+{
+  "input": {
+    "kind": "video",
+    "path": "C:\\Users\\ryo52\\orca\\workspaces\\sample-app\\v01-m1-core\\app\\test\\results\\m2-v41-videos\\1080p-12s.mp4",
+    "frameCount": 360
+  },
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "frameCount": 360,
+  "durationSec": 12,
+  "analysis": {
+    "blockSize": 8,
+    "cssPxPerPx": 1,
+    "whiteLuminanceCdM2": 200,
+    "minSwing": 0.01,
+    "visualFieldCssPx": [341, 256],
+    "visualFieldBlocks": [43, 32]
+  },
+  "wcag": {
+    "pass": true,
+    "rateExceeded": false,
+    "areaExceeded": false,
+    "worstWindow": {
+      "startSec": 1.267,
+      "endSec": 2.267,
+      "flashCount": 1,
+      "generalFlashes": 1,
+      "redFlashes": 0
+    },
+    "totalFlashes": 3215,
+    "maxFlashesPerSecond": 1,
+    "maxGeneralFlashesPerSecond": 1,
+    "maxRedFlashesPerSecond": 0,
+    "minLeadingEdgeGapMs": null,
+    "maxConcurrentFlashAreaRatio": 0
+  },
+  "itu": {
+    "pass": true,
+    "rateExceeded": false,
+    "areaExceeded": false,
+    "worstWindow": {
+      "startSec": 1.267,
+      "endSec": 2.267,
+      "flashCount": 1,
+      "generalFlashes": 1,
+      "redFlashes": 0
+    },
+    "totalFlashes": 3215,
+    "maxFlashesPerSecond": 1,
+    "maxGeneralFlashesPerSecond": 1,
+    "maxRedFlashesPerSecond": 0,
+    "minLeadingEdgeGapMs": null,
+    "maxConcurrentFlashAreaRatio": 0
+  }
+}

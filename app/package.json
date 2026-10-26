@@ -11,12 +11,18 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run && node test/browser.mjs",
     "lint": "biome check .",
-    "check": "tsc --noEmit && npm run lint && npm test && npm run licenses",
+    "check": "tsc --noEmit && npm run lint && npm test && npm run test:production && npm run licenses",
     "test:browser": "node test/browser.mjs",
     "test:production": "npm run build && node test/production.mjs",
-    "licenses": "node test/licenses.mjs"
+    "licenses": "node test/licenses.mjs",
+    "test:matrix": "node test/validate-m2.mjs",
+    "test:performance": "node test/performance-m2.mjs",
+    "test:captures": "node test/capture-islands.mjs && node test/capture-ui.mjs"
   },
   "dependencies": {
+    "@fontsource/zen-kaku-gothic-new": "5.3.1",
+    "@phosphor-icons/react": "2.1.10",
+    "mp4-muxer": "5.2.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

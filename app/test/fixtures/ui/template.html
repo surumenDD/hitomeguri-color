@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ひとめぐり（仮）— 外枠のモック</title>
+<link rel="stylesheet" href="node_modules/@fontsource/zen-kaku-gothic-new/400.css">
+<link rel="stylesheet" href="node_modules/@fontsource/zen-kaku-gothic-new/500.css">
+<link rel="stylesheet" href="node_modules/@fontsource/zen-kaku-gothic-new/700.css">
+<style>
+/* Tokens. Chrome follows landing-page-design (ADR-0002): spacing steps, Tailwind type scale,
+   dark surfaces from its list, base curve. The picture is the only colourful thing on screen;
+   the one accent is taken from the picture's horizon at the current moment. */
+:root{
+  --room:#181818; --panel:#1F1F1F; --control:#272727; --control-hover:#313131;
+  --ink:#ECECEC; --ink-quiet:#9B9B9B; --focus:#FFFFFF;
+  --accent:#dd6777;            /* horizon colour at the playhead (from the strip data) */
+  --s25:2px; --s50:4px; --s75:8px; --s100:12px; --s200:16px; --s300:24px; --s400:32px; --s500:40px; --s600:48px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --font:"Zen Kaku Gothic New",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--room);color:var(--ink);font-family:var(--font);font-size:16px;line-height:24px}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.skip{position:absolute;left:var(--s200);top:-48px;background:var(--control);padding:var(--s75) var(--s100);border-radius:8px}
+.skip:focus{top:var(--s200)}
+
+.top{display:flex;align-items:center;gap:var(--s300);padding:var(--s200) var(--s400)}
+.name{font-weight:700;font-size:18px;line-height:28px;letter-spacing:.04em;margin:0}
+.name small{font-weight:400;font-size:12px;line-height:16px;color:var(--ink-quiet);margin-left:var(--s75);letter-spacing:0}
+.samples{display:flex;gap:var(--s75);margin-left:auto}
+.thumb{width:48px;height:32px;border-radius:4px;border:0;padding:0;overflow:hidden;cursor:pointer;opacity:.62;
+  transition:opacity 300ms var(--ease),transform 500ms var(--ease)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb:hover{opacity:1}
+.thumb[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 2px var(--ink)}
+.open{background:var(--control);border:0;border-radius:8px;padding:var(--s75) var(--s100);font-size:14px;line-height:20px;font-weight:700;cursor:pointer;
+  transition:background-color 300ms var(--ease)}
+.open:hover{background:var(--control-hover)}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--s400);padding:0 var(--s400) var(--s400)}
+.picture{margin:0}
+.picture img{width:100%;display:block;border-radius:4px}
+
+/* The colour script: the whole loop in one band, and the timeline itself. */
+.script{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--s200);margin-top:var(--s300)}
+.play{width:48px;height:48px;border-radius:9999px;border:0;background:var(--ink);color:var(--room);cursor:pointer;display:grid;place-items:center;
+  transition:transform 500ms var(--ease)}
+.play:active{transform:scale(.98)}
+.play svg{width:20px;height:20px}
+.strip{position:relative;height:40px;border-radius:8px;overflow:hidden;cursor:pointer}
+.strip .band{height:50%}
+.strip .upper{background:__UPPER__}
+.strip .lower{background:__LOWER__}
+.strip .head{position:absolute;top:0;bottom:0;left:12.5%;width:2px;background:var(--ink);box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.when{min-width:7em;text-align:right;margin:0}
+.when b{display:block;font-weight:700;color:var(--accent)}
+.when span{font-size:14px;line-height:20px;color:var(--ink-quiet);font-variant-numeric:tabular-nums}
+
+/* No card behind the controls: the room itself is the panel, so the picture stays the only object. */
+.panel{display:flex;flex-direction:column;gap:var(--s500);align-self:start;padding-top:var(--s50)}
+.panel h2{font-size:14px;line-height:20px;font-weight:700;margin:0 0 var(--s100);color:var(--ink-quiet)}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s50);background:var(--control);border-radius:8px;padding:var(--s50)}
+.presets button{border:0;background:none;border-radius:4px;padding:var(--s75) var(--s50);font-size:14px;line-height:20px;cursor:pointer;color:var(--ink-quiet);
+  transition:background-color 300ms var(--ease),color 300ms var(--ease)}
+.presets button[aria-pressed="true"]{background:var(--control-hover);color:var(--ink);font-weight:700}
+.slider{display:grid;grid-template-columns:1fr auto;gap:var(--s50) var(--s100);margin-top:var(--s200);font-size:14px;line-height:20px}
+.slider output{color:var(--ink-quiet);font-variant-numeric:tabular-nums}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--ink)}
+.islands{display:flex;flex-direction:column;gap:var(--s75)}
+/* One row per role: the role name, then its islands as swatches, largest first. */
+.role-row{display:grid;grid-template-columns:40px 1fr;gap:var(--s75);align-items:start}
+.role-row>span{font-size:12px;line-height:16px;padding-top:2px;color:var(--ink-quiet)} /* 12/16 step; 2px centres it on the 20px swatch row */
+.role-row>div{display:flex;flex-wrap:wrap;gap:var(--s50)}
+.swatch{width:28px;height:20px;border-radius:4px;border:0;padding:0;cursor:pointer;transition:box-shadow 300ms var(--ease)}
+.swatch:hover{box-shadow:0 0 0 1px var(--ink-quiet)}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--room),0 0 0 4px var(--ink)}
+.actions{display:flex;flex-direction:column;gap:var(--s75)}
+.primary{border:0;border-radius:8px;padding:var(--s75) var(--s100);background:var(--ink);color:var(--room);font-weight:700;cursor:pointer;
+  transition:transform 500ms var(--ease)}
+.primary:active{transform:scale(.98)}
+.secondary{border:0;border-radius:8px;padding:var(--s75) var(--s100);background:var(--control);font-size:14px;line-height:20px;font-weight:700;cursor:pointer}
+.note{font-size:12px;line-height:16px;color:var(--ink-quiet);margin:0;text-wrap:pretty}
+.name small{text-wrap:balance}
+
+@media (max-width:960px){
+  .stage{grid-template-columns:1fr;padding:0 var(--s200) var(--s300)}
+  .top{padding:var(--s200);flex-wrap:wrap}
+  .samples{order:3;width:100%;margin-left:0;overflow-x:auto}
+  /* On a phone the colour script gets the full width; play and the time sit beneath it. */
+  .script{grid-template-columns:auto 1fr;grid-template-areas:"strip strip" "play when"}
+  .strip{grid-area:strip}
+  .play{grid-area:play}
+  .when{grid-area:when}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#picture">絵へ移る</a>
+<header class="top">
+  <h1 class="name">ひとめぐり<small>絵の色が、1日をひとめぐりする</small></h1>
+  <nav class="samples" aria-label="見本の絵">
+    <button class="thumb" aria-pressed="true" aria-label="運河の街"><img src="../../assets/hero/raw/canal-town.png" alt=""></button>
+    <button class="thumb" aria-pressed="false" aria-label="雪の村"><img src="../../assets/hero/raw/snow-village.png" alt=""></button>
+    <button class="thumb" aria-pressed="false" aria-label="灯台の岬"><img src="../../assets/hero/raw/lighthouse-cape.png" alt=""></button>
+    <button class="thumb" aria-pressed="false" aria-label="オアシス"><img src="../../assets/hero/raw/desert-oasis.png" alt=""></button>
+    <button class="thumb" aria-pressed="false" aria-label="港町"><img src="../../assets/samples/raw/flat-dusk-harbor.png" alt=""></button>
+  </nav>
+  <button class="open">自分の絵を開く</button>
+</header>
+<main class="stage">
+  <section aria-label="絵と時間">
+    <figure class="picture" id="picture"><img src="canal-t3.png" alt="運河の街。残照の時刻で、空は桃色、提灯が灯り始めている"></figure>
+    <div class="script">
+      <button class="play" aria-label="再生"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3l12 7-12 7z" fill="currentColor"/></svg></button>
+      <div class="strip" role="slider" tabindex="0" aria-label="1周の中の時刻" aria-valuemin="0" aria-valuemax="24" aria-valuenow="3" aria-valuetext="残照、3.0 秒">
+        <div class="band upper"></div><div class="band lower"></div><div class="head"></div>
+      </div>
+      <p class="when"><b>残照</b><span>3.0 / 24 秒</span></p>
+    </div>
+  </section>
+  <aside class="panel" aria-label="台本と書き出し">
+    <div>
+      <h2>台本</h2>
+      <div class="presets" role="group" aria-label="台本の種類">
+        <button aria-pressed="true">1日の光</button><button aria-pressed="false">長い夕暮れ</button><button aria-pressed="false">夜の灯り</button>
+      </div>
+      <label class="slider">長さ<output>24 秒</output><input type="range" min="12" max="48" value="24"></label>
+      <label class="slider">夜の深さ<output>ふつう</output><input type="range" min="0" max="100" value="50"></label>
+      <label class="slider">灯りの強さ<output>ふつう</output><input type="range" min="0" max="100" value="50"></label>
+    </div>
+    <div>
+      <h2>色の島</h2>
+      <div class="islands">
+        __ISLANDS__
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary">動画を書き出す</button>
+      <button class="secondary">この瞬間を画像で保存</button>
+      <p class="note">点滅の基準に通った動画だけを書き出します。画像は外へ送りません。</p>
+    </div>
+  </aside>
+</main>
+</body>
+</html>

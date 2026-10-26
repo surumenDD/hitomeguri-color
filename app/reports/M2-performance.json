@@ -1,0 +1,39 @@
+{
+  "render": {
+    "size": [1920, 1080],
+    "gpuMedianMs": 0.158784,
+    "wallMedianMs": 0.4000000059604645,
+    "rafMedianMs": 16.699999999999818,
+    "rafP95Ms": 16.799999999999955,
+    "rafMaxMs": 16.800000000000182
+  },
+  "preprocess": {
+    "size": [1732, 1155],
+    "runs": [
+      {
+        "conversion": 162.79999999701977,
+        "palette": 52.900000005960464,
+        "assignment": 59,
+        "weights": 160.29999999701977,
+        "total": 435,
+        "wallMs": 479.40000000596046
+      },
+      {
+        "conversion": 163.5,
+        "palette": 51,
+        "assignment": 59.70000000298023,
+        "weights": 162.79999999701977,
+        "total": 437,
+        "wallMs": 449.3999999910593
+      },
+      {
+        "conversion": 163.29999999701977,
+        "palette": 52.6000000089407,
+        "assignment": 56.599999994039536,
+        "weights": 164.5,
+        "total": 437,
+        "wallMs": 446.5
+      }
+    ]
+  }
+}

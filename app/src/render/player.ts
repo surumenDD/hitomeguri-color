@@ -70,7 +70,11 @@ export class Player {
     }
     this.renderer.draw(
       rolePaletteAt(image.data.metadata.palette, image.roles, state.seconds, state.preset),
-      { selected: state.selected },
+      {
+        selected: state.selected,
+        splitAt: state.splitPreview?.at,
+        splitLower: state.splitPreview?.side === 'lower',
+      },
     );
   }
   dispose(): void {

@@ -25,7 +25,7 @@ export interface Decomposition {
   alpha: Uint8Array<ArrayBuffer>;
   /** RGBA32F: L,a,b,nearest-palette-index, rows from top to bottom. */
   lab: Float32Array<ArrayBuffer>;
-  /** Four RGBA32F planes, each holding four of the sixteen fixed weights. */
+  /** RGBA32F planes holding four weights each: 16 base colours, up to 32 spatial islands. */
   weights: Float32Array<ArrayBuffer>[];
   metadata: Metadata;
 }

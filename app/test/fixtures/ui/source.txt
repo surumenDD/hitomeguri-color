@@ -1,0 +1,2 @@
+UI screenshots: 2cec53d0fbc37c5b7bf742493bc7bc5966e1b2e1; template and UI text incl. 12/16px + 2px padding: 652ee02e666c2b65da55c0c45717129cb24160b3
+Selection emphasis specification: d99a07183a513a1607d441fbee9be5eaac66af1b (OKLab L x 0.6, C x 0.25)
