@@ -1,16 +1,16 @@
 import {SAMPLES,paletteAt,labHex} from './color.js';
 import {Renderer} from './renderer.js';
-import {ROLES,DURATION,MOMENTS,inferRoles,rolePaletteAt} from './script.js';
+import {ROLES,DURATION,MOMENTS,PRESETS,inferRoles,rolePaletteAt} from './script.js';
 
 const $=q=>document.querySelector(q),captureMode=new URLSearchParams(location.search).has('capture');
 if(captureMode){document.body.classList.add('capture-mode');$('#capture').hidden=false;}
-const state={rows:[],ready:false,seconds:0,playing:false,previous:null,sample:0,mode:'role',weights:'soft',selected:-1};
+const state={rows:[],ready:false,seconds:0,playing:false,previous:null,sample:0,mode:'role',weights:'soft',selected:-1,preset:PRESETS.day};
 const renderer=new Renderer($('#scene')),captureRenderer=new Renderer($('#capture'));
 const status=text=>{$('#status').textContent=text;};
 function palette(row,seconds,mode='role'){
   if(mode==='original')return row.data.metadata.palette;
   if(mode==='legacy')return paletteAt(row.data.metadata.palette,'c',seconds);
-  return rolePaletteAt(row.data.metadata.palette,row.roles,seconds);
+  return rolePaletteAt(row.data.metadata.palette,row.roles,seconds,state.preset);
 }
 function stop(){state.playing=false;state.previous=null;$('#play').textContent='再生';}
 function draw(){
@@ -79,7 +79,8 @@ function diagnostic(index,seconds){
   return {seconds,lightnessOut,chromaMapped,pixels:pixels.length/4,minOut:lightnessOut?minOut:null,maxOut:lightnessOut?maxOut:null,examples};
 }
 function metadata(){return state.rows.map(row=>({id:row.id,name:row.name,...row.data.metadata,inference:row.inference,roles:row.roles}));}
-window.roleSpike={state,capture,diagnostic,metadata,palette:(i,t)=>palette(state.rows[i],t),moments:MOMENTS,duration:DURATION};
+window.roleSpike={state,capture,diagnostic,metadata,palette:(i,t)=>palette(state.rows[i],t),moments:MOMENTS,duration:DURATION,
+  setPreset:(id,overrides={})=>{state.preset={...PRESETS[id],...overrides};return state.preset;}};
 $('#sample').addEventListener('change',e=>{stop();state.sample=state.rows.findIndex(row=>row.id===e.target.value);state.selected=-1;buildPalette();draw();});
 $('#mode').addEventListener('change',e=>{stop();state.mode=e.target.value;state.seconds=0;$('#time').max=state.mode==='legacy'?20:24;draw();});
 $('#weights').addEventListener('change',e=>{state.weights=e.target.value;draw();});
