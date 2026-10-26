@@ -1,0 +1,398 @@
+{
+  "identityExact": true,
+  "storedWeightsUnchanged": true,
+  "cardinal": true,
+  "convex": true,
+  "matrixSolve": true,
+  "allLightnessInRange": false,
+  "unchangedSources": true,
+  "unchangedReferences": true,
+  "captures": 96,
+  "expectedCaptures": 96,
+  "errors": [],
+  "externalRequests": [],
+  "failedRequests": [],
+  "requests": [
+    {
+      "url": "/experiments/weights-spike/?capture",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/analysis.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/gallery.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/weights.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/pixel-rain-street.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-original.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-rbf-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-shepard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-filtered-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-spatial-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-residual-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-soft-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-rbf-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-shepard-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-filtered-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-spatial-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-residual-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-soft-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-rbf-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-shepard-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-filtered-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/flat-spatial-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-original.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-rbf-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-shepard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-filtered-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-spatial-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-original.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-residual-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-soft-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-rbf-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-shepard-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-filtered-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-spatial-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-residual-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-soft-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-rbf-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-shepard-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-filtered-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/painterly-spatial-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-original.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-rbf-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-shepard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-filtered-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-spatial-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-residual-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-soft-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-rbf-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-shepard-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-filtered-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-spatial-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-residual-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-soft-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-rbf-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-shepard-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-filtered-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/pixel-spatial-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-original.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-rbf-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-shepard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-filtered-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-spatial-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-residual-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-soft-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-rbf-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-shepard-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-filtered-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-spatial-d.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-original.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-residual-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-soft-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-rbf-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-shepard-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-filtered-e.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/weights-spike/shots/photo-spatial-e.png",
+      "status": 200
+    }
+  ],
+  "mobileOverflow": false
+}

@@ -16,7 +16,7 @@
 | [0001](0001-orchestration-and-model-roles.md) | オーケストレーションとモデルの役割分担 | 承認 |
 | [0002](0002-design-skill-scope.md) | 導入したデザインスキルの適用範囲 | 承認 |
 | [0003](0003-product-direction.md) | 作るもの — 色を時間に置く道具 | 承認 |
-| [0004](0004-color-representation.md) | 色の表現 — OKLab のパレットと、固定の重みと差分 | 承認（重みの付け方は未決） |
+| [0004](0004-color-representation.md) | 色の表現 — OKLab のパレットと、固定の重みと差分 | 承認 |
 | [0005](0005-export.md) | 書き出し — WebCodecs で MP4 を主にする | 承認 |
 
 ## 書式
