@@ -15,6 +15,7 @@
 |---|---|---|
 | [0001](0001-orchestration-and-model-roles.md) | オーケストレーションとモデルの役割分担 | 承認 |
 | [0002](0002-design-skill-scope.md) | 導入したデザインスキルの適用範囲 | 承認 |
+| [0003](0003-product-direction.md) | 作るもの — 色を時間に置く道具 | 承認 |
 
 ## 書式
 
