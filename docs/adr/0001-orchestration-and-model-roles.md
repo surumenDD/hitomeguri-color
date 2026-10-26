@@ -57,6 +57,7 @@ dsh は遅い（光過敏の判定器に約50分）。そこで、dsh には詰�
   - 入れ子の起動は深さ 2 で動いた（メイン → adviser の Codex → dsh）。
   - dsh に向くのは、API・基準値・入力・許容差・持ち場のファイルを先に固定できる Task。色と Shepard の単体テストは、DeepSeek が 3分7秒で、差し戻しなく終えた。
   - データの型、テクスチャの配置、時計、取り消しのように互いに結び付く部分は、adviser がまとめて書くほうが説明の重複が少ない。
+  - 同じ adviser の端末を次の段に再利用できる（M1 → M2）。`worker-start --task <id> --terminal <handle>` に、ワークツリーを `--worktree id:<repo-id>::<path>` の形で渡す。`path:` の形では「認識できるエージェントが動いていない」で断られた。
   - adviser は、メインの判断が要る点（Shepard での L の範囲外）を、数値を勝手に変えずに報告して回した。比較の基準（v2 の台本）を固定データとして凍結し、メインの変更で検査の基準が動かないようにした。
 
 - タスクは Orca の Run・Task・Dispatch で管理し、仕様には Target・Change・Constraints・Ownership・Observable acceptance を必ず書く。
