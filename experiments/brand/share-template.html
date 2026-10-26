@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ひとめぐり — 共有用の画像</title>
+<link rel="stylesheet" href="../ui-mock/node_modules/@fontsource/zen-kaku-gothic-new/400.css">
+<link rel="stylesheet" href="../ui-mock/node_modules/@fontsource/zen-kaku-gothic-new/700.css">
+<style>
+/* Share image: the picture on top, the colour script under it, the name on the room colour.
+   Sized in viewport units so one page renders both 1280x640 and 1200x630. No background gradients
+   (landing-page-design B4); the only gradients are the colour script itself. */
+html,body{margin:0;background:#181818;color:#ECECEC;font-family:"Zen Kaku Gothic New",sans-serif}
+.card{width:100vw;height:100vh;display:grid;grid-template-rows:80% 3.75% 1fr}
+.picture{background:url(canal-3s.png) center 58%/cover no-repeat}
+.script{display:grid;grid-template-rows:1fr 1fr}
+.script .upper{background:__UPPER__}
+.script .lower{background:__LOWER__}
+.name{display:flex;align-items:center;gap:2.5vw;padding:0 3.75vw}
+.mark{width:7.5vh;height:7.5vh;flex:none;border-radius:50%;background:__CONIC__;mask:__HOLE__}
+h1{margin:0;font-weight:700;font-size:5.6vh;line-height:1;letter-spacing:.04em}
+p{margin:0;font-size:2.8vh;line-height:1.4;color:#9B9B9B}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="picture" role="img" aria-label="運河の街。残照の時刻"></div>
+  <div class="script"><div class="upper"></div><div class="lower"></div></div>
+  <div class="name"><div class="mark"></div><h1>ひとめぐり</h1><p>絵の色が、1日をひとめぐりする</p></div>
+</div>
+</body>
+</html>
