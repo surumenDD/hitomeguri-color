@@ -90,7 +90,7 @@ export async function selectionFixture(page) {
   await page.waitForFunction(
     () =>
       document.querySelector('.picture canvas')?.getAttribute('aria-label') ===
-        'island-regression.pngの色の台本' && !document.querySelector('.play')?.disabled,
+        'island-regressionの色の台本' && !document.querySelector('.play')?.disabled,
     null,
     { timeout: 30000 },
   );
@@ -188,6 +188,7 @@ export async function exportedColours(page, out) {
   await page.getByRole('button', { name: '動画を書き出す', exact: true }).click();
   const video = await videoWait,
     videoFile = path.join(out, 'selected-export.mp4');
+  assert.equal(video.suggestedFilename(), 'ひとめぐり-island-regression-12秒.mp4');
   await video.saveAs(videoFile);
   await page.waitForFunction(() => !document.querySelector('[role="progressbar"]'), null, {
     timeout: 30000,

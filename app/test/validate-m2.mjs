@@ -7,11 +7,12 @@ import { createServer } from 'vite';
 import { chromium } from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url)),
-  out = path.join(root, 'test/results/m2-v42-videos');
+  out = path.join(root, 'test/results/m4-v42-videos');
 await mkdir(out, { recursive: true });
 let report;
 try {
   report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
+  report.errors = [];
 } catch {
   report = {
     version: 'v4.2',
@@ -38,6 +39,8 @@ let server, browser;
 try {
   server = await createServer({
     root,
+    cacheDir: 'node_modules/.vite-m4-matrix',
+    base: '/',
     server: { host: '127.0.0.1', port: 0, hmr: false, watch: null },
     logLevel: 'error',
   });
@@ -45,6 +48,9 @@ try {
   browser = await chromium.launch({ channel: 'chrome' });
   const page = await browser.newPage();
   page.on('pageerror', (e) => report.errors.push(e.message));
+  page.on('console', (e) => {
+    if (e.type() === 'error') report.errors.push(e.text().slice(0, 300));
+  });
   await page.goto(`${server.resolvedUrls.local[0]}test/engine.html`);
   await page.waitForFunction(() => window.engine);
   for (const image of ['canal', 'snow', 'lighthouse', 'oasis', 'flat']) {
@@ -139,6 +145,17 @@ try {
           }
   }
   await page.evaluate(() => window.engine.load('canal'));
+  assert.equal(report.conditions.length, 120);
+  assert.equal(report.defaults.length, 15);
+  for (const row of [...report.conditions, ...report.defaults])
+    assert.ok(
+      row.app.wcag.pass &&
+        row.app.itu.pass &&
+        row.node.wcag.pass &&
+        row.node.itu.pass &&
+        row.estimate.pass,
+      row.file,
+    );
   const full = await page.evaluate(() =>
     window.engine.video('day', { durationSec: 12 }, { width: 1920, height: 1080 }),
   );

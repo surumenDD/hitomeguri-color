@@ -3,7 +3,7 @@ import { decodeImage } from './image';
 import { preprocessInWorker } from './palette/client';
 import { curate, type Island, materializeIslands, splitIsland } from './palette/islands';
 import type { Decomposition } from './palette/types';
-import { outputName } from './product';
+import { imageName, outputName } from './product';
 import { SafetyClient } from './safety/client';
 import type { Estimate } from './safety/estimate';
 import { SAMPLES } from './samples';
@@ -119,7 +119,7 @@ export class AppStore {
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
       this.update({
         image: {
-          name,
+          name: typeof source === 'string' ? name : imageName(name),
           id: sampleId,
           base,
           data,

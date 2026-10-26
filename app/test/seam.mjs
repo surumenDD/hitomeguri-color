@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-const video = fileURLToPath(new URL('./results/m2-v42-videos/1080p-12s.mp4', import.meta.url));
+const video = fileURLToPath(new URL('./results/m4-v42-videos/1080p-12s.mp4', import.meta.url));
 const size = 384 * 216 * 3,
   means = [];
 let pending = Buffer.alloc(0),
@@ -67,7 +67,7 @@ const report = {
 assert.equal(count, 360);
 assert.ok(report.pass);
 await writeFile(
-  new URL('../reports/M2-v42-loop.json', import.meta.url),
+  new URL('../reports/M4-loop.json', import.meta.url),
   `${JSON.stringify(report, null, 2)}\n`,
 );
 console.log(report);

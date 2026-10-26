@@ -22,11 +22,11 @@ let server, browser;
 try {
   server = await preview({
     root,
-    base: '/nested/',
     preview: { host: '127.0.0.1', port: 0 },
     logLevel: 'error',
   });
   const url = server.resolvedUrls.local[0];
+  assert.ok(new URL(url).pathname.startsWith('/hitomeguri-color/'));
   browser = await chromium.launch({ channel: 'chrome' });
   const page = await browser.newPage({
     viewport: { width: 1440, height: 960 },
@@ -156,6 +156,28 @@ try {
   assert.equal(report.consoleErrors.length, 0, report.consoleErrors[0]);
   assert.deepEqual(report.cspViolations, []);
   assert.equal(report.fonts, true);
+  report.brand = await page.evaluate(async () => {
+    const files = ['favicon.svg', 'favicon-32.png', 'favicon-180.png', 'share-1200x630.jpg'];
+    const statuses = await Promise.all(
+      files.map(async (file) => {
+        const response = await fetch(new URL(file, document.baseURI));
+        return { file, status: response.status };
+      }),
+    );
+    return {
+      statuses,
+      icons: [...document.querySelectorAll('link[rel="icon"],link[rel="apple-touch-icon"]')].map(
+        (n) => n.getAttribute('href'),
+      ),
+      ogImage: document.querySelector('meta[property="og:image"]').content,
+    };
+  });
+  assert.ok(report.brand.statuses.every((r) => r.status === 200));
+  assert.ok(report.brand.icons.every((href) => href.startsWith('/hitomeguri-color/')));
+  assert.equal(
+    report.brand.ogImage,
+    'https://surumendd.github.io/hitomeguri-color/share-1200x630.jpg',
+  );
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.externalRequests, []);
   const notices = await page.evaluate(async () => {

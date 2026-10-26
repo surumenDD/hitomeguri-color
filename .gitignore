@@ -7,3 +7,6 @@ experiments/recolor-spike/shots/
 experiments/recolor-spike/*.log
 # Regenerate with experiments/brand/render-frame.mjs (steps at the top of experiments/brand/make.py)
 experiments/brand/canal-3s.png
+# Showcase media stays local; the main agent chooses the public README loop.
+app/reports/showcase/*.mp4
+app/reports/showcase/*.gif

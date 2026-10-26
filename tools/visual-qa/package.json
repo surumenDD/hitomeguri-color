@@ -8,7 +8,7 @@
     "flash-check": "node flash-check.mjs",
     "test": "node --test test/"
   },
-  "dependencies": {
-    "playwright-core": "1.61.1"
+  "devDependencies": {
+    "playwright-core": "1.65.0-alpha-2026-10-26"
   }
 }

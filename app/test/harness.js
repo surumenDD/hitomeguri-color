@@ -1,10 +1,24 @@
 // Browser-only integration harness: real Workers, shader and exact source pixels.
+
+import canalOriginal from '../../assets/hero/raw/canal-town.png?url';
+import oasisOriginal from '../../assets/hero/raw/desert-oasis.png?url';
+import lighthouseOriginal from '../../assets/hero/raw/lighthouse-cape.png?url';
+import snowOriginal from '../../assets/hero/raw/snow-village.png?url';
+import flatOriginal from '../../assets/samples/raw/flat-dusk-harbor.png?url';
 import { decodeImage } from '../src/image';
 import { preprocessInWorker } from '../src/palette/client';
 import { Renderer } from '../src/render';
 import { SAMPLES } from '../src/samples';
 import { inferRoles, PRESETS, rolePaletteAt } from '../src/script';
 import { DEVELOPMENT_SAMPLES } from './samples';
+
+const originals = {
+  canal: canalOriginal,
+  snow: snowOriginal,
+  lighthouse: lighthouseOriginal,
+  oasis: oasisOriginal,
+  flat: flatOriginal,
+};
 
 const renderer = new Renderer(document.querySelector('#result'));
 function psnr(a, b) {
@@ -38,7 +52,10 @@ async function sampleTest(id) {
       renderer.draw(rolePaletteAt(palette, roles, seconds, preset));
       endpoints.push({ preset: preset.id, seconds, ...psnr(expected, renderer.read()) });
     }
-  return { id, width, height, identity, endpoints, timing: data.metadata.timing };
+  const lossless = originals[id]
+    ? psnr((await decodeImage(originals[id])).data, expected)
+    : undefined;
+  return { id, width, height, identity, endpoints, lossless, timing: data.metadata.timing };
 }
 async function alphaTest() {
   const rgba = new Uint8ClampedArray([20, 40, 60, 255, 80, 100, 120, 128, 0, 0, 0, 0]),

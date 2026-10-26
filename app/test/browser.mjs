@@ -13,6 +13,7 @@ let server, browser;
 try {
   server = await createServer({
     root,
+    base: '/',
     server: { host: '127.0.0.1', port: 0, hmr: false, watch: null },
     logLevel: 'error',
   });
@@ -50,6 +51,7 @@ try {
     const result = await harness.evaluate((id) => window.harness.sampleTest(id), id);
     report.samples.push(result);
     assert.equal(result.identity.psnrDb, 'Infinity', id);
+    if (result.lossless) assert.equal(result.lossless.psnrDb, 'Infinity', `${id}/lossless WebP`);
     for (const end of result.endpoints)
       assert.equal(end.psnrDb, 'Infinity', `${id}/${end.preset}/${end.seconds}`);
     console.log(`${id}: shader identity + 3 preset endpoints PSNR Infinity`);
@@ -218,7 +220,7 @@ try {
   await ready();
   assert.equal(
     await ui.locator('canvas').getAttribute('aria-label'),
-    `${path.basename(file)}の色の台本`,
+    `${path.basename(file, path.extname(file))}の色の台本`,
   );
   const bytes = (await readFile(file)).toString('base64');
   await ui.evaluate((bytes) => {
@@ -230,7 +232,7 @@ try {
     );
   }, bytes);
   await ready();
-  assert.equal(await ui.locator('canvas').getAttribute('aria-label'), 'drop.pngの色の台本');
+  assert.equal(await ui.locator('canvas').getAttribute('aria-label'), 'dropの色の台本');
   report.sampleFileDrop = true;
   const beforeBad = await canvasData();
   await ui
