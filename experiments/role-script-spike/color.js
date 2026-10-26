@@ -5,7 +5,11 @@ export const SAMPLES = [
   { id: 'flat', file: 'flat-dusk-harbor.png', name: '平らな色面', detail: '港のポスター · 空には階調がある' },
   { id: 'painterly', file: 'painterly-blue-hour-lake.png', name: '絵画調', detail: '湖と筆致 · 連続した空と水面' },
   { id: 'pixel', file: 'pixel-rain-street.png', name: 'にせのドット絵', detail: '雨の街路 · 格子と色数は不均一' },
-  { id: 'photo', file: 'photo-sunset-shore.png', name: '写真調', detail: '夕日の海岸 · 岩、雲、水の質感' }
+  { id: 'photo', file: 'photo-sunset-shore.png', name: '写真調', detail: '夕日の海岸 · 岩、雲、水の質感' },
+  { id: 'canal', file: '../../hero/raw/canal-town.png', name: '運河の街', detail: '見本の絵' },
+  { id: 'snow', file: '../../hero/raw/snow-village.png', name: '雪の村', detail: '見本の絵' },
+  { id: 'lighthouse', file: '../../hero/raw/lighthouse-cape.png', name: '灯台の岬', detail: '見本の絵' },
+  { id: 'oasis', file: '../../hero/raw/desert-oasis.png', name: 'オアシス', detail: '見本の絵' }
 ];
 const decode = c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
 const encode = c => c <= .0031308 ? 12.92 * c : 1.055 * Math.max(0, c) ** (1 / 2.4) - .055;
