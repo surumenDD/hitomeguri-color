@@ -484,21 +484,25 @@ select:disabled {
   background: #fff;
   cursor: ns-resize;
 }
+/* The labels sit on an arbitrary picture, so a shadow cannot promise legibility: a chip of the room
+   colour at 72% keeps the text at 5.9:1 or more even over pure white. */
 .split-line .upper-label,
 .split-line .lower-label {
   position: absolute;
   left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(24, 24, 24, 0.72);
   font-size: 12px;
   line-height: 16px;
-  color: white;
-  text-shadow: 0 1px 3px black;
+  color: var(--ink);
   pointer-events: none;
 }
 .split-line .upper-label {
-  bottom: 8px;
+  bottom: 6px;
 }
 .split-line .lower-label {
-  top: 8px;
+  top: 6px;
 }
 .progress {
   position: relative;
