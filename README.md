@@ -16,6 +16,8 @@
 
 画像は端末の外へ送りません。読み込みから書き出しまで、すべてブラウザの中で処理します。
 
+動画の書き出しは、Windows の Chrome と Firefox で確かめています。動画の書き出し（WebCodecs の `VideoEncoder`）に対応していないブラウザでは、PNG の保存だけが使えます。Mac の Safari では、まだ確かめていません。
+
 ## 光の点滅への配慮
 
 動画を書き出す前に、光過敏発作の基準（WCAG 2.3.1 と ITU-R BT.1702）で点滅を数え、基準に通った動画だけを書き出します。OS で動きを減らす設定（`prefers-reduced-motion`）をしていると、絵はひとりでには動きません。
@@ -35,6 +37,8 @@ cd app
 npm ci
 npm run dev
 ```
+
+検査の回し方は [`app/README.md`](app/README.md) にあります。
 
 ## 作り方の記録
 
@@ -62,4 +66,4 @@ npm run dev
 - **Try**: open your own picture. It is split into 16 colour islands, each given a role (sky, light, celestial, water, shadow, middle) that you can change. Pick one of three scripts and adjust length, night depth and lamp strength.
 - **Export**: save a looping MP4 or a PNG of any moment. Videos are checked against the photosensitive-seizure guidelines (WCAG 2.3.1, ITU-R BT.1702) before they are written.
 
-Your picture never leaves your device; everything runs in the browser. The UI is in Japanese. The sample pictures were made with ChatGPT image generation. Everything in this repository is MIT-licensed, to the extent of the author's rights.
+Your picture never leaves your device; everything runs in the browser. Video export needs WebCodecs `VideoEncoder` and has been tested in Chrome and Firefox on Windows; elsewhere you can still save PNGs. The UI is in Japanese. The sample pictures were made with ChatGPT image generation. Everything in this repository is MIT-licensed, to the extent of the author's rights.
