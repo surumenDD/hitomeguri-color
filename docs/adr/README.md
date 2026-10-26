@@ -19,7 +19,7 @@
 | [0004](0004-color-representation.md) | 色の表現 — OKLab のパレットと、固定の重みと差分 | 承認 |
 | [0005](0005-export.md) | 書き出し — WebCodecs で MP4 を主にする | 承認 |
 | [0006](0006-safety-and-accessibility.md) | 安全とアクセシビリティの基準 | 承認 |
-| [0007](0007-tech-stack.md) | 技術の構成 | 提案 |
+| [0007](0007-tech-stack.md) | 技術の構成 | 承認 |
 
 ## 書式
 
