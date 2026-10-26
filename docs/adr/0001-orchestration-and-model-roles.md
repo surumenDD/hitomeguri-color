@@ -48,7 +48,7 @@ dsh は遅い（光過敏の判定器に約50分）。そこで、dsh には詰�
 | adviser（流れごとに1人、その流れのワークツリーに付く） | 技術の流れは Codex（sol）、視覚の流れは Claude | Task を細かく切り、仕様と受け入れの基準を詰め、dsh の成果を一次レビューする。切るのが二度手間か、難しい部分は自分で実装する |
 | 実行 | dsh（MiMo / DeepSeek） | 詰め切られた易しい Task だけ |
 
-- adviser は Orca のワーカーとして立てる（`worker-start --worktree new-child` で専用のワークツリー）。Orca では、ワーカーが自分の手伝いを `worker-start --spec` で起動でき、手伝いはそのワーカーに報告する。
+- adviser は Orca のワーカーとして立てる（`worker-start --worktree new-child` で専用のワークツリー）。**`--base-branch surumenDD/main` を必ず付ける**。付けないと、リポジトリの `main`（最初のコミット）から作られ、メインの作業が見えない（2026-10-27 の M1 で起きた。adviser に早送りさせて直した）。Orca では、ワーカーが自分の手伝いを `worker-start --spec` で起動でき、手伝いはそのワーカーに報告する。
 - Claude のサブエージェントは、メインと同じ端末で動くので、独立した Orca の調整役にはなれない（Run の結び付けがぶつかる）。Orca を使わない設計や仕様づくりの adviser として使う。
 - dsh の起動は `tools/orca/dsh-launch.sh` で行う。モデルの設定ファイルは機械全体で1つなので、ロックで同時に1つしか起動しない。プロンプトの送信も確かめる。
 - 入れ子の深さには上限がある（`nested_worker_depth_exceeded`）。最初の実装の流れで確かめる。
