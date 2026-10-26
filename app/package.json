@@ -11,7 +11,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run && node test/browser.mjs",
     "lint": "biome check .",
-    "check": "tsc --noEmit && npm run lint && npm test && npm run licenses",
+    "check": "tsc --noEmit && npm run lint && npm test && npm run test:production && npm run licenses",
     "test:browser": "node test/browser.mjs",
     "test:production": "npm run build && node test/production.mjs",
     "licenses": "node test/licenses.mjs",

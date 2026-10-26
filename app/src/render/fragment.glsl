@@ -14,6 +14,7 @@ uniform sampler2D uAlpha;
 uniform vec3 uSource[32];
 uniform vec3 uPalette[32];
 uniform int uSelected;
+uniform vec2 uDim;
 uniform int uDiagnostic;
 uniform float uSplitAt;
 uniform bool uSplitLower;
@@ -63,14 +64,15 @@ void main(){
   if(uDiagnostic==1){outColor=vec4(float(lab.x<0.||lab.x>1.),float(!inGamut(labToLinear(lab))),0.,1.);return;}
   // Main's M1 fallback: diagnose the raw L above, then bound L before hue/chroma mapping.
   lab.x=clamp(lab.x,0.,1.);
-  vec3 linear=gamutMap(lab);
-  float dim=1.;
+  float kept=1.;
   if(uSelected>=0){
     vec4 ws[8]=vec4[8](w0,w1,w2,w3,w4,w5,w6,w7);
     float selected=ws[uSelected/4][uSelected%4];
-    dim=mix(.35,1.,clamp(selected,0.,1.));
+    kept=clamp(selected,0.,1.);
   }
-  if(uSplitAt>0.&&(uSplitLower?uv.y<uSplitAt:uv.y>uSplitAt))dim=min(dim,.35);
-  linear*=dim;
+  if(uSplitAt>0.&&(uSplitLower?uv.y<uSplitAt:uv.y>uSplitAt))kept=0.;
+  // Preview emphasis belongs to OKLab, before gamut mapping, and is omitted from exports.
+  lab*=mix(vec3(uDim.x,uDim.y,uDim.y),vec3(1.),kept);
+  vec3 linear=gamutMap(lab);
   outColor=vec4(encode(linear.r),encode(linear.g),encode(linear.b),texture(uAlpha,uv).r);
 }

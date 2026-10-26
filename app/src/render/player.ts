@@ -2,11 +2,13 @@ import type { Decomposition } from '../palette/types';
 import { rolePaletteAt } from '../script';
 import type { AppStore } from '../state';
 import { Renderer } from './index';
+import { previewEmphasis } from './preview';
 
 /** React owns controls; this object owns GPU resources and requestAnimationFrame. */
 export class Player {
   readonly renderer: Renderer;
   private uploaded?: Decomposition;
+  private readonly emphasis = previewEmphasis(location.search);
   private frame?: number;
   private previous?: number;
   private unsubscribe: () => void;
@@ -72,6 +74,7 @@ export class Player {
       rolePaletteAt(image.data.metadata.palette, image.roles, state.seconds, state.preset),
       {
         selected: state.selected,
+        emphasis: this.emphasis,
         splitAt: state.splitPreview?.at,
         splitLower: state.splitPreview?.side === 'lower',
       },
