@@ -1,0 +1,36 @@
+[
+  {
+    "sample": "flat",
+    "pairs": [
+      {
+        "before": 499,
+        "after": 500,
+        "meanBrightnessStep": 0.0009583274644404523,
+        "meanPixelStep": 0.0009626786460706231,
+        "maxPixelStep": 0.006797623281665555,
+        "areaOverPointOne": 0.0
+      },
+      {
+        "before": 719,
+        "after": 0,
+        "meanBrightnessStep": 3.934149280399405e-06,
+        "meanPixelStep": 9.906007670546491e-06,
+        "maxPixelStep": 0.0032873674425166755,
+        "areaOverPointOne": 0.0
+      }
+    ]
+  },
+  {
+    "sample": "painterly",
+    "pairs": [
+      {
+        "before": 719,
+        "after": 0,
+        "meanBrightnessStep": 5.135001115910143e-06,
+        "meanPixelStep": 6.081825686679091e-06,
+        "maxPixelStep": 0.004586809153111826,
+        "areaOverPointOne": 0.0
+      }
+    ]
+  }
+]

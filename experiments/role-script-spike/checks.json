@@ -1,0 +1,741 @@
+{
+  "diagnostics": [
+    {
+      "sample": "flat",
+      "seconds": 0,
+      "lightnessOut": 0,
+      "chromaMapped": 4222,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 4.2,
+      "lightnessOut": 0,
+      "chromaMapped": 1009,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 7.2,
+      "lightnessOut": 0,
+      "chromaMapped": 2862,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 11.4,
+      "lightnessOut": 0,
+      "chromaMapped": 12305,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 14.6,
+      "lightnessOut": 0,
+      "chromaMapped": 17578,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 17.2,
+      "lightnessOut": 0,
+      "chromaMapped": 60,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 20,
+      "lightnessOut": 0,
+      "chromaMapped": 0,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 23.6,
+      "lightnessOut": 0,
+      "chromaMapped": 2434,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 0,
+      "lightnessOut": 0,
+      "chromaMapped": 66358,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 4.2,
+      "lightnessOut": 0,
+      "chromaMapped": 8,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 7.2,
+      "lightnessOut": 0,
+      "chromaMapped": 757,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 11.4,
+      "lightnessOut": 0,
+      "chromaMapped": 14688,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 14.6,
+      "lightnessOut": 0,
+      "chromaMapped": 146405,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 17.2,
+      "lightnessOut": 0,
+      "chromaMapped": 2,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 20,
+      "lightnessOut": 0,
+      "chromaMapped": 13,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "painterly",
+      "seconds": 23.6,
+      "lightnessOut": 0,
+      "chromaMapped": 52644,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 0,
+      "lightnessOut": 0,
+      "chromaMapped": 12832,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 4.2,
+      "lightnessOut": 0,
+      "chromaMapped": 4943,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 7.2,
+      "lightnessOut": 0,
+      "chromaMapped": 5544,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 11.4,
+      "lightnessOut": 0,
+      "chromaMapped": 11198,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 14.6,
+      "lightnessOut": 0,
+      "chromaMapped": 7132,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 17.2,
+      "lightnessOut": 0,
+      "chromaMapped": 5143,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 20,
+      "lightnessOut": 0,
+      "chromaMapped": 8405,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "photo",
+      "seconds": 23.6,
+      "lightnessOut": 0,
+      "chromaMapped": 7180,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    }
+  ],
+  "lightnessInsideGamut": true,
+  "noAutoplay": true,
+  "roleControl": true,
+  "resetRole": true,
+  "selection": true,
+  "playAdvanced": true,
+  "slider": true,
+  "sampleControl": true,
+  "mobileOverflow": false,
+  "errors": [],
+  "networkFailures": [],
+  "requests": [
+    {
+      "url": "/experiments/role-script-spike/?capture=1",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/style.css",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/app.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/script.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/renderer.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/?capture=1",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/app.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/renderer.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/pixel-rain-street.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/index.html?capture=1",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/style.css",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/app.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/renderer.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/script.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-4.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-5.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-6.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-role-7.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-old-c-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-old-c-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-old-c-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-old-c-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-controlled-old-c-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-controlled-old-c-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-controlled-old-c-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/flat-controlled-old-c-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-4.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-5.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-6.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-role-7.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-old-c-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-old-c-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-old-c-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-old-c-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-controlled-old-c-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-controlled-old-c-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-controlled-old-c-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-controlled-old-c-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-4.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-5.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-6.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-role-7.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-old-c-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-same-clock-0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-old-c-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-same-clock-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-old-c-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-same-clock-2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-old-c-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/photo-same-clock-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/style.css",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/app.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/renderer.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/script.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
+      "status": 200
+    }
+  ],
+  "browserVersion": "155.0.8059.86",
+  "playwrightCore": "1.61.1",
+  "date": "2026-10-26T16:57:13.280Z",
+  "resultsBytes": 3530730
+}

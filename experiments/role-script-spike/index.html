@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="空、灯り、水、影。それぞれの時間で光を巡らせる試作。">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+<title>光の役割と時間</title>
+<body>
+<a class="skip" href="#art">絵へ移動</a>
+<header><p class="eyebrow">色の台本 / 試作</p><h1>空が変わり、灯りが残る。</h1><p>24秒で巡る光を止めて、色の役割を確かめる。</p></header>
+<main>
+<section class="controls" aria-label="再生と素材">
+<label>絵 <select id="sample" disabled><option value="flat">港の夕暮れ</option><option value="painterly">湖畔の青い時間</option><option value="photo">写真調の夕日</option></select></label>
+<label>見る台本 <select id="mode"><option value="role">役割ごとの台本</option><option value="legacy">従来の規則（20秒）</option><option value="original">原画</option></select></label>
+<label>重み <select id="weights"><option value="soft">柔らかい重み</option><option value="residual">最近傍と差分</option></select></label>
+<button id="play" disabled>再生</button><output id="clock" for="time">0.00 / 24秒</output>
+<label class="timeline">時刻 <input id="time" type="range" min="0" max="24" step="0.01" value="0" disabled></label>
+<p id="stage">夕方の始まり</p>
+</section>
+<p id="status" role="status">画像の色を分けています。</p>
+<section id="art" tabindex="-1"><canvas id="scene" aria-label="色の役割ごとに光が移り変わる絵"></canvas></section>
+<section aria-labelledby="roles-title"><div class="section-title"><h2 id="roles-title">色に役割を渡す</h2><button id="reset" disabled>自動推定に戻す</button></div><p>色の番号を選ぶと、その色が多い場所を確認できます。役割を変えると絵に反映されます。</p><div id="palette" class="palette"></div></section>
+<p class="footnote">自動再生はしません。画像の処理はこの端末内で行います。変更した役割は再読み込みすると自動推定に戻ります。</p>
+</main>
+<canvas id="capture" hidden></canvas>
+<script type="module" src="app.js"></script>
+</body></html>

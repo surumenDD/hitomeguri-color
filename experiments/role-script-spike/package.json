@@ -1,0 +1,10 @@
+{
+  "name": "role-script-spike",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "capture": "node capture.mjs",
+    "export": "node capture.mjs --video"
+  }
+}
