@@ -38,16 +38,17 @@ const night=[0,.35,.75,1,1,.8,.35,0];
 const GLOW=[0,.55,.85,1,1,.85,.45,0];
 const DAWN=[0,0,0,0,0,.25,.65,1];
 
-// nightDepth and glow are 1 for the tuned look; the day preset at 1 reproduces v2 exactly.
+// v4.2 defaults: deeper nights and stronger lamps (the user's sense after trying M2: about 0.8 of the old bars).
+// Above 1.5 glow no longer changes a lamp's colour; it keeps lamps lit for longer (on = min(1, GLOW*glow)).
 export const PRESETS={
-  day:{id:'day',name:'1日の光',durationSec:24,nightDepth:1,glow:1,sequence:[
+  day:{id:'day',name:'1日の光',durationSec:24,nightDepth:2.1,glow:1.3,sequence:[
     ['original',0],['afterglow',2.8/24],['blueHour',5.2/24],['midnight',8.2/24],['lateNight',13.6/24],
     ['twilight',15/24],['sunrise',17.2/24],['morning',20/24],['original',1]]},
   // The magic hour breathes: the sky sinks into the blue hour and rises back into the afterglow.
-  longDusk:{id:'longDusk',name:'長い夕暮れ',durationSec:20,nightDepth:.85,glow:1,sequence:[
+  longDusk:{id:'longDusk',name:'長い夕暮れ',durationSec:20,nightDepth:1.2,glow:1.3,sequence:[
     ['original',0],['afterglow',.30],['blueHour',.55],['afterglow',.80],['original',1]]},
   // Most of the loop is night, so the lamps carry the picture.
-  nightLights:{id:'nightLights',name:'夜の灯り',durationSec:32,nightDepth:1.1,glow:1.25,sequence:[
+  nightLights:{id:'nightLights',name:'夜の灯り',durationSec:32,nightDepth:2.3,glow:1.5,sequence:[
     ['original',0],['afterglow',.09],['blueHour',.20],['midnight',.38],['lateNight',.60],
     ['midnight',.76],['blueHour',.90],['original',1]]},
 };
@@ -73,7 +74,9 @@ const MIDDLE=[null,[.90,.85,.10],[.76,.60,.30],[.60,.36,.50],[.61,.36,.50],[.69,
 function target(p,role,key,o){
   if(key===0)return p.slice();
   // nightDepth scales how far the night-weighted states darken (1 keeps the tuned values).
-  const deep=scale=>scale<=1?1-(1-scale)*(1+(o.nightDepth-1)*night[key]):scale;
+  // v4.2: nightDepth works as an exponent, so any depth keeps the order of values (the old
+  // subtractive form reached 0 near 2 and flattened the sky). At 1 it equals the tuned scale.
+  const deep=scale=>scale<=1?scale**(1+(o.nightDepth-1)*night[key]):scale;
   const L=p[0],C=Math.hypot(p[1],p[2]),H=(Math.atan2(p[2],p[1])*180/Math.PI+360)%360;
   if(role==='sky'||role==='water'){
     const w=warmth(p),[sc,cc,hc]=SKY_COOL[key],[sw,cw,hw]=SKY_WARM[key];
@@ -87,8 +90,10 @@ function target(p,role,key,o){
     const glow=GLOW[key]*o.glow,on=Math.min(1,glow),amber=70-6*on;
     const hue=H+(((amber-H+540)%360)-180)*.35;
     // Reds lit too brightly turn pink, so red-orange lamps get a lower floor than amber ones.
-    const yellowish=clamp((H-35)/30,0,1),floor=(.66+.06*glow)*(1-yellowish)+(.74+.08*glow)*yellowish;
-    const lit=lch(Math.min(.93,Math.max(L,floor)),Math.max(C*.95,.10+.05*glow),hue);
+    // v4.2: the floor stops rising at 1.5, so stronger lamps keep their hue instead of turning pastel.
+    const g=Math.min(glow,1.5),yellowish=clamp((H-35)/30,0,1),floor=(.66+.06*g)*(1-yellowish)+(.74+.08*g)*yellowish;
+    // v4.2: past the tuned strength a lamp gains colour rather than lightness, so it never washes out.
+    const lit=lch(Math.min(.88,Math.max(L,floor)),Math.max(C*.95,.10+.06*g),hue);
     // v4.1: an unlit lamp sinks with the night instead of glowing grey (matters when glow is low).
     const off=lch(darken(L,deep(.78-.4*night[key])),C*.30,H);
     return mix(off,lit,on);

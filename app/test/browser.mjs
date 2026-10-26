@@ -128,6 +128,30 @@ try {
     await ready();
     assert.ok(await control.getAttribute('aria-valuetext'));
   }
+  for (const name of ['長い夕暮れ', '夜の灯り', '1日の光']) {
+    await ui.getByRole('button', { name, exact: true }).click();
+    await ready();
+    for (const label of ['夜の深さ', '灯りの強さ']) {
+      const control = ui.getByRole('slider', { name: label, exact: true });
+      assert.equal(
+        Number(await control.inputValue()),
+        50,
+        `${name}/${label} must reset to its preset default`,
+      );
+      assert.equal(await control.getAttribute('aria-valuetext'), 'ふつう');
+      await control.fill('75');
+      await control.dispatchEvent('change');
+      await ready();
+    }
+  }
+  // Re-select the same preset too: edited coefficients must return to their defaults.
+  await ui.getByRole('button', { name: '1日の光', exact: true }).click();
+  await ready();
+  for (const label of ['夜の深さ', '灯りの強さ'])
+    assert.equal(
+      Number(await ui.getByRole('slider', { name: label, exact: true }).inputValue()),
+      50,
+    );
   report.presetsAndScales = true;
   await ui.getByRole('button', { name: '港町', exact: true }).click();
   await ready();

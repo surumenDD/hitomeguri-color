@@ -20,8 +20,10 @@ import {
   glowLabel,
   glowPosition,
   nightLabel,
+  nightPosition,
   positionDuration,
   positionGlow,
+  positionNight,
 } from './ui/scales';
 import { Timeline, timeName } from './ui/Timeline';
 
@@ -40,6 +42,7 @@ export function App() {
   const store = storeRef.current;
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot),
     image = state.image;
+  const presetDefaults = PRESETS[state.preset.id];
   const canvas = useRef<HTMLCanvasElement>(null),
     file = useRef<HTMLInputElement>(null),
     cancel = useRef<HTMLButtonElement>(null),
@@ -320,33 +323,45 @@ export function App() {
             </label>
             <label className="slider">
               夜の深さ
-              <output>{nightLabel(state.preset.nightDepth)}</output>
+              <output>{nightLabel(state.preset.nightDepth, presetDefaults.nightDepth)}</output>
               <input
                 aria-label="夜の深さ"
-                aria-valuetext={nightLabel(state.preset.nightDepth)}
+                aria-valuetext={nightLabel(state.preset.nightDepth, presetDefaults.nightDepth)}
                 type="range"
-                min={state.limits.nightDepth[0] * 50}
-                max={state.limits.nightDepth[1] * 50}
+                min={nightPosition(state.limits.nightDepth[0], presetDefaults.nightDepth)}
+                max={nightPosition(state.limits.nightDepth[1], presetDefaults.nightDepth)}
                 step={1}
-                value={state.preset.nightDepth * 50}
+                value={nightPosition(state.preset.nightDepth, presetDefaults.nightDepth)}
                 disabled={busy || !image}
-                onChange={(e) => run(store.setParameter('nightDepth', Number(e.target.value) / 50))}
+                onChange={(e) =>
+                  run(
+                    store.setParameter(
+                      'nightDepth',
+                      positionNight(Number(e.target.value), presetDefaults.nightDepth),
+                    ),
+                  )
+                }
               />
             </label>
             <label className="slider">
               灯りの強さ
-              <output>{glowLabel(state.preset.glow)}</output>
+              <output>{glowLabel(state.preset.glow, presetDefaults.glow)}</output>
               <input
                 aria-label="灯りの強さ"
-                aria-valuetext={glowLabel(state.preset.glow)}
+                aria-valuetext={glowLabel(state.preset.glow, presetDefaults.glow)}
                 type="range"
-                min={glowPosition(state.limits.glow[0])}
-                max={glowPosition(state.limits.glow[1])}
+                min={glowPosition(state.limits.glow[0], presetDefaults.glow)}
+                max={glowPosition(state.limits.glow[1], presetDefaults.glow)}
                 step={1}
-                value={glowPosition(state.preset.glow)}
+                value={glowPosition(state.preset.glow, presetDefaults.glow)}
                 disabled={busy || !image}
                 onChange={(e) =>
-                  run(store.setParameter('glow', positionGlow(Number(e.target.value))))
+                  run(
+                    store.setParameter(
+                      'glow',
+                      positionGlow(Number(e.target.value), presetDefaults.glow),
+                    ),
+                  )
                 }
               />
             </label>

@@ -108,14 +108,14 @@ const night = [0, 0.35, 0.75, 1, 1, 0.8, 0.35, 0];
 const GLOW = [0, 0.55, 0.85, 1, 1, 0.85, 0.45, 0];
 const DAWN = [0, 0, 0, 0, 0, 0.25, 0.65, 1];
 
-// nightDepth and glow are 1 for the tuned look; the day preset at 1 reproduces v2 exactly.
+// v4.2 defaults: deeper nights and stronger lamps, copied from the art director's reference.
 export const PRESETS: Record<string, Preset> = {
   day: {
     id: 'day',
     name: '1日の光',
     durationSec: 24,
-    nightDepth: 1,
-    glow: 1,
+    nightDepth: 2.1,
+    glow: 1.3,
     sequence: [
       { key: 'original', at: 0 },
       { key: 'afterglow', at: 2.8 / 24 },
@@ -133,8 +133,8 @@ export const PRESETS: Record<string, Preset> = {
     id: 'longDusk',
     name: '長い夕暮れ',
     durationSec: 20,
-    nightDepth: 0.85,
-    glow: 1,
+    nightDepth: 1.2,
+    glow: 1.3,
     sequence: [
       { key: 'original', at: 0 },
       { key: 'afterglow', at: 0.3 },
@@ -148,8 +148,8 @@ export const PRESETS: Record<string, Preset> = {
     id: 'nightLights',
     name: '夜の灯り',
     durationSec: 32,
-    nightDepth: 1.1,
-    glow: 1.25,
+    nightDepth: 2.3,
+    glow: 1.5,
     sequence: [
       { key: 'original', at: 0 },
       { key: 'afterglow', at: 0.09 },
@@ -227,7 +227,7 @@ function target(p: Lab, role: Role, key: number, o: Preset): Lab {
   if (key === 0) return p.slice() as Lab;
   // nightDepth scales how far the night-weighted states darken (1 keeps the tuned values).
   const deep = (scale: number) =>
-    scale <= 1 ? 1 - (1 - scale) * (1 + (o.nightDepth - 1) * night[key]) : scale;
+    scale <= 1 ? scale ** (1 + (o.nightDepth - 1) * night[key]) : scale;
   const L = p[0],
     C = Math.hypot(p[1], p[2]),
     H = ((Math.atan2(p[2], p[1]) * 180) / Math.PI + 360) % 360;
@@ -251,9 +251,10 @@ function target(p: Lab, role: Role, key: number, o: Preset): Lab {
       amber = 70 - 6 * on;
     const hue = H + (((amber - H + 540) % 360) - 180) * 0.35;
     // Reds lit too brightly turn pink, so red-orange lamps get a lower floor than amber ones.
-    const yellowish = clamp((H - 35) / 30, 0, 1),
-      floor = (0.66 + 0.06 * glow) * (1 - yellowish) + (0.74 + 0.08 * glow) * yellowish;
-    const lit = lch(Math.min(0.93, Math.max(L, floor)), Math.max(C * 0.95, 0.1 + 0.05 * glow), hue);
+    const g = Math.min(glow, 1.5),
+      yellowish = clamp((H - 35) / 30, 0, 1),
+      floor = (0.66 + 0.06 * g) * (1 - yellowish) + (0.74 + 0.08 * g) * yellowish;
+    const lit = lch(Math.min(0.88, Math.max(L, floor)), Math.max(C * 0.95, 0.1 + 0.06 * g), hue);
     const off = lch(darken(L, deep(0.78 - 0.4 * night[key])), C * 0.3, H);
     return mix(off, lit, on);
   }

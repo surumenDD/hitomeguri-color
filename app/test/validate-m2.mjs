@@ -7,13 +7,20 @@ import { createServer } from 'vite';
 import { chromium } from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url)),
-  out = path.join(root, 'test/results/m2-v41-videos');
+  out = path.join(root, 'test/results/m2-v42-videos');
 await mkdir(out, { recursive: true });
 let report;
 try {
   report = JSON.parse(await readFile(path.join(out, 'report.json'), 'utf8'));
 } catch {
-  report = { when: new Date().toISOString(), conditions: [], parity: [], errors: [] };
+  report = {
+    version: 'v4.2',
+    when: new Date().toISOString(),
+    conditions: [],
+    defaults: [],
+    parity: [],
+    errors: [],
+  };
 }
 const command = (cmd, args) =>
   new Promise((resolve, reject) => {
@@ -46,10 +53,50 @@ try {
     if (!report.parity.some((p) => p.image === image))
       report.parity.push({ image, error, timing: source.timing });
     assert.equal(error, 0);
+    for (const preset of ['day', 'longDusk', 'nightLights']) {
+      if (report.defaults.some((row) => row.image === image && row.preset === preset)) continue;
+      const output = await page.evaluate(
+        (p) => window.engine.video(p, {}, { maxEdge: 384 }),
+        preset,
+      );
+      const name = `${image}-${preset}-default.mp4`,
+        file = path.join(out, name);
+      await writeFile(file, Buffer.from(output.base64, 'base64'));
+      delete output.base64;
+      const verdict = JSON.parse(
+        await command(process.execPath, [
+          path.join(root, '../tools/visual-qa/flash-check.mjs'),
+          file,
+          '--css-px-per-px',
+          String(1536 / output.width),
+        ]),
+      );
+      report.defaults.push({
+        image,
+        preset,
+        file: name,
+        width: output.width,
+        height: output.height,
+        frames: output.frames,
+        app: output.report,
+        estimate: output.estimate,
+        node: verdict,
+      });
+      await writeFile(path.join(out, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
+      assert.ok(
+        verdict.wcag.pass &&
+          verdict.itu.pass &&
+          output.estimate.pass &&
+          output.report.wcag.pass &&
+          output.report.itu.pass,
+        name,
+      );
+      console.log(`default ${report.defaults.length}/15 ${name} pass`);
+    }
     for (const preset of ['day', 'longDusk', 'nightLights'])
       for (const durationSec of [12, 48])
-        for (const nightDepth of [0, 2])
-          for (const glow of [0, 1.5]) {
+        for (const nightDepth of [0.2, 4])
+          for (const glow of [0, 2]) {
             const name = `${image}-${preset}-${durationSec}-${nightDepth}-${glow}.mp4`,
               file = path.join(out, name);
             if (report.conditions.some((r) => r.file === name)) continue;

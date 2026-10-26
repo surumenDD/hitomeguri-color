@@ -60,6 +60,8 @@ async function video(id, overrides = {}, options = {}) {
 window.engine = {
   load,
   estimates,
+  estimate: (id, overrides = {}) =>
+    estimateSetting(scene.data, scene.roles, { ...PRESETS[id], ...overrides }),
   parity,
   video,
   getScene: () => scene,

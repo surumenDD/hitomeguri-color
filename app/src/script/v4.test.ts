@@ -6,7 +6,7 @@ import {
 import { rgbToLab } from '../color';
 import { PRESETS, ROLES, type Role, rolePaletteAt } from './index';
 
-describe('v4.1 reference parity', () => {
+describe('v4.2 reference parity', () => {
   const palette = Array.from({ length: 16 }, (_, i) =>
     rgbToLab((i * 37) % 256, (i * 71) % 256, (i * 113) % 256),
   );
@@ -15,8 +15,8 @@ describe('v4.1 reference parity', () => {
       const overrides = [
         {},
         ...[12, 48].flatMap((durationSec) =>
-          [0, 2].flatMap((nightDepth) =>
-            [0, 1.5].map((glow) => ({ durationSec, nightDepth, glow })),
+          [0.2, 4].flatMap((nightDepth) =>
+            [0, 2].map((glow) => ({ durationSec, nightDepth, glow })),
           ),
         ),
       ];

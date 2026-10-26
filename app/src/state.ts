@@ -41,8 +41,8 @@ export interface AppState {
   limits: { nightDepth: [number, number]; glow: [number, number]; durationSec: [number, number] };
 }
 const limits = () => ({
-  nightDepth: [0, 2] as [number, number],
-  glow: [0, 1.5] as [number, number],
+  nightDepth: [0.2, 4] as [number, number],
+  glow: [0, 2] as [number, number],
   durationSec: [12, 48] as [number, number],
 });
 export class AppStore {

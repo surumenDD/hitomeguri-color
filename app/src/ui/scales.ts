@@ -1,10 +1,19 @@
 export const durationPosition = (seconds: number) => (Math.log(seconds / 12) / Math.log(4)) * 100;
 export const positionDuration = (position: number) =>
   Math.round(12 * 4 ** (position / 100) * 10) / 10;
-export const glowPosition = (glow: number) => (glow <= 1 ? glow * 50 : 50 + (glow - 1) * 100);
-export const positionGlow = (position: number) =>
-  position <= 50 ? position / 50 : 1 + (position - 50) / 100;
-export const nightLabel = (value: number) =>
-  value < 0.5 ? '浅い' : value <= 1.5 ? 'ふつう' : '深い';
-export const glowLabel = (value: number) =>
-  value < 0.5 ? 'なし' : value <= 1.25 ? 'ふつう' : '強い';
+const position = (value: number, normal: number, min: number, max: number) =>
+  value <= normal
+    ? ((value - min) / (normal - min)) * 50
+    : 50 + ((value - normal) / (max - normal)) * 50;
+const value = (position: number, normal: number, min: number, max: number) =>
+  position <= 50
+    ? min + ((normal - min) * position) / 50
+    : normal + ((max - normal) * (position - 50)) / 50;
+export const nightPosition = (depth: number, normal: number) => position(depth, normal, 0.2, 4);
+export const positionNight = (at: number, normal: number) => value(at, normal, 0.2, 4);
+export const glowPosition = (glow: number, normal: number) => position(glow, normal, 0, 2);
+export const positionGlow = (at: number, normal: number) => value(at, normal, 0, 2);
+export const nightLabel = (depth: number, normal: number) =>
+  depth < normal * 0.6 ? '浅い' : depth > normal * 1.4 ? '深い' : 'ふつう';
+export const glowLabel = (glow: number, normal: number) =>
+  glow < 0.3 ? 'なし' : glow > normal * 1.25 ? '強い' : 'ふつう';

@@ -28,5 +28,8 @@ describe('edit estimate before painting', () => {
       roles: Role[] = data.metadata.palette.map(() => 'middle');
     expect(estimateSetting(data, roles, { ...PRESETS.day, durationSec: 0.2 }).pass).toBe(false);
     expect(estimateSetting(data, roles, { ...PRESETS.day, glow: NaN }).pass).toBe(false);
+    expect(estimateSetting(data, roles, { ...PRESETS.day, nightDepth: 0.199 }).pass).toBe(false);
+    expect(estimateSetting(data, roles, { ...PRESETS.day, nightDepth: 4.001 }).pass).toBe(false);
+    expect(estimateSetting(data, roles, { ...PRESETS.day, glow: 2.001 }).pass).toBe(false);
   });
 });

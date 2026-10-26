@@ -25,14 +25,14 @@ export function estimateSetting(data: Decomposition, roles: Role[], preset: Pres
     preset.durationSec > 48 ||
     !Number.isFinite(preset.nightDepth) ||
     !Number.isFinite(preset.glow) ||
-    preset.nightDepth < 0 ||
+    preset.nightDepth < 0.2 ||
     preset.glow < 0 ||
-    preset.nightDepth > 2 ||
-    preset.glow > 1.5
+    preset.nightDepth > 4 ||
+    preset.glow > 2
   )
     return {
       pass: false,
-      reason: '長さは12〜48秒、夜の深さは0〜2、灯りの強さは0〜1.5の範囲で選んでください。',
+      reason: '長さは12〜48秒、夜の深さは0.2〜4、灯りの強さは0〜2の範囲で選んでください。',
       lightnessPotentialPixels: 0,
       movementLimit: 0,
       minL: 0,
