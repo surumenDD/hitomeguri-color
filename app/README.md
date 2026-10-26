@@ -24,6 +24,7 @@ npm run test:matrix       # MP4 120端点 + 15既定 + 1080p/12秒。ffmpeg・ff
 npm run test:performance  # 1080p 描画と約2MP の前処理の測定
 npm run test:performance:throttled # CDP CPU4倍、Worker適用の校正、同じ前処理の代理測定
 npm run test:showcase     # 運河・24秒の展示用MP4/GIF。媒体はGit管理外
+node test/showcase-render.mjs <出力先> 名前=<見本のid か画像のパス>:<台本>  # README のループの素材。作り方は ../experiments/brand/reel.sh
 npm run test:secrets      # 全refのパッチ・コミットメッセージと追跡ファイルの走査
 npm run test:captures     # 島の8時点と UI の画面写真
 node test/seam.mjs        # test:matrix の1080p動画の継ぎ目を測定
