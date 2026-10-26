@@ -53,6 +53,14 @@
 
 → 光過敏の数値は品質の基準として `tools/visual-qa` に入れる（いまの「明るさの急な変化」の判定を、ITU の物差しに合わせて直す）。reduced motion は最初から設計に入れる。色の選び方の UI は、方式（RGB・HSV など）より、選んだ結果をどれだけ見せるかが効く可能性がある。色覚への配慮は、当事者に確かめながら記号や形を重ねる。
 
+## 4b. 方向 B の直接の競合（color-animation-tools、ADR-0003 の後に追加）
+
+- 写真を動かすアプリは、保存と書き出しを有料の壁にしている。「何を保存・書き出すにも払わされる」（`appstore-reviews-motionleap-us.md:3`）、「年 $60」（同 `:13`）。Plotaverse もサブスク化への不満がある（`appstore-reviews-plotaverse-us.md:12`）。
+- ドット絵の作り手は、Aseprite にカラーサイクリングを 2019 年から求め続けている。作者は「予定したが実装していない」と答えた（`aseprite-forum-color-cycling-effect.md`）。Pro Motion NG では「手間をかければできる」（同 `:2`）。
+- 小さな専用の道具がある。投げ銭制のもの（`kerimsafa-color-cycling.md:17`）と、$3.99 からのもの（`heos-colorshift.md:17`）。
+
+→ 書き出しを有料の壁にしない買い切りは、それだけで差になる。ドット絵の作り手には、満たされていない需要がある。この調査は WebSearch の上限で1周目までで区切っている（Web のループ GIF の道具、VJ の発言は未検索）。
+
 ## 5. 設計の原則（案を評価する物差し）
 
 | | 原則 | 根拠 |
