@@ -1,5 +1,5 @@
 // Renders 8 evenly spaced moments of each preset and tiles them into results/preset-<id>-<sample>.jpg.
-// Usage: node experiments/role-script-spike/preset-sheet.mjs [presetId ...] [--override '{"nightDepth":1.3}']
+// Usage: node experiments/role-script-spike/preset-sheet.mjs [presetId ...] [--override '{"nightDepth":1.3}'] [--samples canal,oasis]
 import {chromium} from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
@@ -9,10 +9,11 @@ import {createServer} from './server.mjs';
 import {PRESETS} from './script.js';
 
 const directory=path.dirname(fileURLToPath(import.meta.url));
-const args=process.argv.slice(2),flag=args.indexOf('--override');
+const args=process.argv.slice(2),flag=args.indexOf('--override'),only=args.indexOf('--samples');
+const wanted=only>=0?args[only+1].split(','):null;
 const overrides=flag>=0?JSON.parse(args[flag+1]):{};
 const tag=flag>=0?'-'+Object.entries(overrides).map(([k,v])=>`${k}${v}`).join('-'):'';
-const ids=args.filter((a,i)=>!a.startsWith('--')&&(flag<0||i!==flag+1));
+const ids=args.filter((a,i)=>!a.startsWith('--')&&(flag<0||i!==flag+1)&&(only<0||i!==only+1));
 const presets=ids.length?ids:Object.keys(PRESETS);
 const run=(command,argv)=>new Promise((resolve,reject)=>{
   const child=spawn(command,argv,{cwd:directory,stdio:['ignore','ignore','pipe'],windowsHide:true});let errors='';
@@ -30,7 +31,7 @@ try{
   for(const id of presets){
     const preset=await page.evaluate(a=>window.roleSpike.setPreset(a.id,a.overrides),{id,overrides});
     for(const [index,sample] of samples.entries()){
-      if(sample==='photo')continue;
+      if(sample==='photo'||(wanted&&!wanted.includes(sample)))continue;
       const folder=path.join(directory,'shots','presets',id+tag,sample);await mkdir(folder,{recursive:true});
       for(let i=0;i<8;i++){
         const seconds=i*preset.durationSec/8;

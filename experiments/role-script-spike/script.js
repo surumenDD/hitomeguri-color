@@ -83,8 +83,12 @@ function target(p,role,key,o){
   }
   if(role==='light'){
     // Lamps come on with the afterglow, burn amber through the night and go out by morning.
-    const glow=GLOW[key]*o.glow,on=Math.min(1,glow);
-    const lit=lch(Math.min(.93,Math.max(L,.74+.08*glow)),.10+.05*glow,70-6*on);
+    // v4: each lamp keeps its own hue and leans 35% toward amber, so red lanterns stay red.
+    const glow=GLOW[key]*o.glow,on=Math.min(1,glow),amber=70-6*on;
+    const hue=H+(((amber-H+540)%360)-180)*.35;
+    // Reds lit too brightly turn pink, so red-orange lamps get a lower floor than amber ones.
+    const yellowish=clamp((H-35)/30,0,1),floor=(.66+.06*glow)*(1-yellowish)+(.74+.08*glow)*yellowish;
+    const lit=lch(Math.min(.93,Math.max(L,floor)),Math.max(C*.95,.10+.05*glow),hue);
     const off=lch(darken(L,.78),C*.30,H);
     return mix(off,lit,on);
   }

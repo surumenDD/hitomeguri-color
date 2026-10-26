@@ -1,4 +1,4 @@
-import {SAMPLES,paletteAt,labHex} from './color.js';
+import {SAMPLES,paletteAt,labHex,rgbToLab,distance2} from './color.js';
 import {Renderer} from './renderer.js';
 import {ROLES,DURATION,MOMENTS,PRESETS,inferRoles,rolePaletteAt} from './script.js';
 
@@ -40,6 +40,18 @@ function buildPalette(){
     card.append(button,select,detail);$('#palette').append(card);
   });
 }
+// Hand-set roles for the hero images (assets/hero/roles.json): nearest palette colour within maxDistance.
+const curation=await fetch('../../assets/hero/roles.json').then(r=>r.json()).catch(()=>({images:{}}));
+function curate(id,palette,roles){
+  const entry=curation.images?.[id];if(!entry)return roles;
+  const out=roles.slice(),limit=(curation.maxDistance??.04)**2;
+  for(const {hex,role} of entry.colors??[]){
+    const lab=rgbToLab(...[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)));
+    let best=-1,d=Infinity;palette.forEach((p,k)=>{const e=distance2(p,lab);if(e<d){d=e;best=k;}});
+    if(best>=0&&d<=limit)out[best]=role;
+  }
+  return out;
+}
 async function load(sample){
   const image=new Image();image.src=`../../assets/samples/raw/${sample.file}`;await image.decode();
   const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
@@ -52,7 +64,7 @@ async function load(sample){
     worker.postMessage({rgba,width:canvas.width,height:canvas.height},[rgba.buffer]);
   }).finally(()=>worker.terminate());
   const inference=inferRoles(data.metadata);
-  return {...sample,data,inference,roles:inference.map(info=>info.role)};
+  return {...sample,data,inference,roles:curate(sample.id,data.metadata.palette,inference.map(info=>info.role))};
 }
 function capture(index,seconds,width=960,mode='role',weights='soft'){
   stop();const row=state.rows[index];if(captureRenderer.data!==row.data)captureRenderer.upload(row.data);

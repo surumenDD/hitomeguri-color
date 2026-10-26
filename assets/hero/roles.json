@@ -1,0 +1,60 @@
+{
+  "$comment": "Hand-set roles for the hero images (main's art direction). Each entry matches the nearest extracted palette colour within maxDistance (OKLab). regions are applied in M2, once the renderer can split an island by position.",
+  "maxDistance": 0.04,
+  "images": {
+    "canal": {
+      "colors": [
+        {
+          "hex": "#f27a2f",
+          "role": "sky",
+          "why": "orange horizon band and its reflection; inferred as middle"
+        },
+        {
+          "hex": "#ef5723",
+          "role": "light",
+          "why": "paper lanterns; inferred as water because they sit low"
+        },
+        {
+          "hex": "#c66c44",
+          "role": "sky"
+        },
+        {
+          "hex": "#9e6b55",
+          "role": "sky"
+        }
+      ]
+    },
+    "oasis": {
+      "colors": [
+        {
+          "hex": "#f9a035",
+          "role": "light",
+          "why": "tent glow"
+        }
+      ],
+      "regions": [
+        {
+          "rect": [
+            0.06,
+            0.42,
+            0.38,
+            0.6
+          ],
+          "hex": [
+            "#d16b3c",
+            "#ad5c40",
+            "#744034"
+          ],
+          "role": "light",
+          "why": "tent canvas and walls share colours with the dunes and the shore; only inside the tents"
+        }
+      ]
+    },
+    "snow": {
+      "colors": []
+    },
+    "lighthouse": {
+      "colors": []
+    }
+  }
+}
