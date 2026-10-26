@@ -1,0 +1,3 @@
+node_modules/
+tools/visual-qa/out/
+.playwright-mcp/

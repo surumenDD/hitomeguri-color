@@ -1,0 +1,12 @@
+{
+  "name": "visual-qa",
+  "private": true,
+  "type": "module",
+  "description": "Headless checks for color pieces: selftest math, timed screenshots, frame timing, reduced motion, luminance flicker.",
+  "scripts": {
+    "probe": "node probe-eval.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.61.1"
+  }
+}
