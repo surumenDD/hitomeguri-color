@@ -68,11 +68,14 @@ button,select,input{font:inherit;color:inherit}
 .slider{display:grid;grid-template-columns:1fr auto;gap:var(--s50) var(--s100);margin-top:var(--s200);font-size:14px;line-height:20px}
 .slider output{color:var(--ink-quiet);font-variant-numeric:tabular-nums}
 .slider input{grid-column:1/-1;width:100%;accent-color:var(--ink)}
-.islands{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s75)}
-.island{border:0;background:var(--control);border-radius:8px;padding:var(--s75);display:flex;flex-direction:column;gap:var(--s50);align-items:flex-start;cursor:pointer;
-  font-size:12px;line-height:16px;transition:background-color 300ms var(--ease)}
-.island:hover{background:var(--control-hover)}
-.island i{display:block;width:100%;height:16px;border-radius:4px}
+.islands{display:flex;flex-direction:column;gap:var(--s75)}
+/* One row per role: the role name, then its islands as swatches, largest first. */
+.role-row{display:grid;grid-template-columns:40px 1fr;gap:var(--s75);align-items:start}
+.role-row>span{font-size:12px;line-height:20px;color:var(--ink-quiet)}
+.role-row>div{display:flex;flex-wrap:wrap;gap:var(--s50)}
+.swatch{width:28px;height:20px;border-radius:4px;border:0;padding:0;cursor:pointer;transition:box-shadow 300ms var(--ease)}
+.swatch:hover{box-shadow:0 0 0 1px var(--ink-quiet)}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--room),0 0 0 4px var(--ink)}
 .actions{display:flex;flex-direction:column;gap:var(--s75)}
 .primary{border:0;border-radius:8px;padding:var(--s75) var(--s100);background:var(--ink);color:var(--room);font-weight:700;cursor:pointer;
   transition:transform 500ms var(--ease)}
@@ -131,14 +134,10 @@ button,select,input{font:inherit;color:inherit}
     <div>
       <h2>色の島</h2>
       <div class="islands">
-        <button class="island"><i style="background:#134c8a"></i>空</button>
-        <button class="island"><i style="background:#f27a2f"></i>空</button>
-        <button class="island"><i style="background:#04111f"></i>影</button>
-        <button class="island"><i style="background:#052240"></i>影</button>
-        <button class="island"><i style="background:#ef5723"></i>灯り</button>
-        <button class="island"><i style="background:#f9c469"></i>灯り</button>
-        <button class="island"><i style="background:#223a5e"></i>中間</button>
-        <button class="island"><i style="background:#c66c44"></i>空</button>
+        <div class="role-row"><span>空</span><div><button class="swatch" style="background:#134c8a" aria-label="空、面積 36.6%"></button><button class="swatch" style="background:#f27a2f" aria-label="空、面積 8.2%"></button><button class="swatch" style="background:#4a5e85" aria-label="空、面積 3.6%"></button><button class="swatch" style="background:#c66c44" aria-label="空、面積 3.1%"></button><button class="swatch" style="background:#9e6b55" aria-label="空、面積 1.1%"></button></div></div>
+        <div class="role-row"><span>灯り</span><div><button class="swatch" style="background:#ef5723" aria-label="灯り、面積 0.9%"></button><button class="swatch" style="background:#f9c469" aria-label="灯り、面積 0.5%"></button><button class="swatch" style="background:#9a512b" aria-label="灯り、面積 0.3%"></button></div></div>
+        <div class="role-row"><span>影</span><div><button class="swatch" style="background:#04111f" aria-label="影、面積 22.6%"></button><button class="swatch" style="background:#052240" aria-label="影、面積 13.3%"></button><button class="swatch" style="background:#01030b" aria-label="影、面積 1.0%"></button><button class="swatch" style="background:#362523" aria-label="影、面積 0.6%"></button></div></div>
+        <div class="role-row"><span>中間</span><div><button class="swatch" style="background:#223a5e" aria-label="中間、面積 4.5%"></button><button class="swatch" style="background:#746371" aria-label="中間、面積 2.9%"></button><button class="swatch" style="background:#604033" aria-label="中間、面積 0.5%"></button><button class="swatch" style="background:#b59887" aria-label="中間、面積 0.1%"></button></div></div>
       </div>
     </div>
     <div class="actions">
