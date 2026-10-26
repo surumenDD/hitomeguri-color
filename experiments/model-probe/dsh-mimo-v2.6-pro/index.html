@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chromatic Field</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0b0e; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: crosshair; }
+  #selftest {
+    margin: 0; padding: 16px; min-height: 100vh; box-sizing: border-box;
+    font: 13px/1.55 ui-monospace, Consolas, monospace; color: #e6e6ea; background: #0b0b0e;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+<pre id="selftest" hidden></pre>
+<canvas id="c"></canvas>
+<script>
+'use strict';
+
+/* =====================================================================
+ * Color math — OKLab / OKLCH (same formulas as the GLSL shader below).
+ * No sRGB channel-wise mixing is used anywhere (R1).
+ * ===================================================================== */
+const TAU = Math.PI * 2;
+const DEG = Math.PI / 180;
+const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+
+function srgbToLinear(c) {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+function linearToSrgb(c) {
+  // Branch form keeps working for out-of-gamut (negative / >1) values.
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(Math.max(c, 0), 1 / 2.4) - 0.055;
+}
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return { r: ((n >> 16) & 255) / 255, g: ((n >> 8) & 255) / 255, b: (n & 255) / 255 };
+}
+function rgbToHex(r, g, b) {
+  const h = (v) => clamp(Math.round(v * 255), 0, 255).toString(16).padStart(2, '0');
+  return '#' + h(r) + h(g) + h(b);
+}
+function srgbToOklab(r, g, b) {
+  const R = srgbToLinear(r), G = srgbToLinear(g), B = srgbToLinear(b);
+  const l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B);
+  const m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B);
+  const s = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B);
+  return {
+    L: 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+    a: 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+    b: 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
+  };
+}
+function oklabToSrgb(L, a, b) {
+  const l = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s = L - 0.0894841775 * a - 1.2914855480 * b;
+  const l3 = l * l * l, m3 = m * m * m, s3 = s * s * s;
+  return {
+    r: linearToSrgb(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3),
+    g: linearToSrgb(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3),
+    b: linearToSrgb(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3)
+  };
+}
+function oklchToOklab(L, C, hDeg) {
+  const hr = hDeg * DEG;
+  return { L: L, a: C * Math.cos(hr), b: C * Math.sin(hr) };
+}
+
+/* R2: gamut mapping. Keep L and h, lower C by binary search until the
+ * color fits inside sRGB. Never clamp channels per channel. */
+function oklchToSrgbMapped(L, C, hDeg) {
+  const hr = hDeg * DEG;
+  const inGamut = (cc) => {
+    const s = oklabToSrgb(L, cc * Math.cos(hr), cc * Math.sin(hr));
+    return s.r >= 0 && s.r <= 1 && s.g >= 0 && s.g <= 1 && s.b >= 0 && s.b <= 1;
+  };
+  let lo = 0, hi = C;
+  if (!inGamut(hi)) {
+    for (let i = 0; i < 32; i++) {
+      const mid = (lo + hi) / 2;
+      if (inGamut(mid)) lo = mid; else hi = mid;
+    }
+  } else {
+    lo = C;
+  }
+  const s = oklabToSrgb(L, lo * Math.cos(hr), lo * Math.sin(hr));
+  return { hex: rgbToHex(s.r, s.g, s.b), L: L, C: lo, h: hDeg, rgb: s };
+}
+
+/* =====================================================================
+ * Palette — harmony rule (R3): an analogous triad (h0, h0+26, h0+52)
+ * plus a complementary pair (h0+180, h0+206); L alternates light/mid and
+ * C stays low (0.055-0.13) for a quiet pastel field. Every color is
+ * gamut-mapped with oklchToSrgbMapped before use.
+ * ===================================================================== */
+function makePalette() {
+  const h0 = Math.random() * 360;
+  const hues = [h0, h0 + 26, h0 + 52, h0 + 180, h0 + 206].map((h) => ((h % 360) + 360) % 360);
+  return hues.map((h, i) => {
+    const L = i % 2 === 0 ? 0.78 + Math.random() * 0.08 : 0.52 + Math.random() * 0.10;
+    const C = 0.055 + Math.random() * 0.075;
+    return oklchToSrgbMapped(L, C, h);
+  });
+}
+
+/* =====================================================================
+ * Self test (R9) — pure computation, no rendering.
+ * ===================================================================== */
+function buildSelftestJson() {
+  const r4 = (x) => Math.round(x * 10000) / 10000;
+  const primaries = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#808080'];
+  const cases = [[0.7, 0.4, 150], [0.5, 0.05, 30]];
+  return {
+    srgbToOklab: primaries.map((hex) => {
+      const c = hexToRgb(hex);
+      const lab = srgbToOklab(c.r, c.g, c.b);
+      return { hex: hex, L: r4(lab.L), a: r4(lab.a), b: r4(lab.b) };
+    }),
+    oklchToSrgbMapped: cases.map(([L, C, h]) => {
+      const m = oklchToSrgbMapped(L, C, h);
+      return {
+        input: 'oklch(' + L + ' ' + C + ' ' + h + ')',
+        hex: m.hex,
+        L: r4(m.L),
+        h: r4(m.h),
+        C_in: r4(C),
+        C: r4(m.C)
+      };
+    })
+  };
+}
+
+function showSelftest() {
+  const json = JSON.stringify(buildSelftestJson(), null, 2);
+  document.getElementById('c').style.display = 'none';
+  const pre = document.getElementById('selftest');
+  pre.hidden = false;
+  pre.textContent = json;
+  console.log(json);
+}
+
+/* =====================================================================
+ * Rendering — WebGL2 (R8). One full-screen triangle; the fragment shader
+ * computes a weighted OKLab average of soft gaussian color blobs, then
+ * gamut-maps to sRGB by lowering C (keeping L and h) with a binary search.
+ * ===================================================================== */
+const VS = `#version 300 es
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+const FS = `#version 300 es
+precision highp float;
+uniform vec2 uRes;
+uniform float uAspect;
+uniform int uCount;
+uniform vec4 uBlobs[24];   /* x, y, radius, weight (aspect space) */
+uniform vec3 uColors[24];  /* OKLab */
+out vec4 outColor;
+
+vec3 oklabToLinear(float L, float a, float b) {
+  float l = L + 0.3963377774 * a + 0.2158037573 * b;
+  float m = L - 0.1055613458 * a - 0.0638541728 * b;
+  float s = L - 0.0894841775 * a - 1.2914855480 * b;
+  float l3 = l * l * l, m3 = m * m * m, s3 = s * s * s;
+  return vec3(
+    4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3,
+   -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3,
+   -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3);
+}
+
+float linToSrgb(float c) {
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * pow(max(c, 0.0), 1.0 / 2.4) - 0.055;
+}
+
+/* R2: keep L and h, lower C by binary search until inside sRGB gamut. */
+vec3 gamutMap(float L, float a, float b) {
+  float C = sqrt(a * a + b * b);
+  float hr = atan(b, a);
+  float ch = cos(hr), sh = sin(hr);
+  float lo = 0.0, hi = C;
+  for (int i = 0; i < 18; i++) {
+    float mid = 0.5 * (lo + hi);
+    vec3 lin = oklabToLinear(L, mid * ch, mid * sh);
+    bool inside = lin.x >= 0.0 && lin.x <= 1.0 && lin.y >= 0.0 && lin.y <= 1.0 && lin.z >= 0.0 && lin.z <= 1.0;
+    if (inside) lo = mid; else hi = mid;
+  }
+  vec3 lin = oklabToLinear(L, lo * ch, lo * sh);
+  return vec3(linToSrgb(lin.x), linToSrgb(lin.y), linToSrgb(lin.z));
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / uRes;
+  vec2 p = vec2(uv.x * uAspect, 1.0 - uv.y);
+  vec3 acc = vec3(0.0);
+  float wsum = 0.0;
+  for (int i = 0; i < 24; i++) {
+    if (i >= uCount) break;
+    vec4 bl = uBlobs[i];
+    vec2 d = p - bl.xy;
+    float w = bl.w * exp(-dot(d, d) / max(bl.z * bl.z, 1e-4));
+    acc += uColors[i] * w;
+    wsum += w;
+  }
+  vec3 lab = acc / max(wsum, 1e-4);
+  outColor = vec4(gamutMap(lab.x, lab.y, lab.z), 1.0);
+}`;
+
+const MAX_BLOBS = 24;
+const BASE_BLOBS = 6;              /* 1 wide base blob + 5 palette blobs */
+const MAX_INJECTIONS = MAX_BLOBS - BASE_BLOBS;
+
+function boot() {
+  const canvas = document.getElementById('c');
+  const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, depth: false });
+  if (!gl) {
+    document.body.textContent = 'WebGL2 is required.';
+    return;
+  }
+
+  function compile(type, src) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+
+  const locRes = gl.getUniformLocation(prog, 'uRes');
+  const locAspect = gl.getUniformLocation(prog, 'uAspect');
+  const locCount = gl.getUniformLocation(prog, 'uCount');
+  const locBlobs = gl.getUniformLocation(prog, 'uBlobs[0]');
+  const locColors = gl.getUniformLocation(prog, 'uColors[0]');
+  const blobArr = new Float32Array(MAX_BLOBS * 4);
+  const colorArr = new Float32Array(MAX_BLOBS * 3);
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let palette = makePalette();
+  let paletteIdx = 0;
+  const injections = [];
+  let aspect = 1;
+  let width = 0, height = 0;
+
+  const labOf = (c) => oklchToOklab(c.L, c.C, c.h);
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    width = Math.max(2, Math.round(canvas.clientWidth * dpr));
+    height = Math.max(2, Math.round(canvas.clientHeight * dpr));
+    canvas.width = width;
+    canvas.height = height;
+    aspect = width / height;
+    gl.viewport(0, 0, width, height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* Pointer input (R5): press cycles through the palette colors; the drag
+   * path keeps injecting the color chosen at press time. */
+  let dragging = false;
+  let strokeLab = null;
+  let lastInject = 0;
+
+  function inject(e, force) {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * aspect;
+    const y = 1 - (e.clientY - rect.top) / rect.height;
+    const now = performance.now();
+    if (!force && now - lastInject < 70) return;
+    lastInject = now;
+    injections.push({ x: x, y: y, lab: strokeLab, birth: now, rMax: 0.26 + Math.random() * 0.1 });
+    if (injections.length > MAX_INJECTIONS) injections.shift();
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    dragging = true;
+    strokeLab = labOf(palette[paletteIdx]);
+    paletteIdx = (paletteIdx + 1) % palette.length;
+    inject(e, true);
+  });
+  canvas.addEventListener('pointermove', (e) => { if (dragging) inject(e, false); });
+  const stop = () => { dragging = false; };
+  canvas.addEventListener('pointerup', stop);
+  canvas.addEventListener('pointercancel', stop);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      palette = makePalette();
+    } else if (e.key === 's' || e.key === 'S') {
+      render(performance.now());
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'chromatic-field-' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    }
+  });
+
+  function render(nowMs) {
+    /* R7: with reduced motion the autonomous clock is frozen at 0. */
+    const t = reduced ? 0 : nowMs / 1000;
+
+    /* Slow drift, periods 38-61 s (R4), never faster than 20 s per cycle. */
+    const baseX = [0.22, 0.78, 0.48, 0.88, 0.30];
+    const baseY = [0.30, 0.28, 0.72, 0.78, 0.82];
+
+    let n = 0;
+    const put = (x, y, r, w, lab) => {
+      if (n >= MAX_BLOBS) return;
+      blobArr[n * 4] = x; blobArr[n * 4 + 1] = y; blobArr[n * 4 + 2] = r; blobArr[n * 4 + 3] = w;
+      colorArr[n * 3] = lab.L; colorArr[n * 3 + 1] = lab.a; colorArr[n * 3 + 2] = lab.b;
+      n++;
+    };
+
+    /* Wide base blob keeps every pixel colored between the smaller ones. */
+    let avg = { L: 0, a: 0, b: 0 };
+    for (const c of palette) {
+      const lab = labOf(c);
+      avg.L += lab.L / palette.length; avg.a += lab.a / palette.length; avg.b += lab.b / palette.length;
+    }
+    put(aspect * 0.5, 0.5, 2.2, 0.30, avg);
+
+    for (let i = 0; i < palette.length; i++) {
+      const ph = i * 1.7;
+      const x = baseX[i] * aspect + 0.13 * aspect * Math.sin(t * TAU / 47 + ph * 1.3);
+      const y = baseY[i] + 0.11 * Math.cos(t * TAU / 61 + ph * 0.9);
+      const r = 0.36 + 0.06 * Math.sin(t * TAU / 38 + ph * 0.7);
+      put(x, y, r, 1.0, labOf(palette[i]));
+    }
+
+    const growth = reduced ? 0.001 : 2.8;
+    for (let i = injections.length - 1; i >= 0; i--) {
+      const inj = injections[i];
+      const age = (nowMs - inj.birth) / 1000;
+      const g = Math.min(1, age / growth);
+      const smooth = g * g * (3 - 2 * g);
+      let alpha = age > 8 ? Math.max(0, 1 - (age - 8) / 10) : 1;
+      if (alpha <= 0) { injections.splice(i, 1); continue; }
+      put(inj.x, inj.y, inj.rMax * (0.3 + 0.7 * smooth), alpha, inj.lab);
+    }
+
+    gl.uniform2f(locRes, width, height);
+    gl.uniform1f(locAspect, aspect);
+    gl.uniform1i(locCount, n);
+    gl.uniform4fv(locBlobs, blobArr.subarray(0, n * 4));
+    gl.uniform3fv(locColors, colorArr.subarray(0, n * 3));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  function frame(nowMs) {
+    render(nowMs);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+if (typeof document !== 'undefined') {
+  if (new URLSearchParams(location.search).has('selftest')) showSelftest();
+  else boot();
+}
+</script>
+</body>
+</html>

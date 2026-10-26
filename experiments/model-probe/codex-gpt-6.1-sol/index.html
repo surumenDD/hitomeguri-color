@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
+  <title>Chromatic Field — 色の余韻</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #ddd6d0; color: #fffaf1; font-family: "Yu Gothic UI", "Hiragino Kaku Gothic ProN", sans-serif; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+    .heading, .controls { position: fixed; z-index: 1; pointer-events: none; text-shadow: 0 1px 14px #26343c45; }
+    .heading { top: 35px; left: 42px; }
+    h1 { margin: 0; font: italic 400 clamp(30px, 3.2vw, 48px)/1.1 Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
+    .subtitle { margin: 12px 0 0 2px; font-size: 10px; letter-spacing: .24em; }
+    .controls { bottom: 30px; left: 42px; right: 42px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+    .palette { display: flex; align-items: flex-end; gap: 7px; height: 31px; }
+    .swatch { width: 33px; height: 5px; position: relative; box-shadow: 0 0 0 1px #ffffff26; }
+    .swatch.next::after { content: ""; position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fffaf1; left: 15px; bottom: 12px; }
+    .hint { margin-top: 13px; font-size: 10px; letter-spacing: .09em; }
+    .actions { pointer-events: auto; display: flex; gap: 22px; }
+    button { border: 0; padding: 9px 0; background: transparent; color: inherit; font: inherit; font-size: 11px; cursor: pointer; text-shadow: inherit; }
+    button:hover { text-decoration: underline; text-underline-offset: 5px; }
+    button:focus-visible { outline: 1px solid currentColor; outline-offset: 7px; }
+    kbd { margin-right: 6px; font-family: Georgia, serif; font-size: 12px; opacity: .7; }
+    #status { position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%); color: #fffaf1; font-size: 12px; text-shadow: 0 1px 12px #14202e; pointer-events: none; }
+    #error { position: absolute; inset: 30%; font-size: 15px; line-height: 1.8; color: #253943; }
+    body.selftest { height: auto; overflow: auto; background: #f7f7f5; color: #202c31; }
+    .selftest pre { margin: 24px; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.6 Consolas, monospace; }
+    @media (max-width: 600px) {
+      .heading { top: 25px; left: 24px; }
+      .controls { left: 24px; right: 24px; bottom: 20px; gap: 12px; }
+      .actions { gap: 14px; }
+      .swatch { width: 21px; }
+      .swatch.next::after { left: 9px; }
+      .hint { max-width: 150px; font-size: 9px; line-height: 1.7; }
+      button { font-size: 10px; }
+      kbd { display: block; margin: 0 0 6px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field" aria-label="ドラッグで色を差し込める、ゆっくりと変化する色の場"></canvas>
+  <header class="heading">
+    <h1>Chromatic Field</h1>
+    <p class="subtitle">色の余韻</p>
+  </header>
+  <footer class="controls">
+    <div>
+      <div class="palette" id="palette" aria-label="現在の5色のパレット"></div>
+      <div class="hint" id="hint">押して、なぞる。色がほどけていく。</div>
+    </div>
+    <div class="actions">
+      <button type="button" id="renew" aria-keyshortcuts="Space"><kbd>Space</kbd>色を替える</button>
+      <button type="button" id="save" aria-keyshortcuts="S"><kbd>S</kbd>PNG を保存</button>
+    </div>
+  </footer>
+  <div id="status" role="status" aria-live="polite"></div>
+  <script>
+  'use strict';
+  (() => {
+    const TAU = Math.PI * 2;
+    const MAX_DABS = 32;
+    const DAB_LIFETIME = 10;
+    const canvas = document.getElementById('field');
+
+    // Colour conversions use linear-light sRGB only at the input/output boundary.
+    const decode = c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+    const encode = c => c <= .0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - .055;
+    function srgbToOklab(rgb) {
+      const [r, g, b] = rgb.map(decode);
+      const l = Math.cbrt(.4122214708*r + .5363325363*g + .0514459929*b);
+      const m = Math.cbrt(.2119034982*r + .6806995451*g + .1073969566*b);
+      const s = Math.cbrt(.0883024619*r + .2817188376*g + .6299787005*b);
+      return [.2104542553*l + .793617785*m - .0040720468*s,
+              1.9779984951*l - 2.428592205*m + .4505937099*s,
+              .0259040371*l + .7827717662*m - .808675766*s];
+    }
+    function oklabToLinear([L, a, b]) {
+      const l = (L + .3963377774*a + .2158037573*b) ** 3;
+      const m = (L - .1055613458*a - .0638541728*b) ** 3;
+      const s = (L - .0894841775*a - 1.291485548*b) ** 3;
+      return [4.0767416621*l - 3.3077115913*m + .2309699292*s,
+              -1.2684380046*l + 2.6097574011*m - .3413193965*s,
+              -.0041960863*l - .7034186147*m + 1.707614701*s];
+    }
+    const lchToLab = ([L, C, h]) => [L, C * Math.cos(h * Math.PI / 180), C * Math.sin(h * Math.PI / 180)];
+    const inGamut = rgb => rgb.every(v => v >= 0 && v <= 1);
+    function mapOklch([L, C, h]) {
+      let lab = lchToLab([L, C, h]);
+      let linear = oklabToLinear(lab);
+      if (!inGamut(linear)) {
+        let lo = 0, hi = C;
+        // Fix L and h; find the largest admissible chroma. No RGB clipping.
+        for (let i = 0; i < 26; i++) {
+          const mid = (lo + hi) / 2;
+          if (inGamut(oklabToLinear(lchToLab([L, mid, h])))) lo = mid;
+          else hi = mid;
+        }
+        C = lo;
+        lab = lchToLab([L, C, h]);
+        linear = oklabToLinear(lab);
+      }
+      const rgb = linear.map(encode);
+      const hex = '#' + rgb.map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
+      return { L, C, h, lab, rgb, hex };
+    }
+
+    function selftest() {
+      const input = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#808080'];
+      const rounded = v => Number(v.toFixed(4));
+      return {
+        srgbToOklab: Object.fromEntries(input.map(hex => {
+          const rgb = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
+          const [L, a, b] = srgbToOklab(rgb).map(rounded);
+          return [hex, { L, a, b }];
+        })),
+        oklchToSrgbMapped: Object.fromEntries([[.7, .4, 150], [.5, .05, 30]].map(lch => {
+          const mapped = mapOklch(lch);
+          return [`oklch(${lch.join(' ')})`, { hex: mapped.hex, C: Number(mapped.C.toFixed(8)) }];
+        }))
+      };
+    }
+    if (new URLSearchParams(location.search).has('selftest')) {
+      const result = selftest();
+      const json = JSON.stringify(result, null, 2);
+      document.body.className = 'selftest';
+      document.body.replaceChildren(Object.assign(document.createElement('pre'), { textContent: json }));
+      console.log(json);
+      return;
+    }
+
+    const reducedQuery = matchMedia('(prefers-reduced-motion: reduce)');
+    let reducedMotion = reducedQuery.matches;
+    let clock = 0, previousFrame = null, frameHandle = 0, frames = 0;
+    let dabs = [], activePointer = null, activeColor = null, lastDab = null;
+    let palette, previousPalette, transitionStart = -10, nextColor = 0;
+    let statusTimer;
+    let contextLost = false;
+    const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false });
+    function fail(message) {
+      const error = document.createElement('p');
+      error.id = 'error';
+      error.textContent = message;
+      document.body.append(error);
+      console.error(message);
+    }
+    if (!gl) {
+      fail('この作品には WebGL2 が必要です。ブラウザのハードウェア アクセラレーションを有効にして開き直してください。');
+      return;
+    }
+
+    const vertexSource = `#version 300 es
+      precision highp float;
+      void main() {
+        vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
+        gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+      }`;
+    const fragmentSource = `#version 300 es
+      precision highp float;
+      uniform vec2 uResolution;
+      uniform float uTime;
+      uniform vec3 uPalette[5];
+      uniform int uDabCount;
+      uniform vec4 uDabs[32];
+      uniform vec3 uDabColors[32];
+      out vec4 outColor;
+
+      vec3 labToLinear(vec3 lab) {
+        float l = lab.x + .3963377774*lab.y + .2158037573*lab.z;
+        float m = lab.x - .1055613458*lab.y - .0638541728*lab.z;
+        float s = lab.x - .0894841775*lab.y - 1.291485548*lab.z;
+        l = l*l*l; m = m*m*m; s = s*s*s;
+        return vec3(4.0767416621*l - 3.3077115913*m + .2309699292*s,
+                    -1.2684380046*l + 2.6097574011*m - .3413193965*s,
+                    -.0041960863*l - .7034186147*m + 1.707614701*s);
+      }
+      bool inGamut(vec3 rgb) {
+        return all(greaterThanEqual(rgb, vec3(0.0))) && all(lessThanEqual(rgb, vec3(1.0)));
+      }
+      vec3 gamutMap(vec3 lab) {
+        vec3 rgb = labToLinear(lab);
+        if (inGamut(rgb)) return rgb;
+        // Scaling the a,b vector reduces C while preserving L and atan(b,a).
+        float lo = 0.0, hi = 1.0;
+        for (int i = 0; i < 16; ++i) {
+          float mid = (lo + hi) * .5;
+          vec3 candidate = labToLinear(vec3(lab.x, lab.yz * mid));
+          if (inGamut(candidate)) lo = mid; else hi = mid;
+        }
+        return labToLinear(vec3(lab.x, lab.yz * lo));
+      }
+      float encode(float c) {
+        return c <= .0031308 ? 12.92*c : 1.055*pow(c, 1.0/2.4)-.055;
+      }
+      void main() {
+        vec2 uv = gl_FragCoord.xy / uResolution;
+        float aspect = uResolution.x / uResolution.y;
+        // Independent periods are 64, 80 and 96 seconds, all above 20 seconds.
+        vec3 phase = uTime * 6.28318530718 / vec3(64.0, 80.0, 96.0);
+        vec2 q = uv;
+        q.x += .115*sin(uv.y*4.4 + phase.x) + .035*cos(uv.y*9.0-phase.y);
+        q.y += .095*sin(uv.x*3.9 - phase.z);
+        vec2 anchors[5] = vec2[5](vec2(.03,.68), vec2(.40,1.04), vec2(.90,.75), vec2(1.02,.02), vec2(.22,-.07));
+        vec3 sum = vec3(0.0);
+        float total = 0.0;
+        for (int i = 0; i < 5; ++i) {
+          float fi = float(i);
+          vec2 center = anchors[i] + .065*vec2(sin(phase.y+fi*1.8), cos(phase.z+fi*2.4));
+          vec2 d = q - center;
+          float angle = -.65 + fi*.37 + .13*sin(phase.x);
+          mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+          d = rotation*d;
+          d *= vec2(1.0, 1.75);
+          float weight = exp(-dot(d,d)*5.2) + .002;
+          sum += uPalette[i] * weight;
+          total += weight;
+        }
+        vec3 lab = sum / total;
+        // A very faint fold in lightness makes the washes feel like a continuous surface.
+        float fold = sin((q.y + .32*sin(q.x*3.2-phase.y))*5.0 + phase.z);
+        lab.x += .012*fold;
+        vec3 ink = vec3(0.0);
+        float inkWeight = 0.0;
+        for (int i = 0; i < 32; ++i) {
+          if (i >= uDabCount) break;
+          vec4 dab = uDabs[i];
+          float age = max(0.0, uTime-dab.z);
+          float radius = .032 + .024*age;
+          vec2 drift = vec2(.012*sin(age*.35), .010*age);
+          vec2 d = (uv-dab.xy-drift) * vec2(aspect, 1.0);
+          float weight = dab.w*4.0*exp(-dot(d,d)/(2.0*radius*radius)) * exp(-.43*age);
+          weight *= 1.0-smoothstep(7.0, 10.0, age);
+          ink += uDabColors[i] * weight;
+          inkWeight += weight;
+        }
+        lab = (lab + ink) / (1.0 + inkWeight);
+        // Output conversion happens once, after every mixture in OKLab.
+        // Static lightness dither precedes gamut mapping, so no RGB channel clipping is needed.
+        float grain = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(.06711056,.00583715))))-.5;
+        lab.x += grain/1400.0;
+        vec3 linear = gamutMap(lab);
+        vec3 rgb = vec3(encode(linear.r), encode(linear.g), encode(linear.b));
+        outColor = vec4(rgb, 1.0);
+      }`;
+
+    function compile(type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+      return shader;
+    }
+    let program;
+    try {
+      const vertex = compile(gl.VERTEX_SHADER, vertexSource);
+      const fragment = compile(gl.FRAGMENT_SHADER, fragmentSource);
+      program = gl.createProgram();
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
+      gl.useProgram(program);
+    } catch (error) {
+      fail('描画を開始できませんでした: ' + error.message);
+      return;
+    }
+    const uniform = name => gl.getUniformLocation(program, name);
+    const locations = Object.fromEntries(['uResolution', 'uTime', 'uPalette[0]', 'uDabCount', 'uDabs[0]', 'uDabColors[0]'].map(name => [name, uniform(name)]));
+    const paletteBuffer = new Float32Array(15);
+    const dabBuffer = new Float32Array(MAX_DABS*4);
+    const dabColors = new Float32Array(MAX_DABS*3);
+
+    function newPalette() {
+      const base = Math.random()*360;
+      // Split-complement harmony: three neighbours around h, two around h+180°.
+      // Alternate lightness/chroma to keep both luminous space and dense pigment.
+      const recipe = [[.62,.17,-22], [.87,.07,12], [.71,.145,35], [.53,.125,164], [.79,.12,194]];
+      return recipe.map(([L,C,offset]) => mapOklch([L, C, (base+offset+360)%360]));
+    }
+    function visiblePalette() {
+      const t = reducedMotion ? 1 : Math.min(1, Math.max(0, (clock-transitionStart)/2.4));
+      const eased = t*t*(3-2*t);
+      return palette.map((color, i) => color.lab.map((v,j) => previousPalette[i][j]*(1-eased)+v*eased));
+    }
+    function updateSwatches() {
+      const container = document.getElementById('palette');
+      container.replaceChildren(...palette.map((color, i) => {
+        const swatch = document.createElement('span');
+        swatch.className = 'swatch' + (i === nextColor ? ' next' : '');
+        swatch.style.backgroundColor = color.hex;
+        swatch.title = `${i+1}: ${color.hex}`;
+        return swatch;
+      }));
+    }
+    function regenerate() {
+      previousPalette = visiblePalette();
+      palette = newPalette();
+      transitionStart = clock;
+      nextColor = 0;
+      updateSwatches();
+      requestRender();
+    }
+    function announce(message) {
+      clearTimeout(statusTimer);
+      document.getElementById('status').textContent = message;
+      statusTimer = setTimeout(() => { document.getElementById('status').textContent = ''; }, 2600);
+    }
+    function resize() {
+      // Cap the backing store at 1080p-equivalent pixels, including on high-DPI displays.
+      const scale = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(2073600/(innerWidth*innerHeight)));
+      canvas.width = Math.max(1, Math.round(innerWidth*scale));
+      canvas.height = Math.max(1, Math.round(innerHeight*scale));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      requestRender();
+    }
+    function draw() {
+      if (contextLost) return;
+      const colors = visiblePalette();
+      for (let i = 0; i < 5; i++) paletteBuffer.set(colors[i], i*3);
+      dabs = dabs.filter(dab => clock-dab.time < DAB_LIFETIME);
+      dabs.forEach((dab,i) => {
+        dabBuffer.set([dab.x, dab.y, dab.time, dab.strength], i*4);
+        dabColors.set(dab.lab, i*3);
+      });
+      gl.uniform2f(locations.uResolution, canvas.width, canvas.height);
+      gl.uniform1f(locations.uTime, clock);
+      gl.uniform3fv(locations['uPalette[0]'], paletteBuffer);
+      gl.uniform1i(locations.uDabCount, dabs.length);
+      if (dabs.length) {
+        gl.uniform4fv(locations['uDabs[0]'], dabBuffer);
+        gl.uniform3fv(locations['uDabColors[0]'], dabColors);
+      }
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      frames++;
+    }
+    function frame(now) {
+      frameHandle = 0;
+      if (document.hidden || contextLost) { previousFrame = null; return; }
+      if (!reducedMotion && previousFrame !== null) clock += Math.min(.1, (now-previousFrame)/1000);
+      previousFrame = now;
+      draw();
+      if (!reducedMotion) frameHandle = requestAnimationFrame(frame);
+    }
+    function requestRender() {
+      if (!frameHandle && !contextLost) frameHandle = requestAnimationFrame(frame);
+    }
+    function compactDabs() {
+      dabs = dabs.filter(dab => clock-dab.time < DAB_LIFETIME);
+      if (dabs.length <= MAX_DABS) return;
+      // Merge the closest space/time/colour pair instead of abruptly dropping old ink.
+      let pair = [0, 1], closest = Infinity;
+      const aspect = canvas.width/canvas.height;
+      for (let i = 0; i < dabs.length; i++) {
+        for (let j = i+1; j < dabs.length; j++) {
+          const a = dabs[i], b = dabs[j];
+          const colorDistance = a.lab.reduce((sum, v, k) => sum+(v-b.lab[k])**2, 0);
+          const score = ((a.x-b.x)*aspect)**2 + (a.y-b.y)**2 + .003*(a.time-b.time)**2 + 2*colorDistance;
+          if (score < closest) { closest = score; pair = [i, j]; }
+        }
+      }
+      const [i,j] = pair, a = dabs[i], b = dabs[j];
+      const strength = a.strength+b.strength;
+      const blend = (x,y) => (x*a.strength+y*b.strength)/strength;
+      dabs[i] = {x:blend(a.x,b.x), y:blend(a.y,b.y), time:blend(a.time,b.time), strength,
+        lab:a.lab.map((v,k) => blend(v,b.lab[k]))};
+      dabs.splice(j,1);
+    }
+    function deposit(event, force = false) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX-rect.left)/rect.width;
+      const y = 1-(event.clientY-rect.top)/rect.height;
+      const distance = lastDab ? Math.hypot((x-lastDab.x)*rect.width/rect.height, y-lastDab.y) : Infinity;
+      if (!force && lastDab && distance < .022 && event.timeStamp-lastDab.wallTime < 85) return;
+      // In reduced motion, only input advances diffusion; idle frames are never scheduled.
+      if (reducedMotion) clock += .08;
+      const dab = { x, y, time: clock, strength: 1, lab: activeColor.slice(), wallTime: event.timeStamp };
+      dabs.push(dab);
+      compactDabs();
+      lastDab = dab;
+      requestRender();
+    }
+    canvas.addEventListener('pointerdown', event => {
+      if (activePointer !== null || event.button !== 0) return;
+      activePointer = event.pointerId;
+      activeColor = palette[nextColor].lab;
+      nextColor = (nextColor+1)%palette.length;
+      lastDab = null;
+      canvas.setPointerCapture(event.pointerId);
+      updateSwatches();
+      deposit(event, true);
+    });
+    canvas.addEventListener('pointermove', event => {
+      if (event.pointerId === activePointer) deposit(event);
+    });
+    function endPointer(event) {
+      if (event.pointerId !== activePointer) return;
+      activePointer = null;
+      lastDab = null;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+    }
+    canvas.addEventListener('pointerup', endPointer);
+    canvas.addEventListener('pointercancel', endPointer);
+    canvas.addEventListener('lostpointercapture', endPointer);
+    function savePng() {
+      // Draw immediately before capture: the default framebuffer need not be preserved.
+      draw();
+      canvas.toBlob(blob => {
+        if (!blob) { announce('画像を保存できませんでした。'); return; }
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'chromatic-field-' + new Date().toISOString().replace(/[:.]/g,'-') + '.png';
+        anchor.click();
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        announce('色の場を PNG に保存しました。');
+      }, 'image/png');
+    }
+    document.getElementById('renew').addEventListener('click', regenerate);
+    document.getElementById('save').addEventListener('click', savePng);
+    addEventListener('keydown', event => {
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.target.closest('button, input, textarea, select, [contenteditable]')) return;
+      if (event.code === 'Space') { event.preventDefault(); regenerate(); }
+      if (event.key.toLowerCase() === 's') { event.preventDefault(); savePng(); }
+    });
+    reducedQuery.addEventListener('change', event => {
+      reducedMotion = event.matches;
+      previousFrame = null;
+      if (frameHandle) cancelAnimationFrame(frameHandle);
+      frameHandle = 0;
+      document.getElementById('hint').textContent = reducedMotion ? '動きを止めています。なぞって色を差し込む。' : '押して、なぞる。色がほどけていく。';
+      requestRender();
+    });
+    addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', () => { previousFrame = null; if (!document.hidden) requestRender(); });
+    canvas.addEventListener('webglcontextlost', event => {
+      event.preventDefault();
+      contextLost = true;
+      if (frameHandle) cancelAnimationFrame(frameHandle);
+      fail('描画が中断されました。ページを再読み込みしてください。');
+    });
+
+    palette = newPalette();
+    previousPalette = palette.map(color => color.lab.slice());
+    updateSwatches();
+    if (reducedMotion) document.getElementById('hint').textContent = '動きを止めています。なぞって色を差し込む。';
+    // Read-only diagnostics for repeatable checks, kept outside the artwork UI.
+    window.chromaticField = Object.freeze({
+      selftest, srgbToOklab, mapOklch, oklabToLinear,
+      inspect: () => ({ frames, time: clock, reducedMotion, dabs: dabs.length, nextColor,
+        resolution: [canvas.width, canvas.height], palette: palette.map(c => ({hex:c.hex, L:c.L, C:c.C, h:c.h})) })
+    });
+    resize();
+  })();
+  </script>
+</body>
+</html>
