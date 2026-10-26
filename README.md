@@ -10,7 +10,7 @@
 
 ## できること
 
-- **見る**: 見本の絵が4枚あります（運河の街、雪の村、灯台の岬、オアシス）。再生を押すと、色が1日をめぐります。
+- **見る**: 見本の絵が5枚あります（運河の街、雪の村、灯台の岬、オアシス、港町）。再生を押すと、色が1日をめぐります。
 - **試す**: 「自分の絵を開く」で好きな絵を読み込むと、絵を16色の島（色のかたまり）に分け、それぞれの役割（空、灯り、天体、水、影、中間）を推します。役割は島ごとに付け替えられます。同じ色の空と海は、線を1本引いて分けられます。台本は「1日の光」「長い夕暮れ」「夜の灯り」の3つで、「長さ」「夜の深さ」「灯りの強さ」の3本の目盛りで調整します。
 - **書き出す**: ループする MP4 の動画と、好きな時刻の PNG を保存できます。
 
@@ -42,7 +42,7 @@ npm run dev
 
 ## 見本の絵について
 
-`assets/hero/` の見本の絵4枚は、ChatGPT の画像生成で作りました。生成した画像の著作権の扱いは国や地域によって定まっていないため、下の MIT ライセンスでの許諾は、作者が持つ権利の範囲に限ります。
+`assets/` の絵（見本の絵5枚と、検証用の絵）は、すべて ChatGPT の画像生成で作りました。生成した画像の著作権の扱いは国や地域によって定まっていないため、下の MIT ライセンスでの許諾は、作者が持つ権利の範囲に限ります。
 
 ## ライセンス
 
@@ -58,7 +58,7 @@ npm run dev
 
 **Hitomeguri** ("one full turn") moves the colours of a picture through a whole day. The shapes stay; only the sky, the lights, the water and the shadows change with the hour.
 
-- **Watch**: four sample pictures cycle from evening through night, morning and day.
+- **Watch**: five sample pictures cycle from evening through night, morning and day.
 - **Try**: open your own picture. It is split into 16 colour islands, each given a role (sky, light, celestial, water, shadow, middle) that you can change. Pick one of three scripts and adjust length, night depth and lamp strength.
 - **Export**: save a looping MP4 or a PNG of any moment. Videos are checked against the photosensitive-seizure guidelines (WCAG 2.3.1, ITU-R BT.1702) before they are written.
 
