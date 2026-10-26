@@ -1,0 +1,11 @@
+/* Tailwind utilities are available; M3 owns the visual design and Preflight reset. */
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind 3 build directive. */
+@tailwind components;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind 3 build directive. */
+@tailwind utilities;
+
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
