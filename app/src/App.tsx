@@ -1,21 +1,63 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { Pause, Play, WarningCircle } from '@phosphor-icons/react';
+import {
+  type CSSProperties,
+  type PointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { labHex } from './color';
+import { PRODUCT } from './product';
 import { Player } from './render/player';
 import { SAMPLES } from './samples';
-import { MOMENTS, ROLES, type Role } from './script';
+import { PRESETS, ROLES, type Role } from './script';
+import { buildStrip, horizonAt } from './script/strip';
 import { AppStore } from './state';
+import {
+  durationPosition,
+  glowLabel,
+  glowPosition,
+  nightLabel,
+  positionDuration,
+  positionGlow,
+} from './ui/scales';
+import { Timeline, timeName } from './ui/Timeline';
 
+const ROLE_ORDER: Role[] = ['sky', 'water', 'light', 'celestial', 'shadow', 'middle'];
+function Notice({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="notice" role="alert">
+      <WarningCircle size={16} aria-hidden="true" />
+      <span>{children}</span>
+    </p>
+  );
+}
 export function App() {
   const storeRef = useRef<AppStore | null>(null);
   if (!storeRef.current) storeRef.current = new AppStore();
   const store = storeRef.current;
-  const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const state = useSyncExternalStore(store.subscribe, store.getSnapshot),
+    image = state.image;
+  const canvas = useRef<HTMLCanvasElement>(null),
+    file = useRef<HTMLInputElement>(null),
+    cancel = useRef<HTMLButtonElement>(null),
+    picture = useRef<HTMLElement>(null);
+  const [split, setSplit] = useState<{
+    at: number;
+    upper: Role;
+    lower: Role;
+    side: 'upper' | 'lower';
+  } | null>(null);
+  const run = (promise: Promise<unknown>) => {
+    void promise.catch((error) => store.fail(error));
+  };
   useEffect(() => {
     let player: Player | undefined;
     try {
-      if (canvasRef.current) player = new Player(canvasRef.current, store);
-      void store.load(SAMPLES[0].url, SAMPLES[0].name);
+      if (canvas.current) player = new Player(canvas.current, store);
+      void store.load(SAMPLES[0].url, SAMPLES[0].name, SAMPLES[0].id);
     } catch (error) {
       store.fail(error);
     }
@@ -24,19 +66,24 @@ export function App() {
       store.dispose();
     };
   }, [store]);
-  const image = state.image;
-  const moment = MOMENTS.findLast(([t]) => state.seconds >= t)?.[1] ?? MOMENTS[0][1];
-  const loadFile = (file?: File) => {
-    if (file) void store.load(file, file.name);
-  };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Selection and image changes invalidate the local split preview.
+  useEffect(() => {
+    setSplit(null);
+  }, [state.selected, image?.data]);
+  useEffect(() => {
+    store.previewSplit(split ? { at: split.at, side: split.side } : undefined);
+  }, [store, split]);
+  useEffect(() => {
+    if (state.exporting) cancel.current?.focus();
+  }, [state.exporting]);
   useEffect(() => {
     const over = (event: DragEvent) => {
       if (event.dataTransfer?.types.includes('Files')) event.preventDefault();
     };
     const drop = (event: DragEvent) => {
       event.preventDefault();
-      const file = event.dataTransfer?.files[0];
-      if (file) void store.load(file, file.name);
+      const selected = event.dataTransfer?.files[0];
+      if (selected) void store.load(selected, selected.name);
     };
     window.addEventListener('dragover', over);
     window.addEventListener('drop', drop);
@@ -45,115 +92,452 @@ export function App() {
       window.removeEventListener('drop', drop);
     };
   }, [store]);
-  return (
-    <main>
-      <h1>色を時間に置く</h1>
-      <p>画像をここにドロップするか、ファイルを選んでください。画像はこの端末内で処理します。</p>
-      <label>
-        見本の画像{' '}
-        <select
-          value={SAMPLES.find((sample) => sample.name === image?.name)?.id ?? ''}
-          disabled={state.loading}
-          onChange={(event) => {
-            const sample = SAMPLES.find((s) => s.id === event.target.value);
-            if (sample) void store.load(sample.url, sample.name);
-          }}
-        >
-          <option value="" disabled>
-            {image ? '自分の画像' : '画像を選択'}
+  const strip = useMemo(
+    () => (image ? buildStrip(image.data.metadata, image.roles, state.preset) : undefined),
+    [image, state.preset],
+  );
+  const accent = image
+    ? horizonAt(image.data.metadata, image.roles, state.preset, state.seconds)
+    : '#ECECEC';
+  const busy = state.loading || state.checking || state.exporting,
+    selected = image?.islands[state.selected];
+  const initial = selected ? image?.initial.find((i) => i.base === selected.base)?.role : undefined;
+  const splitGroup = selected
+    ? image?.splits.find((g) => g.upper === selected.id || g.lower === selected.id)
+    : undefined;
+  const roleSelect = (
+    label: string,
+    value: Role,
+    onChange: (r: Role) => void,
+    onFocus?: () => void,
+  ) => (
+    <label>
+      {label}
+      <select
+        aria-label={label}
+        disabled={busy}
+        value={value}
+        onFocus={onFocus}
+        onChange={(e) => onChange(e.target.value as Role)}
+      >
+        {Object.entries(ROLES).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
           </option>
+        ))}
+      </select>
+    </label>
+  );
+  const moveLine = (event: PointerEvent<HTMLElement>) => {
+    const rect = picture.current?.getBoundingClientRect();
+    if (rect && split)
+      setSplit({
+        ...split,
+        at: Math.max(0.01, Math.min(0.99, (event.clientY - rect.top) / rect.height)),
+      });
+  };
+  return (
+    <>
+      <a className="skip" href="#picture">
+        絵へ移る
+      </a>
+      <header className="top">
+        <h1 className="name">
+          {PRODUCT.name}
+          <small>{PRODUCT.subtitle}</small>
+        </h1>
+        <nav className="samples" aria-label="見本の絵">
           {SAMPLES.map((sample) => (
-            <option key={sample.id} value={sample.id}>
-              {sample.name}
-            </option>
+            <button
+              key={sample.id}
+              type="button"
+              className="thumb"
+              aria-label={sample.name}
+              aria-pressed={image?.id === sample.id}
+              disabled={state.exporting}
+              onClick={() => run(store.load(sample.url, sample.name, sample.id))}
+            >
+              <img src={sample.url} alt="" />
+            </button>
           ))}
-        </select>
-      </label>{' '}
-      <label>
-        画像ファイル{' '}
+        </nav>
+        <button
+          type="button"
+          className="open"
+          disabled={state.exporting}
+          onClick={() => file.current?.click()}
+        >
+          自分の絵を開く
+        </button>
         <input
+          ref={file}
+          className="sr-only"
+          aria-label="画像ファイル"
           type="file"
-          accept="image/*"
+          accept="image/png,image/jpeg,image/webp"
+          tabIndex={-1}
           onChange={(event) => {
-            loadFile(event.target.files?.[0]);
+            const selected = event.target.files?.[0];
+            if (selected) run(store.load(selected, selected.name));
             event.target.value = '';
           }}
         />
-      </label>
-      <p role="status">{state.status}</p>
-      {state.error && <p role="alert">{state.error}</p>}
-      <figure>
-        <canvas
-          ref={canvasRef}
-          aria-label={image ? `${image.name}：色の台本の表示` : '画像の表示'}
-          role="img"
-        />
-        <figcaption>{image?.name}</figcaption>
-      </figure>
-      <p>台本：{state.preset.name}</p>
-      <button
-        type="button"
-        disabled={!image || state.loading || state.reducedMotion || !!state.error}
-        onClick={() => store.setPlaying(!state.playing)}
-      >
-        {state.playing ? '一時停止' : '再生'}
-      </button>{' '}
-      <label>
-        時刻{' '}
-        <input
-          aria-label="時刻"
-          type="range"
-          min="0"
-          max={state.preset.durationSec}
-          step="0.01"
-          value={state.seconds}
-          disabled={!image || state.loading}
-          onChange={(event) => store.seek(Number(event.target.value))}
-        />
-      </label>{' '}
-      <output>
-        {state.seconds.toFixed(2)} / {state.preset.durationSec} 秒 · {moment}
-      </output>
-      {state.reducedMotion && <p>動きを減らす設定が有効です。時刻を手動で選べます。</p>}
-      <h2>島と役割</h2>
-      <button type="button" disabled={!image || state.loading} onClick={() => store.resetRoles()}>
-        自動推定に戻す
-      </button>
-      <ol>
-        {image?.inference.map((info, k) => (
-          <li key={info.index}>
-            <button
-              type="button"
-              aria-label={`色 ${k + 1} の場所を確認`}
-              aria-pressed={state.selected === k}
-              onClick={() => store.select(k)}
-            >
-              色 {k + 1}
-            </button>{' '}
-            <span>
-              {labHex(image.data.metadata.palette[k])} · {(info.area * 100).toFixed(2)}%
-            </span>{' '}
-            <label>
-              色 {k + 1} の役割{' '}
-              <select
-                aria-label={`色 ${k + 1} の役割`}
-                disabled={state.loading}
-                value={image.roles[k]}
-                onChange={(event) => store.setRole(k, event.target.value as Role)}
+      </header>
+      <main className="stage" style={{ '--accent': accent } as CSSProperties}>
+        <section aria-label="絵と時間">
+          <figure ref={picture} className="picture" id="picture" tabIndex={-1}>
+            <canvas
+              ref={canvas}
+              role="img"
+              aria-label={image ? `${image.name}の色の台本` : '絵の表示'}
+              style={{ display: state.loading ? 'none' : 'block' }}
+            />
+            {state.loading && <div className="skeleton picture-skeleton" aria-hidden="true" />}
+            {split && !state.loading && (
+              <div
+                className="split-line"
+                style={{ '--split-at': `${split.at * 100}%` } as CSSProperties}
               >
-                {Object.entries(ROLES).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>{' '}
-            <span>
-              自動：{ROLES[info.role]}（{info.reason}）
-            </span>
-          </li>
-        ))}
-      </ol>
-    </main>
+                <span className="upper-label">上: {ROLES[split.upper]}</span>
+                <span className="lower-label">下: {ROLES[split.lower]}</span>
+                <div
+                  className="split-handle"
+                  role="slider"
+                  tabIndex={0}
+                  aria-label="島を分ける線"
+                  aria-orientation="vertical"
+                  aria-valuemin={1}
+                  aria-valuemax={99}
+                  aria-valuenow={Math.round(split.at * 100)}
+                  aria-valuetext={`上から ${Math.round(split.at * 100)}%`}
+                  onPointerDown={(e) => {
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    moveLine(e);
+                  }}
+                  onPointerMove={(e) => {
+                    if (e.currentTarget.hasPointerCapture(e.pointerId)) moveLine(e);
+                  }}
+                  onPointerUp={(e) => {
+                    if (e.currentTarget.hasPointerCapture(e.pointerId))
+                      e.currentTarget.releasePointerCapture(e.pointerId);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+                    e.preventDefault();
+                    setSplit({
+                      ...split,
+                      at: Math.max(
+                        0.01,
+                        Math.min(
+                          0.99,
+                          split.at + (e.key === 'ArrowDown' ? 1 : -1) * (e.shiftKey ? 0.1 : 0.01),
+                        ),
+                      ),
+                    });
+                  }}
+                />
+              </div>
+            )}
+          </figure>
+          {state.error && <Notice>{state.error}</Notice>}
+          {state.loading ? (
+            <>
+              <div className="skeleton strip-skeleton" />
+              <p className="note" role="status">
+                色を調べています
+              </p>
+            </>
+          ) : (
+            <div className="script">
+              <button
+                type="button"
+                className="play"
+                aria-label={state.playing ? '一時停止' : '再生'}
+                disabled={!image || busy || state.reducedMotion || !state.estimate?.pass}
+                onClick={() => store.setPlaying(!state.playing)}
+              >
+                {state.playing ? (
+                  <Pause size={20} weight="fill" />
+                ) : (
+                  <Play size={20} weight="fill" />
+                )}
+              </button>
+              <Timeline
+                seconds={state.seconds}
+                preset={state.preset}
+                upper={strip?.upper ?? 'none'}
+                lower={strip?.lower ?? 'none'}
+                disabled={!image || state.exporting}
+                onSeek={(t) => store.seek(t)}
+              />
+              <p className="when">
+                <b>{timeName(state.seconds, state.preset)}</b>
+                <span>
+                  {state.seconds.toFixed(1)} / {state.preset.durationSec} 秒
+                </span>
+              </p>
+            </div>
+          )}
+          {state.reducedMotion && (
+            <p className="note">動きを減らす設定が有効です。帯で時刻を選べます。</p>
+          )}
+          <span className="sr-only" role="status">
+            {state.status}
+            {state.checking ? ' 設定を確かめています' : ''}
+          </span>
+        </section>
+        <aside className="panel" aria-label="台本と書き出し">
+          <div aria-disabled={state.exporting}>
+            <h2>台本</h2>
+            <fieldset className="presets" aria-label="台本の種類">
+              {Object.values(PRESETS).map((p) => (
+                <button
+                  type="button"
+                  key={p.id}
+                  disabled={busy || !image}
+                  aria-pressed={state.preset.id === p.id}
+                  onClick={() => run(store.setPreset(p.id))}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </fieldset>
+            <label className="slider">
+              長さ<output>{Number(state.preset.durationSec.toFixed(1))} 秒</output>
+              <input
+                aria-label="長さ"
+                aria-valuetext={`${Number(state.preset.durationSec.toFixed(1))} 秒`}
+                type="range"
+                min={durationPosition(state.limits.durationSec[0])}
+                max={durationPosition(state.limits.durationSec[1])}
+                step={1}
+                value={durationPosition(state.preset.durationSec)}
+                disabled={busy || !image}
+                onChange={(e) =>
+                  run(store.setParameter('durationSec', positionDuration(Number(e.target.value))))
+                }
+              />
+            </label>
+            <label className="slider">
+              夜の深さ
+              <output>{nightLabel(state.preset.nightDepth)}</output>
+              <input
+                aria-label="夜の深さ"
+                aria-valuetext={nightLabel(state.preset.nightDepth)}
+                type="range"
+                min={state.limits.nightDepth[0] * 50}
+                max={state.limits.nightDepth[1] * 50}
+                step={1}
+                value={state.preset.nightDepth * 50}
+                disabled={busy || !image}
+                onChange={(e) => run(store.setParameter('nightDepth', Number(e.target.value) / 50))}
+              />
+            </label>
+            <label className="slider">
+              灯りの強さ
+              <output>{glowLabel(state.preset.glow)}</output>
+              <input
+                aria-label="灯りの強さ"
+                aria-valuetext={glowLabel(state.preset.glow)}
+                type="range"
+                min={glowPosition(state.limits.glow[0])}
+                max={glowPosition(state.limits.glow[1])}
+                step={1}
+                value={glowPosition(state.preset.glow)}
+                disabled={busy || !image}
+                onChange={(e) =>
+                  run(store.setParameter('glow', positionGlow(Number(e.target.value))))
+                }
+              />
+            </label>
+            {state.editError && (
+              <p className="edit-note" role="alert">
+                <WarningCircle size={16} />
+                <span>{state.editError}</span>
+              </p>
+            )}
+          </div>
+          <div aria-disabled={state.exporting}>
+            <h2>色の島</h2>
+            <div className="islands">
+              {ROLE_ORDER.map((role) => {
+                const indexes =
+                  image?.islands
+                    .map((_, k) => k)
+                    .filter((k) => image.roles[k] === role)
+                    .sort(
+                      (a, b) => image.data.metadata.counts[b] - image.data.metadata.counts[a],
+                    ) ?? [];
+                return indexes.length > 0 ? (
+                  <div className="role-row" key={role}>
+                    <span>{ROLES[role]}</span>
+                    <div>
+                      {indexes.map((k) => {
+                        const island = image?.islands[k];
+                        if (!image || !island) return null;
+                        const group = image.splits.find(
+                          (g) => g.upper === island.id || g.lower === island.id,
+                        );
+                        const side = group ? (group.upper === island.id ? '（上）' : '（下）') : '';
+                        return (
+                          <button
+                            type="button"
+                            key={island.id}
+                            data-testid={`island-${k}`}
+                            className="swatch"
+                            aria-label={`${ROLES[role]}${side}、面積 ${Math.round((image.data.metadata.counts[k] / (image.data.metadata.width * image.data.metadata.height)) * 100)}%`}
+                            aria-pressed={state.selected === k}
+                            disabled={busy}
+                            style={{ background: labHex(image.data.metadata.palette[k]) }}
+                            onClick={() => store.select(k)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null;
+              })}
+            </div>
+            {selected && (
+              <div className="island-editor">
+                {split ? (
+                  <>
+                    {roleSelect(
+                      '上の役割',
+                      split.upper,
+                      (upper) => setSplit({ ...split, upper, side: 'upper' }),
+                      () => setSplit({ ...split, side: 'upper' }),
+                    )}
+                    {roleSelect(
+                      '下の役割',
+                      split.lower,
+                      (lower) => setSplit({ ...split, lower, side: 'lower' }),
+                      () => setSplit({ ...split, side: 'lower' }),
+                    )}
+                    <button
+                      className="primary"
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        run(store.split(state.selected, split.at, split.upper, split.lower))
+                      }
+                    >
+                      分ける
+                    </button>
+                    <button
+                      className="secondary"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setSplit(null)}
+                    >
+                      やめる
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {roleSelect('役割', selected.role, (role) =>
+                      run(store.setRole(state.selected, role)),
+                    )}
+                    {initial !== selected.role && (
+                      <button
+                        type="button"
+                        className="text-button"
+                        disabled={busy}
+                        onClick={() => run(store.resetRoles())}
+                      >
+                        自動に戻す
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={busy}
+                      onClick={() =>
+                        setSplit({
+                          at: image?.data.metadata.spatial[state.selected].y ?? 0.5,
+                          upper: selected.role,
+                          lower: selected.role,
+                          side: 'upper',
+                        })
+                      }
+                    >
+                      上下の線で分ける
+                    </button>
+                    {splitGroup && (
+                      <button
+                        type="button"
+                        className="text-button"
+                        disabled={busy}
+                        onClick={() => run(store.undoSplit(state.selected))}
+                      >
+                        分割を戻す
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="actions">
+            {state.progress ? (
+              <>
+                <div
+                  className="progress"
+                  role="progressbar"
+                  aria-label="動画の書き出し"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(state.progress.fraction * 100)}
+                  style={{ '--progress': `${state.progress.fraction * 100}%` } as CSSProperties}
+                >
+                  <div style={{ background: strip?.lower }} />
+                </div>
+                <p className="progress-label" aria-live="polite">
+                  {state.progress.phase === 'analysis'
+                    ? '1/2 点滅を確かめています'
+                    : '2/2 動画を作っています'}{' '}
+                  {Math.round(state.progress.fraction * 100)}%
+                </p>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="primary"
+                disabled={busy || !image || !state.estimate?.pass || !!state.exportError}
+                onClick={() => run(store.exportVideo())}
+              >
+                動画を書き出す
+              </button>
+            )}
+            {state.exporting ? (
+              <button
+                ref={cancel}
+                type="button"
+                className="secondary"
+                onClick={() => store.cancelExport()}
+              >
+                中止
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="secondary"
+                disabled={state.loading || !image}
+                onClick={() => run(store.savePng())}
+              >
+                この瞬間を画像で保存
+              </button>
+            )}
+            {state.exportError ? (
+              <Notice>{state.exportError}</Notice>
+            ) : (
+              <p className="note" aria-live="polite">
+                {state.saved ?? '点滅の基準に通った動画だけを書き出します。画像は外へ送りません。'}
+              </p>
+            )}
+          </div>
+        </aside>
+      </main>
+    </>
   );
 }

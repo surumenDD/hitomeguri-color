@@ -38,9 +38,9 @@ try {
     { timeout: 30000 },
   );
   assert.equal(await page.getByRole('button', { name: '再生', exact: true }).isDisabled(), true);
-  assert.ok((await page.locator('output').textContent()).startsWith('0.00'));
-  await page.getByLabel('時刻', { exact: true }).fill('7.2');
-  assert.ok((await page.locator('output').textContent()).startsWith('7.20'));
+  assert.ok((await page.locator('.when span').textContent()).startsWith('0.0'));
+  await page.getByRole('slider', { name: '1周の中の時刻', exact: true }).press('Shift+ArrowRight');
+  assert.ok((await page.locator('.when span').textContent()).startsWith('1.0'));
   report.canvasSize = await page
     .locator('canvas')
     .evaluate((canvas) => [canvas.width, canvas.height]);
@@ -48,6 +48,14 @@ try {
   await page.screenshot({ path: path.join(out, 'production.png'), fullPage: true });
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.externalRequests, []);
+  const notices = await page.evaluate(async () => {
+    const response = await fetch(new URL('THIRD-PARTY-LICENSES.txt', document.baseURI));
+    if (!response.ok) throw new Error('Bundled notices are missing');
+    return response.text();
+  });
+  assert.match(notices, /SIL OPEN FONT LICENSE/i);
+  assert.match(notices, /MIT License/);
+  report.bundledLicenses = true;
   report.relativeAssetsAndWorker = true;
   report.initialReducedMotion = true;
   report.passed = true;

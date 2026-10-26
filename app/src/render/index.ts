@@ -1,4 +1,4 @@
-import { K, type Lab } from '../color';
+import type { Lab } from '../color';
 import type { Decomposition } from '../palette/types';
 import fragment from './fragment.glsl?raw';
 
@@ -67,11 +67,17 @@ export class Renderer {
         'uW1',
         'uW2',
         'uW3',
+        'uW4',
+        'uW5',
+        'uW6',
+        'uW7',
         'uAlpha',
         'uSource[0]',
         'uPalette[0]',
         'uSelected',
         'uDiagnostic',
+        'uSplitAt',
+        'uSplitLower',
         'uViewport',
         'uImageSize',
         'uContain',
@@ -95,14 +101,18 @@ export class Renderer {
       height > gl.getParameter(gl.MAX_TEXTURE_SIZE)
     )
       throw new Error('この GPU で扱える画像の大きさを超えています。');
-    if (palette.length !== K || data.weights.length !== K / 4)
+    if (palette.length > 32 || data.weights.length > 8)
       throw new Error('16色の分解データが必要です。');
     for (const texture of this.textures) gl.deleteTexture(texture);
     this.textures = [];
     this.source = undefined;
     // biome-ignore lint/correctness/useHookAtTopLevel: WebGL API, not a React hook.
     gl.useProgram(this.program);
-    [data.lab, ...data.weights, data.alpha].forEach((array, i) => {
+    [
+      data.lab,
+      ...Array.from({ length: 8 }, (_, i) => data.weights[i] ?? new Float32Array(4)),
+      data.alpha,
+    ].forEach((array, i) => {
       const texture = gl.createTexture();
       if (!texture) throw new Error('画像用の GPU メモリを確保できません。');
       this.textures.push(texture);
@@ -115,19 +125,22 @@ export class Renderer {
       gl.texImage2D(
         gl.TEXTURE_2D,
         0,
-        i === 5 ? gl.R8 : gl.RGBA32F,
-        width,
-        height,
+        i === 9 ? gl.R8 : gl.RGBA32F,
+        array.length === 4 && i > 0 && i < 9 ? 1 : width,
+        array.length === 4 && i > 0 && i < 9 ? 1 : height,
         0,
-        i === 5 ? gl.RED : gl.RGBA,
-        i === 5 ? gl.UNSIGNED_BYTE : gl.FLOAT,
+        i === 9 ? gl.RED : gl.RGBA,
+        i === 9 ? gl.UNSIGNED_BYTE : gl.FLOAT,
         array,
       );
     });
-    ['uLab', 'uW0', 'uW1', 'uW2', 'uW3', 'uAlpha'].forEach((key, i) => {
+    ['uLab', 'uW0', 'uW1', 'uW2', 'uW3', 'uW4', 'uW5', 'uW6', 'uW7', 'uAlpha'].forEach((key, i) => {
       gl.uniform1i(this.loc[key], i);
     });
-    gl.uniform3fv(this.loc['uSource[0]'], new Float32Array(palette.flat()));
+    gl.uniform3fv(
+      this.loc['uSource[0]'],
+      new Float32Array([...palette.flat(), ...new Array((32 - palette.length) * 3).fill(0)]),
+    );
     gl.uniform2f(this.loc.uImageSize, width, height);
     if (gl.getError() !== gl.NO_ERROR) throw new Error('画像の GPU 転送に失敗しました。');
     this.source = data;
@@ -138,7 +151,19 @@ export class Renderer {
   }
   draw(
     palette: Lab[],
-    { selected = -1, diagnostic = false }: { selected?: number; diagnostic?: boolean } = {},
+    {
+      selected = -1,
+      diagnostic = false,
+      contain = false,
+      splitAt = 0,
+      splitLower = false,
+    }: {
+      selected?: number;
+      diagnostic?: boolean;
+      contain?: boolean;
+      splitAt?: number;
+      splitLower?: boolean;
+    } = {},
   ): void {
     if (this.lost) throw new Error('GPU の接続が失われました。ページを再読み込みしてください。');
     if (!this.source) return;
@@ -151,10 +176,15 @@ export class Renderer {
     });
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.uniform4f(this.loc.uViewport, 0, 0, this.canvas.width, this.canvas.height);
-    gl.uniform1i(this.loc.uContain, 0);
+    gl.uniform1i(this.loc.uContain, contain ? 1 : 0);
     gl.uniform1i(this.loc.uSelected, selected);
+    gl.uniform1f(this.loc.uSplitAt, splitAt);
+    gl.uniform1i(this.loc.uSplitLower, splitLower ? 1 : 0);
     gl.uniform1i(this.loc.uDiagnostic, diagnostic ? 1 : 0);
-    gl.uniform3fv(this.loc['uPalette[0]'], new Float32Array(palette.flat()));
+    gl.uniform3fv(
+      this.loc['uPalette[0]'],
+      new Float32Array([...palette.flat(), ...new Array((32 - palette.length) * 3).fill(0)]),
+    );
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   /** Top-down RGBA8, through the real shader including inverse OKLab and gamut mapping. */
