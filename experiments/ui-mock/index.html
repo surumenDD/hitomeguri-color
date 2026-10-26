@@ -71,7 +71,7 @@ button,select,input{font:inherit;color:inherit}
 .islands{display:flex;flex-direction:column;gap:var(--s75)}
 /* One row per role: the role name, then its islands as swatches, largest first. */
 .role-row{display:grid;grid-template-columns:40px 1fr;gap:var(--s75);align-items:start}
-.role-row>span{font-size:12px;line-height:20px;color:var(--ink-quiet)}
+.role-row>span{font-size:12px;line-height:16px;padding-top:2px;color:var(--ink-quiet)} /* 12/16 step; 2px centres it on the 20px swatch row */
 .role-row>div{display:flex;flex-wrap:wrap;gap:var(--s50)}
 .swatch{width:28px;height:20px;border-radius:4px;border:0;padding:0;cursor:pointer;transition:box-shadow 300ms var(--ease)}
 .swatch:hover{box-shadow:0 0 0 1px var(--ink-quiet)}
