@@ -1,7 +1,6 @@
 import type { Lab } from '../color';
 import type { Decomposition } from '../palette/types';
 import fragment from './fragment.glsl?raw';
-import { DEFAULT_EMPHASIS, type PreviewEmphasis } from './preview';
 
 const vertex = `#version 300 es
 precision highp float;
@@ -76,7 +75,6 @@ export class Renderer {
         'uSource[0]',
         'uPalette[0]',
         'uSelected',
-        'uDim',
         'uDiagnostic',
         'uSplitAt',
         'uSplitLower',
@@ -159,14 +157,12 @@ export class Renderer {
       contain = false,
       splitAt = 0,
       splitLower = false,
-      emphasis = DEFAULT_EMPHASIS,
     }: {
       selected?: number;
       diagnostic?: boolean;
       contain?: boolean;
       splitAt?: number;
       splitLower?: boolean;
-      emphasis?: PreviewEmphasis;
     } = {},
   ): void {
     if (this.lost) throw new Error('GPU の接続が失われました。ページを再読み込みしてください。');
@@ -182,7 +178,6 @@ export class Renderer {
     gl.uniform4f(this.loc.uViewport, 0, 0, this.canvas.width, this.canvas.height);
     gl.uniform1i(this.loc.uContain, contain ? 1 : 0);
     gl.uniform1i(this.loc.uSelected, selected);
-    gl.uniform2f(this.loc.uDim, emphasis.L, emphasis.C);
     gl.uniform1f(this.loc.uSplitAt, splitAt);
     gl.uniform1i(this.loc.uSplitLower, splitLower ? 1 : 0);
     gl.uniform1i(this.loc.uDiagnostic, diagnostic ? 1 : 0);

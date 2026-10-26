@@ -128,31 +128,43 @@ try {
     await ready();
     assert.ok(await control.getAttribute('aria-valuetext'));
   }
-  for (const name of ['長い夕暮れ', '夜の灯り', '1日の光']) {
+  report.presetSliderPositions = [];
+  for (const [name, seconds] of [
+    ['長い夕暮れ', 20],
+    ['夜の灯り', 32],
+    ['1日の光', 24],
+  ]) {
     await ui.getByRole('button', { name, exact: true }).click();
     await ready();
-    for (const label of ['夜の深さ', '灯りの強さ']) {
+    const positions = [];
+    for (const label of ['長さ', '夜の深さ', '灯りの強さ']) {
       const control = ui.getByRole('slider', { name: label, exact: true });
+      positions.push(Number(await control.inputValue()));
       assert.equal(
         Number(await control.inputValue()),
         50,
         `${name}/${label} must reset to its preset default`,
       );
-      assert.equal(await control.getAttribute('aria-valuetext'), 'ふつう');
+      assert.equal(
+        await control.getAttribute('aria-valuetext'),
+        label === '長さ' ? `${seconds} 秒` : 'ふつう',
+      );
       await control.fill('75');
       await control.dispatchEvent('change');
       await ready();
     }
+    report.presetSliderPositions.push({ name, positions });
   }
   // Re-select the same preset too: edited coefficients must return to their defaults.
   await ui.getByRole('button', { name: '1日の光', exact: true }).click();
   await ready();
-  for (const label of ['夜の深さ', '灯りの強さ'])
+  for (const label of ['長さ', '夜の深さ', '灯りの強さ'])
     assert.equal(
       Number(await ui.getByRole('slider', { name: label, exact: true }).inputValue()),
       50,
     );
   report.presetsAndScales = true;
+  console.log('Presets: day/longDusk/nightLights reset all three sliders to [50, 50, 50].');
   await ui.getByRole('button', { name: '港町', exact: true }).click();
   await ready();
   const originalCount = await ui.locator('.swatch').count();

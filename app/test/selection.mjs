@@ -50,8 +50,9 @@ export const ratios = (before, after) =>
       q = rgbToLab(...rgb);
     return { L: q[0] / p[0], C: Math.hypot(q[1], q[2]) / Math.hypot(p[1], p[2]) };
   });
-export function assertRatios(before, after, selected, expected = { L: 0.6, C: 0.25 }) {
-  const measured = ratios(before, after);
+export function assertRatios(before, after, selected) {
+  const measured = ratios(before, after),
+    expected = { L: 0.6, C: 0.25 };
   measured.forEach((ratio, k) => {
     if (selected.includes(k))
       assert.deepEqual(after[k], before[k], `Selected cell ${k} must keep its colour exactly`);
@@ -133,8 +134,8 @@ export async function measureSelection(page, playing = false) {
   );
   return { before, after, selected, ratios: ratios(before, after), restored };
 }
-export function assertSelection(result, expected) {
-  assertRatios(result.before, result.after, result.selected, expected);
+export function assertSelection(result) {
+  assertRatios(result.before, result.after, result.selected);
   assert.deepEqual(
     result.restored,
     result.before,

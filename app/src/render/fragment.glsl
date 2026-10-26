@@ -14,7 +14,6 @@ uniform sampler2D uAlpha;
 uniform vec3 uSource[32];
 uniform vec3 uPalette[32];
 uniform int uSelected;
-uniform vec2 uDim;
 uniform int uDiagnostic;
 uniform float uSplitAt;
 uniform bool uSplitLower;
@@ -72,7 +71,7 @@ void main(){
   }
   if(uSplitAt>0.&&(uSplitLower?uv.y<uSplitAt:uv.y>uSplitAt))kept=0.;
   // Preview emphasis belongs to OKLab, before gamut mapping, and is omitted from exports.
-  lab*=mix(vec3(uDim.x,uDim.y,uDim.y),vec3(1.),kept);
+  lab*=mix(vec3(.6,.25,.25),vec3(1.),kept);
   vec3 linear=gamutMap(lab);
   outColor=vec4(encode(linear.r),encode(linear.g),encode(linear.b),texture(uAlpha,uv).r);
 }

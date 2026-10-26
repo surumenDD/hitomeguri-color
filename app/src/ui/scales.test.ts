@@ -13,11 +13,23 @@ import {
 
 describe('v4.2 slider scales', () => {
   it('keeps the duration logarithmic around 24 seconds', () => {
-    expect([12, 24, 48].map(durationPosition)).toEqual([0, 50, 100]);
-    expect([0, 50, 100].map(positionDuration)).toEqual([12, 24, 48]);
+    for (const x of [0, 1, 25, 50, 75, 99, 100]) {
+      const seconds = 12 * 4 ** (x / 100);
+      expect(durationPosition(seconds, 24)).toBeCloseTo(x, 12);
+      expect(positionDuration(x, 24)).toBe(Math.round(seconds * 10) / 10);
+    }
   });
   for (const preset of Object.values(PRESETS))
     it(`${preset.id} centres each coefficient on its own default`, () => {
+      const normal = preset.durationSec;
+      expect([12, normal, 48].map((x) => durationPosition(x, normal))).toEqual([0, 50, 100]);
+      expect([0, 50, 100].map((x) => positionDuration(x, normal))).toEqual([12, normal, 48]);
+      expect(durationPosition(Math.sqrt(12 * normal), normal)).toBeCloseTo(25, 12);
+      expect(durationPosition(Math.sqrt(normal * 48), normal)).toBeCloseTo(75, 12);
+      expect(positionDuration(25, normal)).toBe(Math.round(Math.sqrt(12 * normal) * 10) / 10);
+      expect(positionDuration(75, normal)).toBe(Math.round(Math.sqrt(normal * 48) * 10) / 10);
+      for (const seconds of [12, 16, 20, 24, 32, 40, 48])
+        expect(positionDuration(durationPosition(seconds, normal), normal)).toBe(seconds);
       expect([0.2, preset.nightDepth, 4].map((x) => nightPosition(x, preset.nightDepth))).toEqual([
         0, 50, 100,
       ]);

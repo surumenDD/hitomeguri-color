@@ -97,3 +97,26 @@ Chrome 155.0.8059.86、Windows、NVIDIA GeForce RTX 5070 Ti / ANGLE D3D11 で測
 実装と検査コードのコミットは `32b5841`（台本v4.1と島の分割、安全な動画保存と操作画面を実装）。測定・画面写真・この報告は別のコミットにまとめる。
 
 再現手順は [README](../README.md)。`npm run check` と本番ビルドのログは `test/results/check-run.log` と `production-run.log`、全動画・完全な行列の判定はGit管理外の `test/results/m2-v41-videos/` に残す。画面写真・一覧画像・集約した数値はこのreports/に保存した。ソースと依存の変更はapp/だけで、メインのワークツリーと試作は変更していない。範囲外の生成物はない。検査用サーバー・Chrome・起動した処理はすべて停止し、残る検査プロセスがないことを確認した。受け入れとマージはメインが行う。
+
+## M2の最終状態
+
+利用者の試用後、台本は **v4.2** で確定した。正本との誤差0、端点120本＋既定15本のWCAG・ITU全合格、見積もりの見逃し0、L丸め最大27画素（0.0017166%）・逸脱0.0524351の結果は [v4.2検査](M2-v42-report.md) と [全条件](M2-v42-metrics.json) を参照。今回、台本の数値は変更していない。
+
+島の強調は **OKLabのLを0.6倍・Cを0.25倍** に固定した。試用用URLパラメータの読み取りと可変係数の受け渡しを削除。旧パラメータを付けても、配布版の画面上の画素はパラメータなしと完全一致する。PNG・MP4には強調を入れない。
+
+3本のつまみは各プリセットの既定が中央50。長さは12〜48秒の範囲で、12秒→既定、既定→48秒の両側をそれぞれ対数で割り当てる。夜・灯りはv4.2の折れ線のまま。切り替え・同じプリセットの再選択で3本とも既定に戻る。Chromeで1日の光（24秒）・長い夕暮れ（20秒）・夜の灯り（32秒）の全てが `[50, 50, 50]` になることを確認した。この最終状態が、過去の報告にある固定中央24秒と試用用の係数変更に置き換わる。
+
+最終の `npm run check` と、内包する `npm run build` は終了コード0。ログは `test/results/m2-final-check.log`。要点:
+
+```text
+Test Files  11 passed (11), Tests 58 passed (58)
+8画像: shader identity + 3 preset endpoints PSNR Infinity
+Presets: day/longDusk/nightLights reset all three sliders to [50, 50, 50].
+built in 3.00s
+Production: console errors 0, CSP violations 0, fonts true, CSS 308203 bytes;
+  paused/playing selection, fixed emphasis ignoring retired URL parameters,
+  split, PNG/MP4, nested path, reduced motion passed.
+licenses: packages 173, invalid []
+```
+
+検査には一時ポートを使い、サーバーとChromeは終了済み。メインの4173番の配信には触れていない。変更は `app/` 内だけで、追加の依存・範囲外の生成物はない。

@@ -128,8 +128,13 @@ try {
     document.querySelector('.sr-only[role="status"]')?.textContent.includes('準備できました'),
   );
   await selectionFixture(page);
-  report.parameterSelection = await measureSelection(page);
-  assertSelection(report.parameterSelection, { L: 0.8, C: 0.7 });
+  report.ignoredParameterSelection = await measureSelection(page);
+  assertSelection(report.ignoredParameterSelection);
+  assert.deepEqual(
+    report.ignoredParameterSelection,
+    report.selection,
+    'Retired URL parameters must not change the fixed selection emphasis',
+  );
   report.cspViolations = [...priorCsp, ...(await page.evaluate(() => window.cspViolations))];
   report.cssBytes = 0;
   for (const name of await readdir(path.join(root, 'dist/assets'))) {
@@ -165,7 +170,7 @@ try {
   report.initialReducedMotion = true;
   report.passed = true;
   console.log(
-    `Production: console errors ${report.consoleErrors.length}, CSP violations ${report.cspViolations.length}, fonts ${report.fonts}, CSS ${report.cssBytes} bytes; paused/playing selection, split, PNG/MP4, nested path, reduced motion passed.`,
+    `Production: console errors ${report.consoleErrors.length}, CSP violations ${report.cspViolations.length}, fonts ${report.fonts}, CSS ${report.cssBytes} bytes; paused/playing selection, fixed emphasis ignoring retired URL parameters, split, PNG/MP4, nested path, reduced motion passed.`,
   );
 } finally {
   await browser?.close();

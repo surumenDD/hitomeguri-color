@@ -311,13 +311,18 @@ export function App() {
                 aria-label="長さ"
                 aria-valuetext={`${Number(state.preset.durationSec.toFixed(1))} 秒`}
                 type="range"
-                min={durationPosition(state.limits.durationSec[0])}
-                max={durationPosition(state.limits.durationSec[1])}
+                min={durationPosition(state.limits.durationSec[0], presetDefaults.durationSec)}
+                max={durationPosition(state.limits.durationSec[1], presetDefaults.durationSec)}
                 step={1}
-                value={durationPosition(state.preset.durationSec)}
+                value={durationPosition(state.preset.durationSec, presetDefaults.durationSec)}
                 disabled={busy || !image}
                 onChange={(e) =>
-                  run(store.setParameter('durationSec', positionDuration(Number(e.target.value))))
+                  run(
+                    store.setParameter(
+                      'durationSec',
+                      positionDuration(Number(e.target.value), presetDefaults.durationSec),
+                    ),
+                  )
                 }
               />
             </label>

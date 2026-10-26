@@ -1,6 +1,13 @@
-export const durationPosition = (seconds: number) => (Math.log(seconds / 12) / Math.log(4)) * 100;
-export const positionDuration = (position: number) =>
-  Math.round(12 * 4 ** (position / 100) * 10) / 10;
+export const durationPosition = (seconds: number, normal: number) =>
+  seconds <= normal
+    ? (Math.log(seconds / 12) / Math.log(normal / 12)) * 50
+    : 50 + (Math.log(seconds / normal) / Math.log(48 / normal)) * 50;
+export const positionDuration = (position: number, normal: number) =>
+  Math.round(
+    (position <= 50
+      ? 12 * (normal / 12) ** (position / 50)
+      : normal * (48 / normal) ** ((position - 50) / 50)) * 10,
+  ) / 10;
 const position = (value: number, normal: number, min: number, max: number) =>
   value <= normal
     ? ((value - min) / (normal - min)) * 50
