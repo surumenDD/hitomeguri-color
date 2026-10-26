@@ -28,6 +28,15 @@
 
 → 色の計算は OKLab/OKLCH。色域に収めるときは色相と明度を保って彩度を下げる（試走の要件 R2 と同じ）。調和を自動で採点して売り物にするのは根拠が弱い。採点より、作り手や使い手の手で選ぶ仕組みのほうが確か。絵の具の混色を使うなら Spectral.js か自前の実装にする。
 
+## 2b. パレットで画像の色を差し替える技術（palette-recoloring、ADR-0003 の後に追加）
+
+- Chang ら 2015 は、パレットに基づく写真の再配色を JavaScript でブラウザ上に実装し、対話的な速さが出ると書く。破綻として、色域外に出る画素と、明るさの逆転を挙げる（`chang-2015-palette-recoloring.txt` 31〜48行目付近）。
+- Tan ら 2018 は、最適化を使わずに RGBXY 空間の幾何で速く分解し、HTML/JavaScript の GUI を実装した。論文の中に実装のコードがある（`tan-2018-efficient-palette-decomposition.txt`）。
+- Tan ら 2016 は、写真向きの手法はデジタルペインティングには向かないと区別する（`tan-2016-decomposing-images-into-layers.txt`）。Aksoy ら 2017 の柔らかい色の分割は高解像度に使えない（`aksoy-2017-soft-color-segmentation.txt`）。Akimoto ら 2020 は、動画 450 フレームを 1.35 秒で分解した（`akimoto-2020-fast-soft-color-segmentation.txt` 305〜310行目付近）。
+- 時間方向で最も近い Du ら 2021（動画の再配色）の本文は取れていない。WebSearch の上限で、1周目までで区切っている。
+
+→ ブラウザで実時間に動かすこと自体は、先行研究に例がある。手法の選び方は、絵の種類で変わる。時間で動かしたときのちらつきは、原文が無いので試作で測る（`experiments/recolor-spike/`）。
+
 ## 3. 芸術性: 上手い作り手の規則（generative-color-craft）
 
 - **並べ方はパレット選びより大事**（Hobbs、`hobbs-careless.md:55`）。要素ごとに乱数の色はひどい結果になる（`hobbs-2021-color-arrangement.md:13`）。同じか近い色の塊を作り（同 `:63`）、親の色を子が高い確率で継ぐ（同 `:139`）。目を細めて構造が残るかで確かめる（同 `:169`）。
