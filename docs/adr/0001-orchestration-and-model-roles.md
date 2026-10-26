@@ -13,7 +13,7 @@
   - Codex のモデル一覧に `gpt-6.1-sol` があり、推論の強さは low〜ultra を選べる。
   - dsh は Orca から `--model` を渡せない。起動時のモデルは `~/.dsh-tui/model.json` で決まる。そのため、起動の直前に model.json を書き換え、起動後に画面下のモデル名で確かめる。
   - dsh で使う DeepSeek は `deepseek/deepseek-v4.1-flash`（利用者の指定。公式の latest が 1017 版であることを利用者が確認済み）。MiMo は `xiaomi/mimo-v2.6-pro`。
-  - Orca から dsh を起動すると、プロンプトが入力欄に入ったまま送信されないことがある（2回とも起きた）。起動後に `orca terminal send --terminal <handle> --enter` で送信する。
+  - Orca から dsh を起動すると、プロンプトが入力欄に入ったまま送信されないことがある（2回とも起きた）。起動後に `orca terminal send --terminal <handle> --enter` で送信する。読み込み中（画面下に「Checking…」が出ている間）の Enter は効かないので、モデル名の行に `Full access` が出てから送り、画面で送信されたことを確かめる。
   - Codex CLI の更新案内（`agent-update-prompt`）が出ると、Orca からの起動が止まる。`~/.codex/version.json` の `dismissed_version` を最新版にすると出なくなる（案内で「スキップ」を選ぶのと同じ）。
   - dsh-tui の headless 実行（`dsh-tui run`）は手元で失敗した（`TASK_FAILED: DSH exited unsuccessfully (1)`）。Orca の TUI 経由で使う。
 - 試走（`experiments/model-probe/RESULTS.md`）:
