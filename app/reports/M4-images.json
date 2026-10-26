@@ -1,0 +1,42 @@
+[
+  {
+    "id": "canal",
+    "originalBytes": 1803476,
+    "webpBytes": 1318336,
+    "thumbBytes": 2542,
+    "decodedRGBSHA256": "18a74c870a6c58262da7e6fd03c40f5344695ba6f2b4a8a94586eb4b8b991fcc",
+    "sourcePixelsExact": true
+  },
+  {
+    "id": "snow",
+    "originalBytes": 1912804,
+    "webpBytes": 1418040,
+    "thumbBytes": 3034,
+    "decodedRGBSHA256": "c583f92f82516f221a8398989607cbb7e9dc70012acea81a9aad0030694d6de4",
+    "sourcePixelsExact": true
+  },
+  {
+    "id": "lighthouse",
+    "originalBytes": 1475059,
+    "webpBytes": 994150,
+    "thumbBytes": 1746,
+    "decodedRGBSHA256": "f5ba2894077297f2d2ab26ee6857f814405a518958d5075c90733fca504eea0a",
+    "sourcePixelsExact": true
+  },
+  {
+    "id": "oasis",
+    "originalBytes": 1846082,
+    "webpBytes": 1366844,
+    "thumbBytes": 2432,
+    "decodedRGBSHA256": "efa0447c85c154db14555c4cdedc81392b895a14619b01da93e1b5d58b2f439e",
+    "sourcePixelsExact": true
+  },
+  {
+    "id": "flat",
+    "originalBytes": 1795293,
+    "webpBytes": 1298184,
+    "thumbBytes": 2404,
+    "decodedRGBSHA256": "cd23f004fb90c4e35f234e4cb0c7a15fb56209701813186522b5e67407b8c057",
+    "sourcePixelsExact": true
+  }
+]

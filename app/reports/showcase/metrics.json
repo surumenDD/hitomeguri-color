@@ -1,0 +1,267 @@
+{
+  "image": "canal",
+  "preset": "day",
+  "durationSec": 24,
+  "nightDepth": 2.1,
+  "glow": 1.3,
+  "mp4": {
+    "width": 1280,
+    "height": 854,
+    "frames": 720,
+    "bytes": 31151179,
+    "app": {
+      "width": 384,
+      "height": 256,
+      "fps": 30,
+      "frameCount": 720,
+      "durationSec": 24,
+      "analysis": {
+        "blockSize": 2,
+        "cssPxPerPx": 4,
+        "whiteLuminanceCdM2": 200,
+        "minSwing": 0.01,
+        "visualFieldCssPx": [341, 256],
+        "visualFieldBlocks": [43, 32]
+      },
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 8.367,
+          "endSec": 9.367,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 4007,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 8.367,
+          "endSec": 9.367,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 4007,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    "estimate": {
+      "pass": true,
+      "lightnessPotentialPixels": 75,
+      "sampledOutPixels": 0,
+      "maxClampedPixels": 0,
+      "maxExcursion": 0,
+      "sampledMinL": 0,
+      "sampledMaxL": 0.013413253771609002,
+      "movementLimit": 0,
+      "minL": -0.009423833665048049,
+      "maxL": 0.9739437096918738,
+      "paletteFlash": {
+        "width": 16,
+        "height": 1,
+        "fps": 60,
+        "frameCount": 1440,
+        "durationSec": 24,
+        "analysis": {
+          "blockSize": 1,
+          "cssPxPerPx": 341,
+          "whiteLuminanceCdM2": 200,
+          "minSwing": 0.01,
+          "visualFieldCssPx": [341, 256],
+          "visualFieldBlocks": [1, 1]
+        },
+        "wcag": {
+          "pass": true,
+          "rateExceeded": false,
+          "areaExceeded": false,
+          "worstWindow": {
+            "startSec": 8.15,
+            "endSec": 9.15,
+            "flashCount": 1,
+            "generalFlashes": 1,
+            "redFlashes": 0
+          },
+          "totalFlashes": 8,
+          "maxFlashesPerSecond": 1,
+          "maxGeneralFlashesPerSecond": 1,
+          "maxRedFlashesPerSecond": 0,
+          "minLeadingEdgeGapMs": null,
+          "maxConcurrentFlashAreaRatio": 0
+        },
+        "itu": {
+          "pass": true,
+          "rateExceeded": false,
+          "areaExceeded": false,
+          "worstWindow": {
+            "startSec": 8.15,
+            "endSec": 9.15,
+            "flashCount": 1,
+            "generalFlashes": 1,
+            "redFlashes": 0
+          },
+          "totalFlashes": 8,
+          "maxFlashesPerSecond": 1,
+          "maxGeneralFlashesPerSecond": 1,
+          "maxRedFlashesPerSecond": 0,
+          "minLeadingEdgeGapMs": null,
+          "maxConcurrentFlashAreaRatio": 0
+        }
+      }
+    },
+    "file": "reports/showcase/hitomeguri-canal-day.mp4",
+    "generationCodec": "avc1.640033 (browser compatibility fix前の原本。現在のアプリはBaseline。媒体は保持)"
+  },
+  "gif20": {
+    "file": "test/results/m4-showcase-20fps.gif",
+    "width": 800,
+    "height": 500,
+    "fps": 20,
+    "bytes": 111111751,
+    "palettePerFrame": true
+  },
+  "gif12": {
+    "file": "reports/showcase/hitomeguri-canal-day-12fps.gif",
+    "width": 800,
+    "height": 500,
+    "fps": 12,
+    "bytes": 66443379,
+    "palettePerFrame": true
+  },
+  "selectedGifFPS": 12,
+  "ffprobe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1280,
+        "height": 854,
+        "duration": "24.000000",
+        "nb_frames": "720"
+      }
+    ]
+  },
+  "mediaTracked": false,
+  "mediaPolicy": "メインの指示でMP4/GIFはGit管理外。READMEに使う版はメインが選ぶ。",
+  "reproduce": "npm run test:showcase (現在のBaselineで再生成。コマンドの詳細はtest/showcase.mjs)",
+  "ffmpegFilter": "fps=12,crop=iw:iw/1.6:0:(ih-iw/1.6)/2,scale=800:500:flags=lanczos,split[a][b];[a]palettegen=stats_mode=single:max_colors=256[p];[b][p]paletteuse=new=1:dither=sierra2_4a",
+  "nodeFlash": {
+    "mp4": {
+      "width": 1280,
+      "height": 854,
+      "fps": 30,
+      "frameCount": 720,
+      "durationSec": 24,
+      "analysis": {
+        "blockSize": 8,
+        "cssPxPerPx": 1.2,
+        "whiteLuminanceCdM2": 200,
+        "minSwing": 0.01,
+        "visualFieldCssPx": [341, 256],
+        "visualFieldBlocks": [36, 27]
+      },
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 2.567,
+          "endSec": 3.567,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 2664,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 2.567,
+          "endSec": 3.567,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 2664,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    "gif": {
+      "width": 800,
+      "height": 500,
+      "fps": 12,
+      "frameCount": 288,
+      "durationSec": 24,
+      "analysis": {
+        "blockSize": 8,
+        "cssPxPerPx": 1.92,
+        "whiteLuminanceCdM2": 200,
+        "minSwing": 0.01,
+        "visualFieldCssPx": [341, 256],
+        "visualFieldBlocks": [22, 17]
+      },
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 2.917,
+          "endSec": 3.917,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 995,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 2.917,
+          "endSec": 3.917,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 995,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    }
+  }
+}
