@@ -274,7 +274,8 @@ input {
 }
 .role-row > span {
   font-size: 12px;
-  line-height: 20px;
+  line-height: 16px;
+  padding-top: 2px;
   color: var(--ink-quiet);
 }
 .role-row > div {

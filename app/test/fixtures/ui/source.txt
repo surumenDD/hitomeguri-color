@@ -1,1 +1,1 @@
-UI screenshots/template: 2cec53d0fbc37c5b7bf742493bc7bc5966e1b2e1; UI text incl. scales: 56973bd7b506090ac64daa0319ce91d15603b279
+UI screenshots: 2cec53d0fbc37c5b7bf742493bc7bc5966e1b2e1; template and UI text incl. 12/16px + 2px padding: 652ee02e666c2b65da55c0c45717129cb24160b3

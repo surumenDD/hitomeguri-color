@@ -1,0 +1,5 @@
+Target / Ownership: app/src/script/strip.ts と strip.test.ts のみ。親と並行、index.tsや他ファイルを変えない。
+Change: experiments/ui-mock/strip.mjs と同じ、平均しない2段の帯を作る純粋関数を TypeScript strict で実装。既存 src/script/index.ts の rolePaletteAt, Preset, Role と src/color の labHex、palette/types の Metadata を使う。親が index.ts をv4へ更新するが、Preset の sequence: {key:string,at:number}[] 等の型と関数の引数は既存のまま。
+export buildStrip(metadata:Pick<Metadata,'palette'|'counts'>,roles:Role[],preset:Preset,n=64): {upper:string,lower:string,overhead:number,horizon:number}。上段はskyの最大counts。下段はskyまたはwaterの中で warm(p)*sqrt(counts) 最大。warm は正本の式そのまま（clampを追加しない）。正本どおり t=i/n*durationSec、CSS割合は i/(n-1)*100 の小数2桁。対象なしはindex0にフォールバック。export horizonAt(metadata,roles,preset,seconds):string は同じ下段の番号のその秒の labHex。渡されたroleを使い、curationは親が事前に適用する。
+Constraints: strip.mjsを全文読む。試作・設定・依存・他の実装を変えない。コミットはしない。サーバーを起動しない。範囲外のファイルは消さず報告。
+Observable acceptance: metadataとrolesの小さな固定入力で、最大sky選択、暖かさ×面積平方根の選択、平均色を使わないこと、64標本、末尾割合100%、各色がrolePaletteAtの該当番号の色そのもの、役割なしフォールバックを検査。npx vitest run src/script/strip.test.ts と tsc と自分のBiomeを確認。終わったらOrca worker_doneで3文で親へ報告。
