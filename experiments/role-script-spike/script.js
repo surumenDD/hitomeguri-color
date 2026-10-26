@@ -89,7 +89,8 @@ function target(p,role,key,o){
     // Reds lit too brightly turn pink, so red-orange lamps get a lower floor than amber ones.
     const yellowish=clamp((H-35)/30,0,1),floor=(.66+.06*glow)*(1-yellowish)+(.74+.08*glow)*yellowish;
     const lit=lch(Math.min(.93,Math.max(L,floor)),Math.max(C*.95,.10+.05*glow),hue);
-    const off=lch(darken(L,.78),C*.30,H);
+    // v4.1: an unlit lamp sinks with the night instead of glowing grey (matters when glow is low).
+    const off=lch(darken(L,deep(.78-.4*night[key])),C*.30,H);
     return mix(off,lit,on);
   }
   if(role==='celestial'){
