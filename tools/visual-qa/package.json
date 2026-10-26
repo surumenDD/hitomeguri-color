@@ -4,7 +4,9 @@
   "type": "module",
   "description": "Headless checks for color pieces: selftest math, timed screenshots, frame timing, reduced motion, luminance flicker.",
   "scripts": {
-    "probe": "node probe-eval.mjs"
+    "probe": "node probe-eval.mjs",
+    "flash-check": "node flash-check.mjs",
+    "test": "node --test test/"
   },
   "dependencies": {
     "playwright-core": "1.61.1"
