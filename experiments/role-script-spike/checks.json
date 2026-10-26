@@ -4,66 +4,6 @@
       "sample": "flat",
       "seconds": 0,
       "lightnessOut": 0,
-      "chromaMapped": 4222,
-      "pixels": 1572864,
-      "minOut": null,
-      "maxOut": null,
-      "examples": []
-    },
-    {
-      "sample": "flat",
-      "seconds": 4.2,
-      "lightnessOut": 0,
-      "chromaMapped": 1009,
-      "pixels": 1572864,
-      "minOut": null,
-      "maxOut": null,
-      "examples": []
-    },
-    {
-      "sample": "flat",
-      "seconds": 7.2,
-      "lightnessOut": 0,
-      "chromaMapped": 2862,
-      "pixels": 1572864,
-      "minOut": null,
-      "maxOut": null,
-      "examples": []
-    },
-    {
-      "sample": "flat",
-      "seconds": 11.4,
-      "lightnessOut": 0,
-      "chromaMapped": 12305,
-      "pixels": 1572864,
-      "minOut": null,
-      "maxOut": null,
-      "examples": []
-    },
-    {
-      "sample": "flat",
-      "seconds": 14.6,
-      "lightnessOut": 0,
-      "chromaMapped": 17578,
-      "pixels": 1572864,
-      "minOut": null,
-      "maxOut": null,
-      "examples": []
-    },
-    {
-      "sample": "flat",
-      "seconds": 17.2,
-      "lightnessOut": 0,
-      "chromaMapped": 60,
-      "pixels": 1572864,
-      "minOut": null,
-      "maxOut": null,
-      "examples": []
-    },
-    {
-      "sample": "flat",
-      "seconds": 20,
-      "lightnessOut": 0,
       "chromaMapped": 0,
       "pixels": 1572864,
       "minOut": null,
@@ -72,9 +12,69 @@
     },
     {
       "sample": "flat",
+      "seconds": 4.2,
+      "lightnessOut": 0,
+      "chromaMapped": 12,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 7.2,
+      "lightnessOut": 0,
+      "chromaMapped": 1805,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 11.4,
+      "lightnessOut": 0,
+      "chromaMapped": 2207,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 14.6,
+      "lightnessOut": 0,
+      "chromaMapped": 613,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 17.2,
+      "lightnessOut": 0,
+      "chromaMapped": 3435,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
+      "seconds": 20,
+      "lightnessOut": 0,
+      "chromaMapped": 658,
+      "pixels": 1572864,
+      "minOut": null,
+      "maxOut": null,
+      "examples": []
+    },
+    {
+      "sample": "flat",
       "seconds": 23.6,
       "lightnessOut": 0,
-      "chromaMapped": 2434,
+      "chromaMapped": 797,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -84,7 +84,7 @@
       "sample": "painterly",
       "seconds": 0,
       "lightnessOut": 0,
-      "chromaMapped": 66358,
+      "chromaMapped": 0,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -94,7 +94,7 @@
       "sample": "painterly",
       "seconds": 4.2,
       "lightnessOut": 0,
-      "chromaMapped": 8,
+      "chromaMapped": 15,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -104,7 +104,7 @@
       "sample": "painterly",
       "seconds": 7.2,
       "lightnessOut": 0,
-      "chromaMapped": 757,
+      "chromaMapped": 745,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -114,7 +114,7 @@
       "sample": "painterly",
       "seconds": 11.4,
       "lightnessOut": 0,
-      "chromaMapped": 14688,
+      "chromaMapped": 842,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -124,7 +124,7 @@
       "sample": "painterly",
       "seconds": 14.6,
       "lightnessOut": 0,
-      "chromaMapped": 146405,
+      "chromaMapped": 284,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -134,7 +134,7 @@
       "sample": "painterly",
       "seconds": 17.2,
       "lightnessOut": 0,
-      "chromaMapped": 2,
+      "chromaMapped": 1275,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -144,7 +144,7 @@
       "sample": "painterly",
       "seconds": 20,
       "lightnessOut": 0,
-      "chromaMapped": 13,
+      "chromaMapped": 2148,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -154,7 +154,7 @@
       "sample": "painterly",
       "seconds": 23.6,
       "lightnessOut": 0,
-      "chromaMapped": 52644,
+      "chromaMapped": 3,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -164,7 +164,7 @@
       "sample": "photo",
       "seconds": 0,
       "lightnessOut": 0,
-      "chromaMapped": 12832,
+      "chromaMapped": 3,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -174,7 +174,7 @@
       "sample": "photo",
       "seconds": 4.2,
       "lightnessOut": 0,
-      "chromaMapped": 4943,
+      "chromaMapped": 7932,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -184,7 +184,7 @@
       "sample": "photo",
       "seconds": 7.2,
       "lightnessOut": 0,
-      "chromaMapped": 5544,
+      "chromaMapped": 11559,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -194,7 +194,7 @@
       "sample": "photo",
       "seconds": 11.4,
       "lightnessOut": 0,
-      "chromaMapped": 11198,
+      "chromaMapped": 20565,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -204,7 +204,7 @@
       "sample": "photo",
       "seconds": 14.6,
       "lightnessOut": 0,
-      "chromaMapped": 7132,
+      "chromaMapped": 14174,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -214,7 +214,7 @@
       "sample": "photo",
       "seconds": 17.2,
       "lightnessOut": 0,
-      "chromaMapped": 5143,
+      "chromaMapped": 62695,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -224,7 +224,7 @@
       "sample": "photo",
       "seconds": 20,
       "lightnessOut": 0,
-      "chromaMapped": 8405,
+      "chromaMapped": 74888,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -234,7 +234,7 @@
       "sample": "photo",
       "seconds": 23.6,
       "lightnessOut": 0,
-      "chromaMapped": 7180,
+      "chromaMapped": 260,
       "pixels": 1572864,
       "minOut": null,
       "maxOut": null,
@@ -270,11 +270,11 @@
       "status": 200
     },
     {
-      "url": "/experiments/role-script-spike/script.js",
+      "url": "/experiments/role-script-spike/renderer.js",
       "status": 200
     },
     {
-      "url": "/experiments/role-script-spike/renderer.js",
+      "url": "/experiments/role-script-spike/script.js",
       "status": 200
     },
     {
@@ -530,6 +530,10 @@
       "status": 200
     },
     {
+      "url": "/experiments/role-script-spike/shots/flat-same-clock-3.png",
+      "status": 200
+    },
+    {
       "url": "/experiments/role-script-spike/shots/painterly-role-0.png",
       "status": 200
     },
@@ -598,7 +602,15 @@
       "status": 200
     },
     {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-0.png",
+      "status": 200
+    },
+    {
       "url": "/experiments/role-script-spike/shots/painterly-controlled-old-c-1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-1.png",
       "status": 200
     },
     {
@@ -606,7 +618,15 @@
       "status": 200
     },
     {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-2.png",
+      "status": 200
+    },
+    {
       "url": "/experiments/role-script-spike/shots/painterly-controlled-old-c-3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/shots/painterly-same-clock-3.png",
       "status": 200
     },
     {
@@ -686,15 +706,15 @@
       "status": 200
     },
     {
-      "url": "/experiments/role-script-spike/color.js",
-      "status": 200
-    },
-    {
       "url": "/experiments/role-script-spike/renderer.js",
       "status": 200
     },
     {
       "url": "/experiments/role-script-spike/script.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/role-script-spike/color.js",
       "status": 200
     },
     {
@@ -736,6 +756,6 @@
   ],
   "browserVersion": "155.0.8059.86",
   "playwrightCore": "1.61.1",
-  "date": "2026-10-26T16:57:13.280Z",
-  "resultsBytes": 3530730
+  "date": "2026-10-26T17:09:37.790Z",
+  "resultsBytes": 3754694
 }
