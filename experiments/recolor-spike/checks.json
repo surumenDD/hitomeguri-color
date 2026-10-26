@@ -1,0 +1,430 @@
+{
+  "shaderReference": true,
+  "identityResidualExact": true,
+  "lightnessInsideGamut": true,
+  "captures": 72,
+  "expectedCaptures": 72,
+  "testB": true,
+  "animationAdvanced": true,
+  "mobileViewportOverflow": false,
+  "errors": [],
+  "failedRequests": [],
+  "requests": [
+    {
+      "url": "/experiments/recolor-spike/?capture=1",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/app.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/renderer.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/pixel-rain-street.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-hard-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-residual-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-soft-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-hard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-hard-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-residual-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-soft-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-hard-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-residual-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-soft-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-hard-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-residual-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-soft-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-hard-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-residual-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/flat-soft-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-hard-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-residual-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-soft-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-hard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-hard-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-residual-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-soft-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-hard-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-residual-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-soft-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-hard-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-residual-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-soft-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-hard-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-residual-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/painterly-soft-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-hard-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-residual-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-soft-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-hard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-hard-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-residual-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-soft-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-hard-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-residual-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-soft-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-hard-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-residual-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-soft-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-hard-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-residual-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/pixel-soft-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-hard-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-residual-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-soft-a.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-hard-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-residual-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-soft-b.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-hard-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-residual-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-soft-c0.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-hard-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-residual-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-soft-c1.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-hard-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-residual-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-soft-c2.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-hard-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-residual-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/shots/photo-soft-c3.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/app.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/renderer.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/flat-dusk-harbor.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/painterly-blue-hour-lake.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/pixel-rain-street.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    },
+    {
+      "url": "/assets/samples/raw/photo-sunset-shore.png",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/preprocess.js",
+      "status": 200
+    },
+    {
+      "url": "/experiments/recolor-spike/color.js",
+      "status": 200
+    }
+  ]
+}

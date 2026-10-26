@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="4種類の画像を3方式で色替えし、階調と時間の連続性を比較するローカル実験。">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:,">
+  <title>色をほどく · パレット差し替え比較</title>
+  <style>
+    :root{font-family:Geist,"Yu Gothic UI",sans-serif;color:#23313d;background:#edf2f6;font-size:16px;line-height:1.5;color-scheme:light}
+    *{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{font-size:14px;font-weight:600;padding:8px 12px;border:1px solid #9baab5;background:#fff;color:inherit;border-radius:8px;cursor:pointer}
+    button:hover{background:#dce6ee}button:active{transform:scale(.98)}button:disabled{opacity:.45;cursor:wait}button:focus-visible,input:focus-visible{outline:3px solid #175d92;outline-offset:4px}
+    h1{font-size:36px;line-height:40px;font-weight:600;letter-spacing:.02em;margin:8px 0 16px;max-width:680px;text-wrap:balance}h2{font-size:20px;line-height:28px;margin:0;font-weight:600}p{margin:8px 0;text-wrap:pretty}small{font-size:12px;line-height:16px}
+    header,main,footer{max-width:1728px;margin:auto;padding:32px}header{padding-bottom:16px}.eyebrow{font-size:12px;letter-spacing:.12em;color:#546878}.intro{max-width:680px;color:#4d606e}.skip{position:absolute;left:16px;top:-80px}.skip:focus{top:16px;background:#fff;padding:12px;z-index:5}
+    .controls{background:#fff;border:1px solid #b3c2cc;border-radius:12px;padding:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:16px 0}.tests{display:flex;gap:16px;flex-wrap:wrap;border:0;padding:0;margin:0}.tests legend{position:absolute;width:1px;height:1px;overflow:hidden}.tests label{cursor:pointer;display:flex;gap:8px;align-items:center;font-size:14px;line-height:20px}input[type=radio]{accent-color:#175d92}
+    .timeline{display:flex;gap:12px;align-items:center;flex:1;min-width:256px}.timeline input{flex:1;accent-color:#175d92;min-width:96px}.time{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}.script{display:flex;max-width:680px;margin-top:16px;font-size:12px;line-height:16px;gap:4px}.script span{padding:8px;color:#fff;border-radius:4px}.script span:nth-child(1){flex:3;background:#9b5962}.script span:nth-child(2){flex:1;background:#67537b}.script span:nth-child(3){flex:2;background:#344e77}.script span:nth-child(4){flex:1;background:#626e83}
+    main{padding-top:8px}.sample{margin-bottom:40px}.rowtitle{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}.rowtitle p{font-size:14px;line-height:20px;color:#536674}.dimensions{font-size:12px;line-height:16px;color:#536674;white-space:nowrap}.comparison{overflow:auto;background:#181818;border-radius:8px}.labels{display:grid;grid-template-columns:repeat(4,1fr);min-width:800px;color:#edf2f6;font-size:14px;line-height:20px}.labels div{padding:12px 16px}.labels small{display:block;color:#aebbc4;margin-top:4px}.comparison canvas{display:block;width:100%;min-width:800px;height:auto}.palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.swatch{height:32px;min-width:48px;flex:1;max-width:128px;position:relative;border-radius:4px}.swatch span{position:absolute;bottom:0;left:4px;font-size:12px;line-height:16px;padding:0 4px;background:#ffffffdd;color:#24333f;border-radius:2px}
+    .loading{min-height:256px;background:#dce6ee;padding:32px}.notice{font-size:14px;line-height:20px;color:#536674}.error{color:#972e35;background:#fff;padding:24px;border-radius:8px}footer{font-size:14px;line-height:20px;color:#536674;padding-top:0}a{color:#175d92}#benchmark{display:none}.capture header,.capture main,.capture footer,.capture .skip{display:none}.capture #benchmark{display:block}.capture{background:#181818}.capture #benchmark canvas{display:block}
+    @media(max-width:700px){header,main,footer{padding:16px}h1{font-size:30px;line-height:36px}.rowtitle{display:block}.timeline{width:100%}.controls{gap:12px}.script{max-width:100%}.sample{margin-bottom:32px}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#comparisons">比較画像へ</a>
+  <header>
+    <div class="eyebrow">PALETTE RECOLORING / 実験</div>
+    <h1>色をほどく。<br>階調は、どこまで残るか。</h1>
+    <p class="intro">同じ8色から、3通りの色替えを比べる。原画と見比べながら、空のなめらかさ、筆致、輪郭を確かめる。</p>
+    <div class="controls">
+      <fieldset class="tests"><legend>共通の色替え試験</legend>
+        <label><input type="radio" name="test" value="a" checked> a · 元のパレット</label>
+        <label><input type="radio" name="test" value="b"> b · 最大の色を +120°</label>
+        <label><input type="radio" name="test" value="c"> c · 夕方から夜へ</label>
+      </fieldset>
+      <div class="timeline"><button id="play" disabled>再生</button><input id="time" aria-label="20秒の中の位置" type="range" min="0" max="20" step="0.01" value="0" disabled><output class="time" id="clock">0.00 / 20秒</output></div>
+      <button id="measure" disabled>比較を計測して JSON を保存</button>
+    </div>
+    <p id="status" role="status" aria-live="polite" class="notice">4枚の画像を、このブラウザの中で分解しています。</p>
+    <div class="script" aria-label="区間の長さは3対1対2対1。20秒でループ。"><span>夕方 8.57秒</span><span>残照 2.86秒</span><span>夜 5.71秒</span><span>夜明け 2.86秒</span></div>
+  </header>
+  <main id="comparisons"><div class="loading">読み込み後、ここに4枚と3方式が並びます。</div></main>
+  <div id="benchmark"><canvas id="capture"></canvas></div>
+  <footer><p>画像は端末の外に送信しません。パレットの補間は OKLab、色域外の色は明度と色相を保って彩度を下げます。動きは明示的な再生操作で始まります。</p><p><a href="NOTES.md">計測条件と方式の検討</a> · <a href="metrics.json">保存した計測結果</a></p></footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

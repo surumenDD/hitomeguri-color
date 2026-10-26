@@ -3,3 +3,5 @@ tools/visual-qa/out/
 .playwright-mcp/
 experiments/model-probe/*/*.png
 experiments/export-spike/out/
+experiments/recolor-spike/shots/
+experiments/recolor-spike/*.log
