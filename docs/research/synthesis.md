@@ -42,15 +42,16 @@
 
 → 「どの色か」より「どう置き、どう時間の中で動かすか」に芸術性の差が出る。時間の中の色の設計（カラースクリプト、カラーサイクリング）は作り手の知恵がある。一方、1. で見た有料品の中には、これを中心にしたものは見つからなかった（探した範囲で）。
 
-## 4. 身体と多様性への配慮（color-ergonomics、2周目の途中）
+## 4. 身体と多様性への配慮（color-ergonomics）
 
 - 光過敏の基準（ITU-R BT.1702-3、`itu-r-bt1702-3-pdf.txt:194,210,215,219`）: 暗い側が 160 cd/m² 未満で明暗差が 20 cd/m² 以上の変化を点滅とみなす。飽和した赤の点滅も対象。画面の 25% を超え、1秒に3回を超えるものを避ける。WCAG は飽和した赤を R/(R+G+B) ≥ 0.8 で定める（`wcag-2.3.1-three-flashes.md:61`）。ITU は絶対輝度の差、NHK の指針は輝度の変化の割合で、物差しが違う（`report.html` の食い違いの欄）。
-- カラーピッカーの比較: HSV は色の組あたり 41.3 秒、HCI は 46.7 秒で、正確さの差は有意でない（`canham-2023-color-selection-gi.txt:15`）。
-- CVD のシミュレーション: Machado 2009（`machado-2009-cvd-simulation.md:19`）。Machado の実装のひとつに、彩度の高い色で不正確になるバグがあり修正された（`colorspace-cvd-fix-2023.md:5`）。色が主役の体験での代わりの手段は、いま調べている。
+- カラーピッカーの比較: HSV は色の組あたり 41.3 秒、HCI は 46.7 秒で、正確さの差は有意でない（`canham-2023-color-selection-gi.txt:15`）。Douglas & Kirkpatrick（CHI '96）は RGB と HSV で速さにも正確さにも差が無く、フィードバックを増やすと正確さが上がったと報告した（`douglas-kirkpatrick-1996-chi.md:9`）。同じ論文が紹介する Schwarz ら 1987 は RGB を最速だが最も不正確としており、先行研究どうしは食い違う（同 `:31`）。
+- CVD のシミュレーション: Machado 2009（`machado-2009-cvd-simulation.md:19`）。Machado の実装のひとつに、彩度の高い色で不正確になるバグがあり修正された（`colorspace-cvd-fix-2023.md:5`）。
+- 代わりの手段: Xbox の指針は、赤と緑の組は失敗しやすいので形や文字も併用するよう求める（`xag-102-contrast.md:51`）。Hue の開発元は、色覚の当事者コミュニティの助言を受けて記号の仕組みを作った（`playstation-blog-hue-2016.md:27`）。記号・模様・色名ラベルの効果を評価した研究は、検索の上限で届いていない。
 - 画面の輝度が高いと視覚疲労が増える（`benedetto-2014-luminance-blink.txt:28`）。青色光を遮るレンズの利益は確実性が低い（`lawrenson-2023-blue-light-review.txt:1053`）。
 - reduced motion の根拠は前庭障害（`webkit-2019-responsive-design-for-motion.md:45`）。穏やかな技術の原典は Weiser & Brown 1996（`weiser-brown-1996-coming-age.md`）。
 
-→ 光過敏の数値は品質の基準として `tools/visual-qa` に入れる（いまの「明るさの急な変化」の判定を、ITU の物差しに合わせて直す）。reduced motion は最初から設計に入れる。
+→ 光過敏の数値は品質の基準として `tools/visual-qa` に入れる（いまの「明るさの急な変化」の判定を、ITU の物差しに合わせて直す）。reduced motion は最初から設計に入れる。色の選び方の UI は、方式（RGB・HSV など）より、選んだ結果をどれだけ見せるかが効く可能性がある。色覚への配慮は、当事者に確かめながら記号や形を重ねる。
 
 ## 5. 設計の原則（案を評価する物差し）
 
