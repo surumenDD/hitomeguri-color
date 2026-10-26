@@ -1,0 +1,624 @@
+{
+  "when": "2026-10-26T18:34:17.974Z",
+  "samples": [
+    {
+      "id": "flat",
+      "width": 1536,
+      "height": 1024,
+      "identity": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "start": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "end": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "timing": {
+        "conversion": 126.30000001192093,
+        "palette": 51.69999998807907,
+        "assignment": 43.6000000089407,
+        "weights": 123.79999999701977,
+        "total": 345.40000000596046
+      },
+      "workerWallMs": 362.29999999701977,
+      "bytes": 127401984,
+      "roles": [
+        "sky",
+        "shadow",
+        "water",
+        "water",
+        "water",
+        "sky",
+        "shadow",
+        "sky",
+        "sky",
+        "sky",
+        "light",
+        "light",
+        "water",
+        "water",
+        "celestial",
+        "middle"
+      ],
+      "moments": [
+        {
+          "seconds": 0,
+          "label": "夕方の始まり",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 4.2,
+          "label": "残照",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 37.96454154988877,
+            "mse": 10.390254991319445,
+            "maxByteError": 30,
+            "changedPixels": 598212
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 7.2,
+          "label": "夜の入り",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 33.810787014619365,
+            "mse": 27.03968695746528,
+            "maxByteError": 64,
+            "changedPixels": 565154
+          },
+          "lightnessOut": 1,
+          "lightnessExamples": [
+            {
+              "x": 515,
+              "y": 554,
+              "sourceL": 0.03827313706278801,
+              "L": -0.0017364974194725592
+            }
+          ]
+        },
+        {
+          "seconds": 11.4,
+          "label": "深夜",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 32.27963778760238,
+            "mse": 38.46950358072917,
+            "maxByteError": 73,
+            "changedPixels": 603805
+          },
+          "lightnessOut": 1,
+          "lightnessExamples": [
+            {
+              "x": 515,
+              "y": 554,
+              "sourceL": 0.03827313706278801,
+              "L": -0.00754416585240076
+            }
+          ]
+        },
+        {
+          "seconds": 14.6,
+          "label": "夜の終わり",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 32.09019196771059,
+            "mse": 40.18474012586805,
+            "maxByteError": 55,
+            "changedPixels": 606180
+          },
+          "lightnessOut": 1,
+          "lightnessExamples": [
+            {
+              "x": 515,
+              "y": 554,
+              "sourceL": 0.03827313706278801,
+              "L": -0.0032595181954924303
+            }
+          ]
+        },
+        {
+          "seconds": 17.2,
+          "label": "夜明け",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 38.45636318635189,
+            "mse": 9.277779405381944,
+            "maxByteError": 39,
+            "changedPixels": 604093
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 20,
+          "label": "朝",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 39.15219919514951,
+            "mse": 7.904245876736111,
+            "maxByteError": 35,
+            "changedPixels": 602656
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 23.6,
+          "label": "夕方へ戻る直前",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 61.30881012047845,
+            "mse": 0.04810601128472222,
+            "maxByteError": 1,
+            "changedPixels": 84265
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        }
+      ],
+      "paletteMaxError": 0,
+      "rolesMatch": true,
+      "scriptMaxError": 0
+    },
+    {
+      "id": "painterly",
+      "width": 1536,
+      "height": 1024,
+      "identity": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "start": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "end": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "timing": {
+        "conversion": 124,
+        "palette": 52.5,
+        "assignment": 50.8999999910593,
+        "weights": 126.30000001192093,
+        "total": 353.70000000298023
+      },
+      "workerWallMs": 364.29999999701977,
+      "bytes": 127401984,
+      "roles": [
+        "sky",
+        "shadow",
+        "middle",
+        "sky",
+        "shadow",
+        "water",
+        "middle",
+        "sky",
+        "water",
+        "sky",
+        "sky",
+        "water",
+        "water",
+        "sky",
+        "water",
+        "light"
+      ],
+      "moments": [
+        {
+          "seconds": 0,
+          "label": "夕方の始まり",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 4.2,
+          "label": "残照",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 41.8281016455058,
+            "mse": 4.268449978298611,
+            "maxByteError": 45,
+            "changedPixels": 576102
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 7.2,
+          "label": "夜の入り",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 40.013205345691276,
+            "mse": 6.482758246527778,
+            "maxByteError": 98,
+            "changedPixels": 587719
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 11.4,
+          "label": "深夜",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 39.43921307278814,
+            "mse": 7.398761935763889,
+            "maxByteError": 100,
+            "changedPixels": 587298
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 14.6,
+          "label": "夜の終わり",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 39.420002579800446,
+            "mse": 7.431561957465278,
+            "maxByteError": 58,
+            "changedPixels": 582453
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 17.2,
+          "label": "夜明け",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 40.46177870076265,
+            "mse": 5.846587999131945,
+            "maxByteError": 22,
+            "changedPixels": 575551
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 20,
+          "label": "朝",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 36.80359702398413,
+            "mse": 13.574400499131944,
+            "maxByteError": 27,
+            "changedPixels": 579787
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        },
+        {
+          "seconds": 23.6,
+          "label": "夕方へ戻る直前",
+          "sameWeights": {
+            "psnrDb": "Infinity",
+            "mse": 0,
+            "maxByteError": 0,
+            "changedPixels": 0
+          },
+          "shepardVsSpike": {
+            "psnrDb": 59.775143245732345,
+            "mse": 0.06848036024305555,
+            "maxByteError": 1,
+            "changedPixels": 102310
+          },
+          "lightnessOut": 0,
+          "lightnessExamples": []
+        }
+      ],
+      "paletteMaxError": 0,
+      "rolesMatch": true,
+      "scriptMaxError": 0
+    },
+    {
+      "id": "pixel",
+      "width": 1672,
+      "height": 941,
+      "identity": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "start": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "end": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "timing": {
+        "conversion": 127.1000000089407,
+        "palette": 55.29999999701977,
+        "assignment": 57.5,
+        "weights": 130.09999999403954,
+        "total": 370
+      },
+      "workerWallMs": 414.90000000596046,
+      "bytes": 127441512,
+      "roles": [
+        "shadow",
+        "shadow",
+        "shadow",
+        "sky",
+        "shadow",
+        "water",
+        "middle",
+        "water",
+        "water",
+        "light",
+        "middle",
+        "middle",
+        "light",
+        "water",
+        "water",
+        "sky"
+      ],
+      "moments": []
+    },
+    {
+      "id": "photo",
+      "width": 1536,
+      "height": 1024,
+      "identity": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "start": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "end": {
+        "psnrDb": "Infinity",
+        "mse": 0,
+        "maxByteError": 0,
+        "changedPixels": 0
+      },
+      "timing": {
+        "conversion": 123.5,
+        "palette": 53.79999999701977,
+        "assignment": 49,
+        "weights": 125.29999999701977,
+        "total": 351.59999999403954
+      },
+      "workerWallMs": 360.70000000298023,
+      "bytes": 127401984,
+      "roles": [
+        "shadow",
+        "middle",
+        "middle",
+        "middle",
+        "middle",
+        "middle",
+        "shadow",
+        "sky",
+        "sky",
+        "sky",
+        "sky",
+        "sky",
+        "sky",
+        "sky",
+        "sky",
+        "celestial"
+      ],
+      "moments": []
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "browser": "155.0.8059.86",
+  "gpu": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+  },
+  "alpha": {
+    "rgb": {
+      "psnrDb": "Infinity",
+      "mse": 0,
+      "maxByteError": 0,
+      "changedPixels": 0
+    },
+    "alphaExact": true
+  },
+  "lightnessFallback": [
+    {
+      "diagnostic": 255,
+      "rgba": [0, 0, 0, 255]
+    },
+    {
+      "diagnostic": 255,
+      "rgba": [255, 255, 255, 255]
+    }
+  ],
+  "preprocessing2MP": {
+    "width": 1732,
+    "height": 1155,
+    "runs": [
+      {
+        "conversion": 157.59999999403954,
+        "palette": 48.900000005960464,
+        "assignment": 55.79999999701977,
+        "weights": 157.70000000298023,
+        "total": 420,
+        "workerWallMs": 445.5,
+        "bytes": 162037260
+      },
+      {
+        "conversion": 160.6000000089407,
+        "palette": 48.29999999701977,
+        "assignment": 56.79999999701977,
+        "weights": 156.40000000596046,
+        "total": 422.1000000089407,
+        "workerWallMs": 442.29999999701977,
+        "bytes": 162037260
+      },
+      {
+        "conversion": 157.69999998807907,
+        "palette": 48.70000000298023,
+        "assignment": 54.20000000298023,
+        "weights": 164.09999999403954,
+        "total": 424.69999998807907,
+        "workerWallMs": 435.70000000298023,
+        "bytes": 162037260
+      }
+    ]
+  },
+  "render1080p": {
+    "width": 1920,
+    "height": 1080,
+    "warmup": 12,
+    "samples": 31,
+    "wallMedianMs": 3.5,
+    "wallMaxMs": 57.29999999701977,
+    "gpuMedianMs": 3.204704
+  },
+  "noAutoplay": true,
+  "playPause": true,
+  "sliderAndRole": true,
+  "sampleFileAndDrop": true,
+  "mobileNoOverflow": true,
+  "reducedMotion": {
+    "seconds": 5,
+    "pixelsUnchanged": true,
+    "clockUnchanged": true,
+    "manualSeek": true
+  },
+  "reducedMotionStopsActivePlayback": true,
+  "passed": true,
+  "production": {
+    "errors": [],
+    "externalRequests": [],
+    "canvasSize": [1536, 1024],
+    "relativeAssetsAndWorker": true,
+    "initialReducedMotion": true,
+    "passed": true
+  },
+  "v2Reference": {
+    "commit": "7df962a",
+    "files": {
+      "color.js": "72d6699ef1ab2d92c5ec872d5c15e5ccd4a181471f51d808b14cca851897d2a3",
+      "preprocess.js": "93e6b338afd7e4f5da7d0029d19763ca5cfcf8c6ec92f29f29012379875bc319",
+      "renderer.js": "2f7add4357e46f4d42407dae591da5e4bf510343ddd79588c8bc9b313e4c896d",
+      "script.js": "2fee016d99d876c595bb2a2943fd423c3a86aed1cf6bf3818ba7200f9b16e092"
+    }
+  }
+}

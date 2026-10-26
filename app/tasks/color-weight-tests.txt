@@ -1,0 +1,7 @@
+Target: app/src/color/color.test.ts と app/src/palette/weights.test.ts（新規）。
+Change: Vitest の単体テストだけを書く。実装者が API を並行実装するので、実装や設定を変更しない。API は app/src/color/index.ts が type Lab=[number,number,number] と rgbToLab(r:number,g:number,b:number):Lab（0..255 の整数）、labToLinear(lab:Lab):Lab、gamutMap(lab:Lab):Lab、labHex(lab:Lab):string、labToLch(lab:Lab):Lab（L,C,h degrees）、lchToLab(lch:Lab):Lab を export。app/src/palette/weights.ts が shepardWeights(p:Lab,palette:Lab[]):Float64Array を export。
+色のテスト: tools/visual-qa/probe-eval.mjs の REF_OKLAB 5色と各成分誤差 <= .001。MAPPED_TARGETS の [L=.7,C=.4,h=150] と [.5,.05,30] を lchToLab -> gamutMap -> labToLch で検査（L保持、色相保持、C非増加、labToLinear が許容1e-7で0..1）。既に色域内の目標は変化しない。RGB8bitの少数の代表色で labHex(rgbToLab(...)) の往復も検査する。
+重みのテスト: 16個の互いに異なる OKLab パレットと決定的な複数の画素で、全重みが有限・非負、総和が1（誤差1e-12以内）、各パレット点が対応番号のone-hot、2色の簡単な距離1:2の条件で重み16:1を検査（指数が-4であること）。乱数は使わない。
+Constraints: TypeScript strict。Vitest の describe/it/expect を import。依存は増やさない。試作、docs、assets、他の実装は変更しない。見た目や台本値を判断しない。サーバーを起動しない。範囲外ファイルが現れたら消さず報告。コミットはしない。
+Ownership: 上の2テストファイルだけ。他の app/ ファイルは adviser が所有する。
+Observable acceptance: 実装ができた後、app/ で npm test -- src/color/color.test.ts src/palette/weights.test.ts が通る。実装待ちならその旨を報告してよいが、テストの失敗を隠さず値を緩めない。完了はOrcaのworker_doneで親へ報告する。何を検査したかと実行結果を3文で書く。
