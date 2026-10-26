@@ -2,3 +2,4 @@ node_modules/
 tools/visual-qa/out/
 .playwright-mcp/
 experiments/model-probe/*/*.png
+experiments/export-spike/out/
