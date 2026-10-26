@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>export-spike — 8秒ループ</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #0b0b0c; }
+  body {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    font: 13px/1.5 ui-sans-serif, system-ui, sans-serif;
+    color: #9b9b9f;
+  }
+  #frame { display: grid; place-items: center; min-height: 0; }
+  canvas {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px #ffffff14, 0 24px 60px #0008;
+  }
+  footer { display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; }
+  code { color: #cfcfd4; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div id="frame"><canvas id="stage" width="1280" height="720"></canvas></div>
+  <footer>
+    <span>8秒でちょうど1周するループ。時刻 <code>t</code> を与えると同じ絵が出ます。</span>
+    <span id="status">WebGL2 を初期化中…</span>
+  </footer>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

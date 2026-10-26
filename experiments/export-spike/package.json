@@ -1,0 +1,19 @@
+{
+  "name": "export-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Probe: exporting a looping WebGL2 animation to MP4/WebM/GIF entirely in the browser (WebCodecs + muxers), measured with ffprobe/ffmpeg.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "export": "node run-export.mjs",
+    "measure": "node measure.mjs",
+    "probe": "node probe-webcodecs.mjs",
+    "serve": "node serve.mjs"
+  },
+  "dependencies": {
+    "gifenc": "1.0.3",
+    "mp4-muxer": "5.2.2",
+    "webm-muxer": "5.1.4"
+  }
+}
