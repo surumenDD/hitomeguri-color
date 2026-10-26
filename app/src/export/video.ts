@@ -91,7 +91,8 @@ export async function exportVideo(
       'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。',
     );
   const config: VideoEncoderConfig = {
-    codec: 'avc1.640033',
+    // Baseline has no B-frames: all browsers can feed the muxer in presentation order.
+    codec: 'avc1.420033',
     width,
     height,
     bitrate: 12_000_000,
@@ -121,7 +122,16 @@ export async function exportVideo(
   });
   let error: Error | undefined;
   const encoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => {
+      if (error) return;
+      try {
+        muxer.addVideoChunk(chunk, meta);
+      } catch {
+        error = new Error(
+          'この端末はH.264の動画の書き出しに対応していません。静止画の保存はこのまま使えます。',
+        );
+      }
+    },
     error: (e) => {
       error = e;
     },

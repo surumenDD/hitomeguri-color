@@ -542,3 +542,28 @@ select:disabled {
   margin: 0;
   min-width: 0;
 }
+.footer {
+  /* The stage supplies the other 32px of the 48px separation. */
+  padding: var(--s200) var(--s400) var(--s400);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-quiet);
+  text-wrap: pretty;
+}
+.footer p {
+  margin: 0;
+}
+.footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+.footer a:hover {
+  color: var(--ink);
+}
+@media (max-width: 960px) {
+  .footer {
+    /* The mobile stage has 24px of bottom padding. */
+    padding-top: var(--s300);
+    padding-inline: var(--s200);
+  }
+}

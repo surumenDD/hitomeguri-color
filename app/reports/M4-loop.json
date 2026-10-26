@@ -1,0 +1,12 @@
+{
+  "video": "1080p-12s.mp4",
+  "frames": 360,
+  "metric": "decoded RGB MAE at 384x216, byte units",
+  "seam": 0.46582835005144035,
+  "firstNeighbor": 0.08885513117283951,
+  "lastNeighbor": 0.025350437242798354,
+  "neighborMedian": 0.5127917631172839,
+  "neighborP95": 1.089574492026749,
+  "neighborMax": 1.3479576581790123,
+  "pass": true
+}

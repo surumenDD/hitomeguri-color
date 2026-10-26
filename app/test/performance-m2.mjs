@@ -12,6 +12,7 @@ const result = {};
 try {
   server = await createServer({
     root,
+    base: '/',
     server: { host: '127.0.0.1', port: 0, hmr: false, watch: null },
     logLevel: 'error',
   });

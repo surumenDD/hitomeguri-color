@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { labHex } from './color';
+import { legibleOn } from './color/legible';
 import { PRODUCT } from './product';
 import { Player } from './render/player';
 import { SAMPLES } from './samples';
@@ -141,7 +142,7 @@ export function App() {
   };
   return (
     <>
-      <a className="skip" href="#picture">
+      <a className="skip" href="#picture" tabIndex={0}>
         絵へ移る
       </a>
       <header className="top">
@@ -160,7 +161,7 @@ export function App() {
               disabled={state.exporting}
               onClick={() => run(store.load(sample.url, sample.name, sample.id))}
             >
-              <img src={sample.url} alt="" />
+              <img src={sample.thumbnail} alt="" width={96} height={64} />
             </button>
           ))}
         </nav>
@@ -186,7 +187,7 @@ export function App() {
           }}
         />
       </header>
-      <main className="stage" style={{ '--accent': accent } as CSSProperties}>
+      <main className="stage" style={{ '--accent': legibleOn(accent) } as CSSProperties}>
         <section aria-label="絵と時間">
           <figure ref={picture} className="picture" id="picture" tabIndex={-1}>
             <canvas
@@ -558,6 +559,20 @@ export function App() {
           </div>
         </aside>
       </main>
+      <footer className="footer">
+        <p>画像はこの端末の中だけで処理し、外へ送りません。見本の絵は画像生成で作りました。</p>
+        <p>
+          {PRODUCT.name}は MIT ライセンスで公開しています。ソースコードは{' '}
+          <a href="https://github.com/surumenDD/hitomeguri-color" tabIndex={0}>
+            GitHub にあります
+          </a>
+          {'。使っている'}
+          <a href="THIRD-PARTY-LICENSES.txt" tabIndex={0}>
+            素材のライセンス
+          </a>
+          も読めます。
+        </p>
+      </footer>
     </>
   );
 }

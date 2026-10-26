@@ -1,0 +1,133 @@
+{
+  "cpuThrottleRate": 4,
+  "calibrationNormal": [
+    {
+      "mainMs": 7.9000000059604645,
+      "workerMs": 8.300000011920929,
+      "sum": 106585781.19344722
+    },
+    {
+      "mainMs": 7.5999999940395355,
+      "workerMs": 7.800000011920929,
+      "sum": 106585781.19344722
+    },
+    {
+      "mainMs": 8.099999994039536,
+      "workerMs": 8.599999994039536,
+      "sum": 106585781.19344722
+    }
+  ],
+  "calibrationThrottled": [
+    {
+      "mainMs": 32.29999998211861,
+      "workerMs": 7.899999976158142,
+      "sum": 106585781.19344722
+    },
+    {
+      "mainMs": 31.80000001192093,
+      "workerMs": 7.300000011920929,
+      "sum": 106585781.19344722
+    },
+    {
+      "mainMs": 32.400000005960464,
+      "workerMs": 8.099999994039536,
+      "sum": 106585781.19344722
+    }
+  ],
+  "render": {
+    "size": [1920, 1080],
+    "gpuMedianMs": 0.158592,
+    "wallMedianMs": 0.7999999821186066,
+    "rafMedianMs": 16.699999999999818,
+    "rafP95Ms": 16.799999999999727,
+    "rafMaxMs": 16.800000000000182
+  },
+  "preprocess": {
+    "size": [1732, 1155],
+    "runs": [
+      {
+        "conversion": 159.80000001192093,
+        "palette": 49.30000001192093,
+        "assignment": 57.19999998807907,
+        "weights": 157.90000000596046,
+        "total": 424.2000000178814,
+        "wallMs": 474.59999999403954
+      },
+      {
+        "conversion": 164,
+        "palette": 50.900000005960464,
+        "assignment": 64.80000001192093,
+        "weights": 158.7999999821186,
+        "total": 438.5,
+        "wallMs": 460.90000000596046
+      },
+      {
+        "conversion": 159.90000000596046,
+        "palette": 50.69999998807907,
+        "assignment": 59.30000001192093,
+        "weights": 164.69999998807907,
+        "total": 434.59999999403954,
+        "wallMs": 449.40000000596046
+      }
+    ]
+  },
+  "mainThreadAlgorithmNormal": {
+    "size": [1732, 1155],
+    "runs": [
+      {
+        "conversion": 159.90000000596046,
+        "palette": 68.90000000596046,
+        "assignment": 56,
+        "weights": 152.19999998807907,
+        "total": 437,
+        "wallMs": 437.2999999821186
+      },
+      {
+        "conversion": 156.59999999403954,
+        "palette": 51.80000001192093,
+        "assignment": 54.69999998807907,
+        "weights": 147.90000000596046,
+        "total": 411,
+        "wallMs": 411.09999999403954
+      },
+      {
+        "conversion": 162.40000000596046,
+        "palette": 120.80000001192093,
+        "assignment": 71.09999999403954,
+        "weights": 154.5,
+        "total": 508.80000001192093,
+        "wallMs": 509
+      }
+    ]
+  },
+  "mainThreadAlgorithmThrottled": {
+    "size": [1732, 1155],
+    "runs": [
+      {
+        "conversion": 690.5,
+        "palette": 516.1999999880791,
+        "assignment": 1059.4000000059605,
+        "weights": 685.2000000178814,
+        "total": 2951.300000011921,
+        "wallMs": 2951.5999999940395
+      },
+      {
+        "conversion": 697.8999999761581,
+        "palette": 258.90000000596046,
+        "assignment": 263.7000000178814,
+        "weights": 729.0999999940395,
+        "total": 1949.5999999940395,
+        "wallMs": 1949.800000011921
+      },
+      {
+        "conversion": 694,
+        "palette": 232.90000000596046,
+        "assignment": 262.39999997615814,
+        "weights": 719.4000000059605,
+        "total": 1908.699999988079,
+        "wallMs": 1908.9000000059605
+      }
+    ]
+  },
+  "workerThrottleLimitation": "CDP Emulation throttles the page, not workers. Calibration confirms this. Main-thread proxy runs the identical preprocessing function under verified 4x throttling; it is not a measured throttled Worker."
+}

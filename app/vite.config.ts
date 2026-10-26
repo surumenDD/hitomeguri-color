@@ -9,7 +9,7 @@ const developmentCsp = productionCsp.replace(
 );
 
 export default defineConfig({
-  base: './',
+  base: '/hitomeguri-color/',
   // Fontsource's small unicode subsets must remain same-origin files under the production CSP.
   build: { assetsInlineLimit: 0 },
   plugins: [

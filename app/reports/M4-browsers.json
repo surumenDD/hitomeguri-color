@@ -1,0 +1,1364 @@
+{
+  "playwright": "1.65.0-alpha-2026-10-26",
+  "axe": "4.14.0",
+  "platform": "Windows; WebKit port, not native macOS Safari",
+  "base": "/hitomeguri-color/",
+  "transferMethod": "Cold cache, Navigation + ResourceTiming.transferSize including estimated HTTP headers; first ready + fonts.ready",
+  "browsers": [
+    {
+      "browser": "chrome",
+      "version": "155.0.8059.86",
+      "passed": true,
+      "mp4Supported": true,
+      "mp4": {
+        "codec_name": "h264",
+        "width": 256,
+        "height": 128,
+        "duration": "12.000000",
+        "nb_frames": "360"
+      },
+      "png": true,
+      "unsupportedStillWorks": null,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "audits": [
+        {
+          "state": "initial",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "island-selected",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "splitting",
+          "violations": 0,
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "targets": [[".upper-label"], [".lower-label"]]
+            }
+          ]
+        },
+        {
+          "state": "midnight",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "exporting",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "load-error",
+          "violations": 0,
+          "incomplete": []
+        }
+      ],
+      "keyboardTargets": [
+        "絵へ移る",
+        "再生",
+        "一時停止",
+        "1周の中の時刻",
+        "雪の村",
+        "灯台の岬",
+        "オアシス",
+        "港町",
+        "運河の街",
+        "長い夕暮れ",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "夜の灯り",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "1日の光",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "1日の光",
+        "空、面積 37%",
+        "役割",
+        "自動に戻す",
+        "上下の線で分ける",
+        "島を分ける線",
+        "上の役割",
+        "下の役割",
+        "分ける",
+        "空（上）、面積 23%",
+        "分割を戻す",
+        "1周の中の時刻",
+        "動画を書き出す",
+        "この瞬間を画像で保存",
+        "長さ",
+        "動画を書き出す",
+        "自分の絵を開く",
+        "自分の絵を開く",
+        "1周の中の時刻",
+        "GitHub にあります",
+        "素材のライセンス",
+        "GitHub にあります",
+        "素材のライセンス"
+      ],
+      "reducedMotionFiveSecondsExact": true,
+      "footerGapPx": [48, 48],
+      "initialTransferBytes": 1875429,
+      "initialEncodedBodyBytes": 1861329,
+      "initialImageBytes": 1330494,
+      "initialFullImageCount": 1,
+      "initialImages": [
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/canal-C28DL42s.webp",
+          "bytes": 2542
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/snow-CAAUp0x_.webp",
+          "bytes": 3034
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/lighthouse-DxSJ7n--.webp",
+          "bytes": 1746
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/flat-DNvGpmAq.webp",
+          "bytes": 2404
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/oasis-BsN4XlKh.webp",
+          "bytes": 2432
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/canal-sCC_AWCh.webp",
+          "bytes": 1318336
+        }
+      ],
+      "resourceTypes": {
+        "css": 329692,
+        "img": 1332294,
+        "link": 100414,
+        "other": 9554,
+        "script": 102355
+      },
+      "samples": [
+        {
+          "id": "canal",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 127.80000001192093,
+            "palette": 50.89999997615814,
+            "assignment": 42,
+            "weights": 124.60000002384186,
+            "total": 345.30000001192093
+          }
+        },
+        {
+          "id": "snow",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 125.2000000178814,
+            "palette": 50.79999998211861,
+            "assignment": 47.400000005960464,
+            "weights": 124.5,
+            "total": 347.90000000596046
+          }
+        },
+        {
+          "id": "lighthouse",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 123.7999999821186,
+            "palette": 46.30000001192093,
+            "assignment": 41.30000001192093,
+            "weights": 121.59999999403954,
+            "total": 333
+          }
+        },
+        {
+          "id": "oasis",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 125.09999999403954,
+            "palette": 48.400000005960464,
+            "assignment": 47.69999998807907,
+            "weights": 121.40000000596046,
+            "total": 342.59999999403954
+          }
+        },
+        {
+          "id": "flat",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 123.2999999821186,
+            "palette": 51.20000001788139,
+            "assignment": 44.599999994039536,
+            "weights": 122.59999999403954,
+            "total": 341.69999998807907
+          }
+        }
+      ]
+    },
+    {
+      "browser": "firefox",
+      "version": "158.0",
+      "passed": true,
+      "mp4Supported": true,
+      "mp4": {
+        "codec_name": "h264",
+        "width": 256,
+        "height": 128,
+        "duration": "12.000000",
+        "nb_frames": "360"
+      },
+      "png": true,
+      "unsupportedStillWorks": null,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "audits": [
+        {
+          "state": "initial",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "island-selected",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "splitting",
+          "violations": 0,
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "targets": [[".upper-label"], [".lower-label"]]
+            }
+          ]
+        },
+        {
+          "state": "midnight",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "exporting",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "load-error",
+          "violations": 0,
+          "incomplete": []
+        }
+      ],
+      "keyboardTargets": [
+        "絵へ移る",
+        "再生",
+        "一時停止",
+        "1周の中の時刻",
+        "雪の村",
+        "灯台の岬",
+        "オアシス",
+        "港町",
+        "運河の街",
+        "長い夕暮れ",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "夜の灯り",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "1日の光",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "1日の光",
+        "空、面積 37%",
+        "役割",
+        "自動に戻す",
+        "上下の線で分ける",
+        "島を分ける線",
+        "上の役割",
+        "下の役割",
+        "分ける",
+        "空（上）、面積 23%",
+        "分割を戻す",
+        "1周の中の時刻",
+        "動画を書き出す",
+        "この瞬間を画像で保存",
+        "長さ",
+        "動画を書き出す",
+        "自分の絵を開く",
+        "自分の絵を開く",
+        "1周の中の時刻",
+        "GitHub にあります",
+        "素材のライセンス",
+        "GitHub にあります",
+        "素材のライセンス"
+      ],
+      "reducedMotionFiveSecondsExact": true,
+      "footerGapPx": [48, 48],
+      "initialTransferBytes": 1882442,
+      "initialEncodedBodyBytes": 1868342,
+      "initialImageBytes": 1350985,
+      "initialFullImageCount": 1,
+      "initialImages": [
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/favicon-180.png",
+          "bytes": 15353
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/favicon.svg",
+          "bytes": 5138
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/canal-C28DL42s.webp",
+          "bytes": 2542
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/snow-CAAUp0x_.webp",
+          "bytes": 3034
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/lighthouse-DxSJ7n--.webp",
+          "bytes": 1746
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/oasis-BsN4XlKh.webp",
+          "bytes": 2432
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/flat-DNvGpmAq.webp",
+          "bytes": 2404
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/canal-sCC_AWCh.webp",
+          "bytes": 1318336
+        }
+      ],
+      "resourceTypes": {
+        "img": 1332294,
+        "link": 100414,
+        "other": 346259,
+        "script": 102355
+      },
+      "samples": [
+        {
+          "id": "canal",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 87,
+            "palette": 72,
+            "assignment": 76,
+            "weights": 170,
+            "total": 405
+          }
+        },
+        {
+          "id": "snow",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 84,
+            "palette": 74,
+            "assignment": 77,
+            "weights": 169,
+            "total": 404
+          }
+        },
+        {
+          "id": "lighthouse",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 85,
+            "palette": 71,
+            "assignment": 74,
+            "weights": 169,
+            "total": 399
+          }
+        },
+        {
+          "id": "oasis",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 84,
+            "palette": 73,
+            "assignment": 75,
+            "weights": 170,
+            "total": 402
+          }
+        },
+        {
+          "id": "flat",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 85,
+            "palette": 72,
+            "assignment": 75,
+            "weights": 168,
+            "total": 400
+          }
+        }
+      ]
+    },
+    {
+      "browser": "webkit",
+      "version": "27.2",
+      "passed": true,
+      "mp4Supported": false,
+      "mp4": null,
+      "png": true,
+      "unsupportedStillWorks": true,
+      "errors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "audits": [
+        {
+          "state": "initial",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "island-selected",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "splitting",
+          "violations": 0,
+          "incomplete": [
+            {
+              "id": "color-contrast",
+              "targets": [[".upper-label"], [".lower-label"]]
+            }
+          ]
+        },
+        {
+          "state": "midnight",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "unsupported-export",
+          "violations": 0,
+          "incomplete": []
+        },
+        {
+          "state": "load-error",
+          "violations": 0,
+          "incomplete": []
+        }
+      ],
+      "keyboardTargets": [
+        "絵へ移る",
+        "再生",
+        "一時停止",
+        "1周の中の時刻",
+        "雪の村",
+        "灯台の岬",
+        "オアシス",
+        "港町",
+        "運河の街",
+        "長い夕暮れ",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "夜の灯り",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "1日の光",
+        "長さ",
+        "夜の深さ",
+        "灯りの強さ",
+        "1日の光",
+        "空、面積 37%",
+        "役割",
+        "自動に戻す",
+        "上下の線で分ける",
+        "島を分ける線",
+        "上の役割",
+        "下の役割",
+        "分ける",
+        "空（上）、面積 23%",
+        "分割を戻す",
+        "1周の中の時刻",
+        "この瞬間を画像で保存",
+        "長さ",
+        "動画を書き出す",
+        "この瞬間を画像で保存",
+        "自分の絵を開く",
+        "自分の絵を開く",
+        "1周の中の時刻",
+        "GitHub にあります",
+        "素材のライセンス",
+        "GitHub にあります",
+        "素材のライセンス"
+      ],
+      "reducedMotionFiveSecondsExact": true,
+      "footerGapPx": [48, 48],
+      "initialTransferBytes": 1865494,
+      "initialEncodedBodyBytes": 1851994,
+      "initialImageBytes": 1330494,
+      "initialFullImageCount": 1,
+      "initialImages": [
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/canal-C28DL42s.webp",
+          "bytes": 2542
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/snow-CAAUp0x_.webp",
+          "bytes": 3034
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/lighthouse-DxSJ7n--.webp",
+          "bytes": 1746
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/oasis-BsN4XlKh.webp",
+          "bytes": 2432
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/flat-DNvGpmAq.webp",
+          "bytes": 2404
+        },
+        {
+          "url": "http://127.0.0.1:56786/hitomeguri-color/assets/canal-sCC_AWCh.webp",
+          "bytes": 1318336
+        }
+      ],
+      "resourceTypes": {
+        "css": 321052,
+        "img": 1332294,
+        "link": 100414,
+        "other": 8259,
+        "script": 102355
+      },
+      "samples": [
+        {
+          "id": "canal",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 106,
+            "palette": 113,
+            "assignment": 125,
+            "weights": 1065,
+            "total": 1409
+          }
+        },
+        {
+          "id": "snow",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 106,
+            "palette": 113,
+            "assignment": 135,
+            "weights": 1063,
+            "total": 1417
+          }
+        },
+        {
+          "id": "lighthouse",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 105,
+            "palette": 113,
+            "assignment": 153,
+            "weights": 977,
+            "total": 1348
+          }
+        },
+        {
+          "id": "oasis",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 109,
+            "palette": 112,
+            "assignment": 123,
+            "weights": 981,
+            "total": 1325
+          }
+        },
+        {
+          "id": "flat",
+          "width": 1536,
+          "height": 1024,
+          "identity": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "endpoints": [
+            {
+              "preset": "day",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "day",
+              "seconds": 24,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "longDusk",
+              "seconds": 20,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 0,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            },
+            {
+              "preset": "nightLights",
+              "seconds": 32,
+              "psnrDb": "Infinity",
+              "maxByteError": 0
+            }
+          ],
+          "lossless": {
+            "psnrDb": "Infinity",
+            "maxByteError": 0
+          },
+          "timing": {
+            "conversion": 103,
+            "palette": 112,
+            "assignment": 125,
+            "weights": 989,
+            "total": 1329
+          }
+        }
+      ]
+    }
+  ],
+  "production": {
+    "consoleErrors": [],
+    "cspViolations": [],
+    "fonts": true,
+    "cssBytes": 325211,
+    "brand": {
+      "statuses": [
+        {
+          "file": "favicon.svg",
+          "status": 200
+        },
+        {
+          "file": "favicon-32.png",
+          "status": 200
+        },
+        {
+          "file": "favicon-180.png",
+          "status": 200
+        },
+        {
+          "file": "share-1200x630.jpg",
+          "status": 200
+        }
+      ],
+      "icons": [
+        "/hitomeguri-color/favicon.svg",
+        "/hitomeguri-color/favicon-32.png",
+        "/hitomeguri-color/favicon-180.png"
+      ],
+      "ogImage": "https://surumendd.github.io/hitomeguri-color/share-1200x630.jpg"
+    }
+  },
+  "brandSource": [
+    {
+      "file": "favicon.svg",
+      "bytes": 5138,
+      "sha256": "2f349e11a47238484e5db5d93037bdd8bad13c137b80a93634aac2aaf3af14c4",
+      "referenceExact": true
+    },
+    {
+      "file": "favicon-32.png",
+      "bytes": 1649,
+      "sha256": "b3f3cc9f9e3327803ea4e7cbe55dd9397d66a13dd074e342a79330700bebfd65",
+      "referenceExact": true
+    },
+    {
+      "file": "favicon-180.png",
+      "bytes": 15353,
+      "sha256": "83504128dfd31b1295293ea71528d784775e7907eebcc8127dd65c406a27644c",
+      "referenceExact": true
+    },
+    {
+      "file": "share-1200x630.jpg",
+      "bytes": 130102,
+      "sha256": "ec006838ea901bcb70e440b27f6e14e21d89933199c8f45a00b03038b1dee8da",
+      "referenceExact": true
+    }
+  ]
+}

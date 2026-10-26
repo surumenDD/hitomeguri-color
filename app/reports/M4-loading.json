@@ -1,0 +1,77 @@
+{
+  "pageCPUThrottle": 4,
+  "workerExtraBusyMs": 2000,
+  "cases": [
+    {
+      "kind": "sample",
+      "paintMs": 14.699999988079071,
+      "totalMs": 2799.5,
+      "maxRAFGapMs": 116.80000000000018,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 7
+    },
+    {
+      "kind": "sample",
+      "paintMs": 8.599999994039536,
+      "totalMs": 2884,
+      "maxRAFGapMs": 116.59999999999854,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 2.7999999821186066
+    },
+    {
+      "kind": "sample",
+      "paintMs": 12,
+      "totalMs": 2951,
+      "maxRAFGapMs": 133.39999999999964,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 5.4000000059604645
+    },
+    {
+      "kind": "file",
+      "paintMs": 13.099999994039536,
+      "totalMs": 3205.5,
+      "maxRAFGapMs": 383.2999999999993,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 3
+    },
+    {
+      "kind": "file",
+      "paintMs": 16.400000005960464,
+      "totalMs": 3096.800000011921,
+      "maxRAFGapMs": 149.89999999999782,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 3.300000011920929
+    },
+    {
+      "kind": "file",
+      "paintMs": 6.700000017881393,
+      "totalMs": 3101.9000000059605,
+      "maxRAFGapMs": 150,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 3.399999976158142
+    },
+    {
+      "kind": "sample",
+      "paintMs": 5.299999982118607,
+      "totalMs": 2982.2999999821186,
+      "maxRAFGapMs": 116.70000000000073,
+      "focusRetained": true,
+      "presetsAndSlidersDisabled": true,
+      "openDuringLoad": true,
+      "keyboardTabResponseMs": 79.5
+    }
+  ],
+  "keyboardSampleChangeWhileLoading": true
+}

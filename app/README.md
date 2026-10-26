@@ -1,6 +1,6 @@
 # ひとめぐり — v0.1
 
-次の実装者向けの起動・検査手順。確定した仕様は [M2最終状態](reports/M2-report.md#m2の最終状態)、台本・安全の詳細は [v4.2 報告](reports/M2-v42-report.md)、初回の実装は [M2 報告](reports/M2-report.md)、外枠の照合は [design-qa.md](design-qa.md) に記録する。M1 の記録は [M1 報告](reports/M1-report.md) に残している。
+次の実装者向けの起動・検査手順。公開前のブラウザ・アクセシビリティ・容量・配置の確認は [M4報告](reports/M4-report.md)。確定した操作は [M2最終状態](reports/M2-report.md#m2の最終状態)、台本・安全の詳細は [v4.2 報告](reports/M2-v42-report.md)、外枠の照合は [design-qa.md](design-qa.md) に記録する。M1 の記録は [M1 報告](reports/M1-report.md) に残している。
 
 Node.js 24 以降とインストール済みの Google Chrome が必要。開発者の `npm run check` は保存動画の先頭フレームの検査に ffmpeg も使う。
 
@@ -18,13 +18,31 @@ npm run dev
 npm run check             # strict 型検査、Biome、Vitest、開発・配布版Chrome、依存ライセンス
 npm run build             # dist/ に配布物を生成
 npm run test:production   # build とサブパスでの配布物・Worker・フォントの起動検査
+npm run test:compat       # 配布版のChrome・Firefox・WebKit、axe、キーボード、画像とMP4/PNG
+npm run test:loading      # CPU4倍のページと、Worker内に2秒の負荷を足した読み込みの応答
 npm run test:matrix       # MP4 120端点 + 15既定 + 1080p/12秒。ffmpeg・ffprobe が必要
 npm run test:performance  # 1080p 描画と約2MP の前処理の測定
+npm run test:performance:throttled # CDP CPU4倍、Worker適用の校正、同じ前処理の代理測定
+npm run test:showcase     # 運河・24秒の展示用MP4/GIF。媒体はGit管理外
+npm run test:secrets      # 全refのパッチ・コミットメッセージと追跡ファイルの走査
 npm run test:captures     # 島の8時点と UI の画面写真
 node test/seam.mjs        # test:matrix の1080p動画の継ぎ目を測定
 ```
 
-Chrome の検査には既存の `../tools/visual-qa/node_modules/playwright-core` と `chromium.launch({ channel: 'chrome' })` を使う。ブラウザをダウンロードしない。結果の詳細と MP4 は Git 管理外の `test/results/` に出る。行列検査は既にあるファイル名を再開の目印にするため、実装や条件を変えて測り直すときは `test/validate-m2.mjs` の出力ディレクトリを新しい名前にする。各検査は成功・失敗のどちらでもサーバーと Chrome を閉じる。
+Chrome の検査には既存の `../tools/visual-qa/node_modules/playwright-core` と `chromium.launch({ channel: 'chrome' })` を使う。Chrome本体はダウンロードしない。結果の詳細と MP4 は Git 管理外の `test/results/` に出る。行列検査は既にあるファイル名を再開の目印にするため、実装や条件を変えて測り直すときは `test/validate-m2.mjs` の出力ディレクトリを新しい名前にする。各検査は成功・失敗のどちらでもサーバーと Chrome を閉じる。
+
+3ブラウザの検査は `npm run build` の後に行う。Firefox・WebKitを用意する場合は、リポジトリのルートで次を実行する。Windows版WebKitの描画バッファのリサイズの不具合を避けるため、検査用のPlaywrightは修正を含む `1.65.0-alpha-2026-10-26` に固定した。配布するアプリには入らない。
+
+```powershell
+Push-Location tools/visual-qa
+npm ci --ignore-scripts --no-audit --no-fund
+npx --no-install playwright-core install firefox webkit
+Pop-Location
+```
+
+Viteのbaseは `/hitomeguri-color/`。`npm run dev` と `npx --no-install vite preview --host 127.0.0.1` が示すbase付きURLを使う。Pagesのworkflowは `main` へのpushまたは手動実行で `app/dist` を配る。公開リポジトリの作成・push・Pagesの有効化は、利用者の確認を取ったメインが行う。
+
+見本の本画像は元PNGと画素が完全一致する可逆WebP。初期の5つの小さな絵は96×64の別ファイルで、未選択の本画像は読まない。コード、台本、見本の絵、文書はMIT。見本は画像生成で作ったもので、こちらが持つ権利の範囲で許諾する。第三者のフォントと依存には、それぞれのライセンスが適用される。
 
 ## 中核の入口
 

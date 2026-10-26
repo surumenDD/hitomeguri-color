@@ -39,3 +39,23 @@ console.log(
   ),
 );
 assert.deepEqual(invalid, [], 'Every locked dependency must have an allowed license.');
+const normalize = (s) => s.replace(/\r\n/g, '\n').trim();
+const notices = normalize(
+  await readFile(path.join(root, 'public/THIRD-PARTY-LICENSES.txt'), 'utf8'),
+);
+for (const name of [
+  '@fontsource/zen-kaku-gothic-new',
+  '@phosphor-icons/react',
+  'mp4-muxer',
+  'react',
+  'react-dom',
+  'scheduler',
+]) {
+  const pkg = JSON.parse(
+    await readFile(path.join(root, 'node_modules', name, 'package.json'), 'utf8'),
+  );
+  const body = await readFile(path.join(root, 'node_modules', name, 'LICENSE'), 'utf8');
+  assert.ok(notices.includes(`${name} ${pkg.version}`), `Missing license version: ${name}`);
+  assert.ok(notices.includes(normalize(body)), `Stale license body: ${name}`);
+}
+console.log('Bundled runtime/font license versions and full texts match the installed packages.');
