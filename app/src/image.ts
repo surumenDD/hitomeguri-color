@@ -33,10 +33,34 @@ export async function decodeImage(
     const ctx = canvas.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' });
     if (!ctx) throw new Error('画像を読み込めません。');
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const pixels: DecodedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    if (scale < 1) pixels.originalSize = { width: image.naturalWidth, height: image.naturalHeight };
-    return pixels;
+    let resized: ImageBitmap | undefined;
+    if (scale < 1 && typeof createImageBitmap === 'function') {
+      try {
+        // An HTMLImageElement can resize synchronously in Chrome. Blob decoding is asynchronous.
+        const blob = typeof source === 'string' ? await (await fetch(url)).blob() : source;
+        const bitmap = await createImageBitmap(blob, {
+          // Match the <img> path, which honours EXIF orientation even for square photos.
+          imageOrientation: 'from-image',
+          resizeWidth: canvas.width,
+          resizeHeight: canvas.height,
+          resizeQuality: 'high',
+        });
+        // Some browsers accept resize options but return the original dimensions.
+        if (bitmap.width === canvas.width && bitmap.height === canvas.height) resized = bitmap;
+        else bitmap.close();
+      } catch {
+        // Keep the canvas path for browsers without bitmap resizing support.
+      }
+    }
+    try {
+      ctx.drawImage(resized ?? image, 0, 0, canvas.width, canvas.height);
+      const pixels: DecodedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      if (scale < 1)
+        pixels.originalSize = { width: image.naturalWidth, height: image.naturalHeight };
+      return pixels;
+    } finally {
+      resized?.close();
+    }
   } finally {
     if (ownedUrl) URL.revokeObjectURL(url);
   }

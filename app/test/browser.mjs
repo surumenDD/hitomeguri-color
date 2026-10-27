@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
@@ -10,6 +10,107 @@ const root = fileURLToPath(new URL('..', import.meta.url)),
 await mkdir(out, { recursive: true });
 const report = { when: new Date().toISOString(), samples: [], errors: [], externalRequests: [] };
 let server, browser;
+
+async function imageDecodingChecks(page) {
+  const samples = (await readdir(path.join(root, 'src/assets/samples')))
+    .filter((name) => name.endsWith('.webp'))
+    .sort();
+  const result = await page.evaluate(async (samples) => {
+    const { decodeImage } = await import('/src/image.ts');
+    // Frozen canvas path from before asynchronous resizing: compare real browser pixels.
+    const reference = async (source) => {
+      const image = new Image();
+      image.src = source;
+      await image.decode();
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, 2048 / Math.max(image.naturalWidth, image.naturalHeight));
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const ctx = canvas.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' });
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      return ctx.getImageData(0, 0, canvas.width, canvas.height);
+    };
+    const hash = async (pixels) =>
+      Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', pixels.data)))
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join('');
+    const fixture = (width, height, alpha = false) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#5195bb');
+      gradient.addColorStop(0.48, '#e3ac78');
+      gradient.addColorStop(0.5, '#346779');
+      gradient.addColorStop(1, '#213b61');
+      ctx.globalAlpha = alpha ? 0.45 : 1;
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = '#bf5d50';
+      ctx.fillRect(width * 0.34, height * 0.25, width * 0.15, height * 0.45);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      for (let x = 19; x < width; x += 37) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x + 30, height);
+        ctx.stroke();
+      }
+      if (alpha) ctx.clearRect(0, 0, width * 0.2, height);
+      return canvas;
+    };
+    const unchanged = [];
+    const sources = samples.map((name) => [name, `/src/assets/samples/${name}`]);
+    const opaque = fixture(2048, 1536);
+    sources.push(['edge-2048.png', opaque.toDataURL('image/png')]);
+    sources.push(['edge-2048.jpg', opaque.toDataURL('image/jpeg', 0.94)]);
+    sources.push(['alpha-1024.png', fixture(1024, 768, true).toDataURL('image/png')]);
+    for (const [name, source] of sources) {
+      const before = await reference(source);
+      const after = await decodeImage(source, { maxEdge: 2048, resize: true });
+      unchanged.push({
+        name,
+        width: after.width,
+        height: after.height,
+        before: await hash(before),
+        after: await hash(after),
+        originalSize: after.originalSize,
+      });
+    }
+    const source = fixture(8000, 6000).toDataURL('image/png');
+    const before = await reference(source);
+    const after = await decodeImage(source, { maxEdge: 2048, resize: true });
+    let difference = 0;
+    for (let i = 0; i < before.data.length; i += 4)
+      for (let c = 0; c < 3; c++) difference += Math.abs(before.data[i + c] - after.data[i + c]);
+    return {
+      unchanged,
+      resized: {
+        width: after.width,
+        height: after.height,
+        originalSize: after.originalSize,
+        meanAbsoluteRgbDifference: difference / (before.width * before.height * 3),
+      },
+    };
+  }, samples);
+  for (const row of result.unchanged) {
+    assert.equal(row.after, row.before, `${row.name}: unchanged decode pixels`);
+    assert.equal(row.originalSize, undefined, row.name);
+  }
+  assert.deepEqual([result.resized.width, result.resized.height], [2048, 1536]);
+  assert.deepEqual(result.resized.originalSize, { width: 8000, height: 6000 });
+  assert.ok(
+    result.resized.meanAbsoluteRgbDifference <= 2,
+    'high-quality resize RGB difference > 2',
+  );
+  console.log(
+    `Image decoding: ${result.unchanged.length} exact SHA-256 matches, resize mean RGB difference ${result.resized.meanAbsoluteRgbDifference.toFixed(6)}.`,
+  );
+  return result;
+}
+
 try {
   server = await createServer({
     root,
@@ -37,6 +138,7 @@ try {
   const harness = await context.newPage();
   await harness.goto(`${origin}/test/harness.html`);
   await harness.waitForFunction(() => window.harness);
+  report.imageDecoding = await imageDecodingChecks(harness);
   report.gpu = await harness.evaluate(() => window.harness.gpu);
   for (const id of [
     'canal',
