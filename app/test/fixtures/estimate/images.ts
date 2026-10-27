@@ -1,4 +1,6 @@
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 export interface TestImage {
   id: string;
@@ -14,13 +16,16 @@ export const GENERATED_IDS = [
   'white-border', 'black-lines-on-white', 'black-background', 'rain-white-lines', 'seed-noise', 'solid',
 ] as const;
 
+const playwrightUrl = new URL(
+  '../../../../tools/visual-qa/node_modules/playwright-core/index.mjs', import.meta.url,
+);
+// CI installs only app/, so the Chrome-decoded samples run where test/browser.mjs can run.
+export const SAMPLES_DECODABLE = existsSync(fileURLToPath(playwrightUrl));
+
 // Reuse the browser decoder installed for test/browser.mjs; no new package or server.
 // The default long edge keeps the exhaustive matrix affordable; Infinity preserves native pixels.
 export async function decodeSamples(maxEdge = 32): Promise<TestImage[]> {
-  const playwrightUrl = new URL(
-    '../../../../tools/visual-qa/node_modules/playwright-core/index.mjs', import.meta.url,
-  ).href;
-  const { chromium } = await import(/* @vite-ignore */ playwrightUrl);
+  const { chromium } = await import(/* @vite-ignore */ playwrightUrl.href);
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   try {
     const page = await browser.newPage();

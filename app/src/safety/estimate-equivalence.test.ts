@@ -4,6 +4,7 @@ import {
   GENERATED_IDS,
   generatedImages,
   SAMPLE_IDS,
+  SAMPLES_DECODABLE,
 } from '../../test/fixtures/estimate/images';
 import { estimateSetting as referenceEstimate } from '../../test/fixtures/estimate/reference';
 import { type Island, materializeIslands, splitIsland } from '../palette/islands';
@@ -27,7 +28,7 @@ const settings = Object.values(PRESETS).flatMap((preset) =>
 );
 
 beforeAll(async () => {
-  const images = [...(await decodeSamples()), ...generatedImages()];
+  const images = [...(SAMPLES_DECODABLE ? await decodeSamples() : []), ...generatedImages()];
   for (const image of images) {
     const data = preprocess(image.rgba, image.width, image.height);
     const roles = inferRoles(data.metadata).map((info) => info.role);
@@ -58,7 +59,7 @@ beforeAll(async () => {
 }, 30_000);
 
 describe('frozen scalar estimate equivalence (samples resized to long edge 32px)', () => {
-  for (const id of [...SAMPLE_IDS, ...GENERATED_IDS]) {
+  for (const id of [...(SAMPLES_DECODABLE ? SAMPLE_IDS : []), ...GENERATED_IDS]) {
     for (const mode of modes) {
       for (const preset of settings) {
         it(`${id}/${mode}/${preset.id}/depth=${preset.nightDepth}/glow=${preset.glow}/seconds=${preset.durationSec}`, () => {
