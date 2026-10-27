@@ -55,6 +55,20 @@
     },
     "lighthouse": {
       "colors": []
+    },
+    "seaside": {
+      "colors": [
+        {
+          "hex": "#f9992c",
+          "role": "sky",
+          "why": "glow around the setting sun and its band on the sea; inferred as light, so it stayed lit at midnight"
+        },
+        {
+          "hex": "#fdca4f",
+          "role": "sky",
+          "why": "sun band on the horizon and its reflection; inferred as light. The lamp's core (#fdf4b8) stays light"
+        }
+      ]
     }
   }
 }
