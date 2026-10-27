@@ -71,7 +71,14 @@ async function copyForeground(reference, index, name) {
 const server = await createServer({
   root,
   base: '/',
-  server: { host: '127.0.0.1', port: 0, hmr: false, watch: null },
+  // Images are copied into test/results/ while the server runs; on Windows, watching a file that
+  // is still being written fails with EBUSY, so that folder is left unwatched.
+  server: {
+    host: '127.0.0.1',
+    port: 0,
+    hmr: false,
+    watch: { ignored: ['**/test/results/**'] },
+  },
   logLevel: 'error',
 });
 await server.listen();
