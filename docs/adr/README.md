@@ -21,7 +21,7 @@
 | [0006](0006-safety-and-accessibility.md) | 安全とアクセシビリティの基準 | 承認 |
 | [0007](0007-tech-stack.md) | 技術の構成 | 承認 |
 | [0008](0008-publication.md) | 公開の方針 — 公開リポジトリ、すべて MIT、無料のサイト | 承認 |
-| [0009](0009-foreground-layer.md) | 人物の絵を背景に重ねる（試作） | 提案 |
+| [0009](0009-foreground-layer.md) | 人物の絵を背景に重ねる | 承認 |
 
 ## 書式
 

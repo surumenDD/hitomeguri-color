@@ -1,0 +1,1635 @@
+{
+  "specCommit": "ce4dd68",
+  "defaults": {
+    "x": 0.68,
+    "y": 1,
+    "size": 0.7,
+    "blend": 0.8
+  },
+  "render": {
+    "scenes": [
+      {
+        "id": "synthetic",
+        "width": 1536,
+        "height": 1024,
+        "roles": [
+          "middle",
+          "water",
+          "middle",
+          "shadow",
+          "shadow",
+          "sky",
+          "water",
+          "sky",
+          "sky",
+          "sky",
+          "sky",
+          "middle",
+          "light",
+          "shadow",
+          "light",
+          "light"
+        ],
+        "foregroundSize": [128, 192],
+        "endpoints": [
+          {
+            "preset": "day",
+            "seconds": 0,
+            "max": 1,
+            "changed": 299
+          },
+          {
+            "preset": "day",
+            "seconds": 24,
+            "max": 1,
+            "changed": 299
+          },
+          {
+            "preset": "longDusk",
+            "seconds": 0,
+            "max": 1,
+            "changed": 299
+          },
+          {
+            "preset": "longDusk",
+            "seconds": 20,
+            "max": 1,
+            "changed": 299
+          },
+          {
+            "preset": "nightLights",
+            "seconds": 0,
+            "max": 1,
+            "changed": 299
+          },
+          {
+            "preset": "nightLights",
+            "seconds": 32,
+            "max": 1,
+            "changed": 299
+          }
+        ],
+        "adaptation": [
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 1,
+            "changed": 1
+          },
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 1,
+            "changed": 1
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 1,
+            "changed": 1
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          }
+        ],
+        "noForeground": [
+          {
+            "preset": "day",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          }
+        ],
+        "preview": [
+          {
+            "original": [239, 211, 180, 255],
+            "selected": [113, 106, 100, 255],
+            "split": [239, 211, 180, 255]
+          },
+          {
+            "original": [102, 143, 185, 255],
+            "selected": [59, 68, 77, 255],
+            "split": [59, 68, 77, 255]
+          }
+        ],
+        "expectedComposite": 6291456,
+        "pngs": [
+          {
+            "time": "evening",
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "time": "midnight",
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "time": "day",
+            "max": 0,
+            "changed": 0
+          }
+        ]
+      },
+      {
+        "id": "seaside",
+        "width": 1536,
+        "height": 1024,
+        "roles": [
+          "middle",
+          "water",
+          "middle",
+          "shadow",
+          "shadow",
+          "sky",
+          "water",
+          "sky",
+          "sky",
+          "sky",
+          "sky",
+          "middle",
+          "light",
+          "shadow",
+          "light",
+          "light"
+        ],
+        "foregroundSize": [1024, 1536],
+        "endpoints": [
+          {
+            "preset": "day",
+            "seconds": 0,
+            "max": 1,
+            "changed": 12851
+          },
+          {
+            "preset": "day",
+            "seconds": 24,
+            "max": 1,
+            "changed": 12851
+          },
+          {
+            "preset": "longDusk",
+            "seconds": 0,
+            "max": 1,
+            "changed": 12851
+          },
+          {
+            "preset": "longDusk",
+            "seconds": 20,
+            "max": 1,
+            "changed": 12851
+          },
+          {
+            "preset": "nightLights",
+            "seconds": 0,
+            "max": 1,
+            "changed": 12851
+          },
+          {
+            "preset": "nightLights",
+            "seconds": 32,
+            "max": 1,
+            "changed": 12851
+          }
+        ],
+        "adaptation": [
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 1,
+            "changed": 2
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 1,
+            "changed": 1
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 1,
+            "changed": 1
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          }
+        ],
+        "noForeground": [
+          {
+            "preset": "day",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          }
+        ],
+        "preview": [
+          {
+            "original": [215, 149, 108, 255],
+            "selected": [93, 78, 69, 255],
+            "split": [215, 149, 108, 255]
+          },
+          {
+            "original": [250, 191, 154, 255],
+            "selected": [112, 99, 91, 255],
+            "split": [112, 99, 91, 255]
+          }
+        ],
+        "expectedComposite": 6291456,
+        "pngs": [
+          {
+            "time": "evening",
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "time": "midnight",
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "time": "day",
+            "max": 0,
+            "changed": 0
+          }
+        ]
+      },
+      {
+        "id": "riverbank",
+        "width": 1536,
+        "height": 1024,
+        "roles": [
+          "shadow",
+          "middle",
+          "water",
+          "sky",
+          "sky",
+          "shadow",
+          "sky",
+          "middle",
+          "sky",
+          "water",
+          "water",
+          "water",
+          "sky",
+          "water",
+          "light",
+          "light"
+        ],
+        "foregroundSize": [1024, 1536],
+        "endpoints": [
+          {
+            "preset": "day",
+            "seconds": 0,
+            "max": 1,
+            "changed": 12487
+          },
+          {
+            "preset": "day",
+            "seconds": 24,
+            "max": 1,
+            "changed": 12487
+          },
+          {
+            "preset": "longDusk",
+            "seconds": 0,
+            "max": 1,
+            "changed": 12487
+          },
+          {
+            "preset": "longDusk",
+            "seconds": 20,
+            "max": 1,
+            "changed": 12487
+          },
+          {
+            "preset": "nightLights",
+            "seconds": 0,
+            "max": 1,
+            "changed": 12487
+          },
+          {
+            "preset": "nightLights",
+            "seconds": 32,
+            "max": 1,
+            "changed": 12487
+          }
+        ],
+        "adaptation": [
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.2,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 0.8,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.8,
+            "blend": 1,
+            "max": 0,
+            "changed": 0
+          }
+        ],
+        "noForeground": [
+          {
+            "preset": "day",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "day",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "longDusk",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.1,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.25,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.5,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 0.75,
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "preset": "nightLights",
+            "fraction": 1,
+            "max": 0,
+            "changed": 0
+          }
+        ],
+        "preview": [
+          {
+            "original": [207, 141, 108, 255],
+            "selected": [89, 74, 66, 255],
+            "split": [207, 141, 108, 255]
+          },
+          {
+            "original": [246, 181, 144, 255],
+            "selected": [109, 94, 86, 255],
+            "split": [109, 94, 86, 255]
+          }
+        ],
+        "expectedComposite": 6291456,
+        "pngs": [
+          {
+            "time": "evening",
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "time": "midnight",
+            "max": 0,
+            "changed": 0
+          },
+          {
+            "time": "day",
+            "max": 0,
+            "changed": 0
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "performance": {
+      "info": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+      },
+      "size": [1920, 1080],
+      "gpuMedianMs": 0.176896,
+      "wallMedianMs": 0.4000000059604645,
+      "rafMedianMs": 16.69999999999709,
+      "rafP95Ms": 16.80000000000291,
+      "rafMaxMs": 16.900000000001455
+    },
+    "resize": {
+      "width": 2048,
+      "height": 1
+    }
+  },
+  "browsers": [
+    {
+      "name": "chrome",
+      "version": "155.0.8059.86",
+      "passed": true,
+      "foreground": {
+        "keyboard": true,
+        "focus": {
+          "visible": true,
+          "width": "1px",
+          "style": "dotted"
+        },
+        "mouseDrag": true,
+        "placementClamped": true,
+        "opaqueRejected": true,
+        "loadingDisabled": true,
+        "backgroundRetainsSettings": true,
+        "removed": true
+      },
+      "audits": [
+        {
+          "state": "initial",
+          "violations": 0
+        },
+        {
+          "state": "island-selected",
+          "violations": 0
+        },
+        {
+          "state": "splitting",
+          "violations": 0
+        },
+        {
+          "state": "midnight",
+          "violations": 0
+        },
+        {
+          "state": "exporting",
+          "violations": 0
+        },
+        {
+          "state": "load-error",
+          "violations": 0
+        },
+        {
+          "state": "foreground-opaque",
+          "violations": 0
+        },
+        {
+          "state": "foreground-present",
+          "violations": 0
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "videoSupport": true
+    },
+    {
+      "name": "firefox",
+      "version": "158.0",
+      "passed": true,
+      "foreground": {
+        "keyboard": true,
+        "focus": {
+          "visible": true,
+          "width": "1px",
+          "style": "dotted"
+        },
+        "mouseDrag": true,
+        "placementClamped": true,
+        "opaqueRejected": true,
+        "loadingDisabled": true,
+        "backgroundRetainsSettings": true,
+        "removed": true
+      },
+      "audits": [
+        {
+          "state": "initial",
+          "violations": 0
+        },
+        {
+          "state": "island-selected",
+          "violations": 0
+        },
+        {
+          "state": "splitting",
+          "violations": 0
+        },
+        {
+          "state": "midnight",
+          "violations": 0
+        },
+        {
+          "state": "exporting",
+          "violations": 0
+        },
+        {
+          "state": "load-error",
+          "violations": 0
+        },
+        {
+          "state": "foreground-opaque",
+          "violations": 0
+        },
+        {
+          "state": "foreground-present",
+          "violations": 0
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "videoSupport": true
+    },
+    {
+      "name": "webkit",
+      "version": "27.2",
+      "passed": true,
+      "foreground": {
+        "keyboard": true,
+        "focus": {
+          "visible": true,
+          "width": "1px",
+          "style": "dotted"
+        },
+        "mouseDrag": true,
+        "placementClamped": true,
+        "opaqueRejected": true,
+        "loadingDisabled": true,
+        "backgroundRetainsSettings": true,
+        "removed": true
+      },
+      "audits": [
+        {
+          "state": "initial",
+          "violations": 0
+        },
+        {
+          "state": "island-selected",
+          "violations": 0
+        },
+        {
+          "state": "splitting",
+          "violations": 0
+        },
+        {
+          "state": "midnight",
+          "violations": 0
+        },
+        {
+          "state": "unsupported-export",
+          "violations": 0
+        },
+        {
+          "state": "load-error",
+          "violations": 0
+        },
+        {
+          "state": "foreground-opaque",
+          "violations": 0
+        },
+        {
+          "state": "foreground-present",
+          "violations": 0
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "externalRequests": [],
+      "videoSupport": false
+    }
+  ],
+  "flash": [
+    {
+      "file": "riverbank-day.mp4",
+      "frames": 720,
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 8,
+          "endSec": 9,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 3021,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 8,
+          "endSec": 9,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 3021,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    {
+      "file": "riverbank-longDusk.mp4",
+      "frames": 600,
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 6.367,
+          "endSec": 7.367,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 3,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 6.367,
+          "endSec": 7.367,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 3,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    {
+      "file": "riverbank-nightLights.mp4",
+      "frames": 960,
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": null,
+          "endSec": null,
+          "flashCount": 0,
+          "generalFlashes": 0,
+          "redFlashes": 0
+        },
+        "totalFlashes": 0,
+        "maxFlashesPerSecond": 0,
+        "maxGeneralFlashesPerSecond": 0,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": null,
+          "endSec": null,
+          "flashCount": 0,
+          "generalFlashes": 0,
+          "redFlashes": 0
+        },
+        "totalFlashes": 0,
+        "maxFlashesPerSecond": 0,
+        "maxGeneralFlashesPerSecond": 0,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    {
+      "file": "seaside-day.mp4",
+      "frames": 720,
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 8.7,
+          "endSec": 9.7,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 2226,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 8.7,
+          "endSec": 9.7,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 2226,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    {
+      "file": "seaside-longDusk.mp4",
+      "frames": 600,
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 6.167,
+          "endSec": 7.167,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 4,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 6.167,
+          "endSec": 7.167,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 4,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    },
+    {
+      "file": "seaside-nightLights.mp4",
+      "frames": 960,
+      "wcag": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 3.167,
+          "endSec": 4.167,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 1,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      },
+      "itu": {
+        "pass": true,
+        "rateExceeded": false,
+        "areaExceeded": false,
+        "worstWindow": {
+          "startSec": 3.167,
+          "endSec": 4.167,
+          "flashCount": 1,
+          "generalFlashes": 1,
+          "redFlashes": 0
+        },
+        "totalFlashes": 1,
+        "maxFlashesPerSecond": 1,
+        "maxGeneralFlashesPerSecond": 1,
+        "maxRedFlashesPerSecond": 0,
+        "minLeadingEdgeGapMs": null,
+        "maxConcurrentFlashAreaRatio": 0
+      }
+    }
+  ],
+  "touch": {
+    "before": {
+      "left": 52.4444,
+      "top": 30
+    },
+    "after": {
+      "left": 60.8243,
+      "top": 21.6197
+    },
+    "pass": true
+  }
+}

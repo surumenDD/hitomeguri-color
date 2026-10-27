@@ -216,7 +216,7 @@ try {
   await ui.getByRole('button', { name: '動画を書き出す', exact: true }).waitFor();
   report.exportProgressCancellation = true;
   const file = path.join(root, '../assets/samples/raw/flat-dusk-harbor.png');
-  await ui.getByLabel('画像ファイル').setInputFiles(file);
+  await ui.getByLabel('画像ファイル', { exact: true }).setInputFiles(file);
   await ready();
   assert.equal(
     await ui.locator('canvas').getAttribute('aria-label'),
@@ -236,7 +236,7 @@ try {
   report.sampleFileDrop = true;
   const beforeBad = await canvasData();
   await ui
-    .getByLabel('画像ファイル')
+    .getByLabel('画像ファイル', { exact: true })
     .setInputFiles({ name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('invalid') });
   await ui.getByRole('alert').first().waitFor();
   assert.equal(await canvasData(), beforeBad);

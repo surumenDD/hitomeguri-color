@@ -20,6 +20,12 @@ uniform bool uSplitLower;
 uniform vec4 uViewport;
 uniform vec2 uImageSize;
 uniform bool uContain;
+uniform sampler2D uForeground;
+uniform bool uHasForeground;
+uniform vec4 uForegroundBounds;
+uniform float uForegroundExposure;
+uniform vec3 uForegroundColor;
+uniform float uForegroundBlend;
 out vec4 outColor;
 vec3 labToLinear(vec3 p){
   float l=p.x+.3963377774*p.y+.2158037573*p.z;
@@ -31,6 +37,15 @@ vec3 labToLinear(vec3 p){
     -.0041960863*l-.7034186147*m+1.707614701*s);
 }
 bool inGamut(vec3 rgb){return all(greaterThanEqual(rgb,vec3(-.000001)))&&all(lessThanEqual(rgb,vec3(1.000001)));}
+vec3 linearToLab(vec3 rgb){
+  vec3 lms=vec3(dot(rgb,vec3(.4122214708,.5363325363,.0514459929)),
+    dot(rgb,vec3(.2119034982,.6806995451,.1073969566)),
+    dot(rgb,vec3(.0883024619,.2817188376,.6299787005)));
+  lms=pow(max(lms,vec3(0.)),vec3(1./3.));
+  return vec3(dot(lms,vec3(.2104542553,.793617785,-.0040720468)),
+    dot(lms,vec3(1.9779984951,-2.428592205,.4505937099)),
+    dot(lms,vec3(.0259040371,.7827717662,-.808675766)));
+}
 vec3 gamutMap(vec3 p){
   vec3 rgb=labToLinear(p); if(inGamut(rgb))return rgb;
   float lo=0.,hi=1.;
@@ -73,5 +88,21 @@ void main(){
   // Preview emphasis belongs to OKLab, before gamut mapping, and is omitted from exports.
   lab*=mix(vec3(.6,.25,.25),vec3(1.),kept);
   vec3 linear=gamutMap(lab);
+  if(uHasForeground){
+    vec2 fgUV=(uv-uForegroundBounds.xy)/uForegroundBounds.zw;
+    if(all(greaterThanEqual(fgUV,vec2(0.)))&&all(lessThanEqual(fgUV,vec2(1.)))){
+      vec4 fg=texture(uForeground,fgUV);
+      if(fg.a>0.){
+        vec3 fgLinear=clamp(labToLinear(fg.xyz)*(vec3(1.)+
+          uForegroundBlend*(uForegroundExposure*uForegroundColor-vec3(1.))),0.,1.);
+        bool dim=uSelected>=0||(uSplitAt>0.&&(uSplitLower?uv.y<uSplitAt:uv.y>uSplitAt));
+        if(dim)fgLinear=gamutMap(linearToLab(fgLinear)*vec3(.6,.25,.25));
+        linear=linear*(1.-fg.a)+fgLinear*fg.a;
+        float alpha=fg.a+texture(uAlpha,uv).r*(1.-fg.a);
+        outColor=vec4(encode(linear.r),encode(linear.g),encode(linear.b),alpha);
+        return;
+      }
+    }
+  }
   outColor=vec4(encode(linear.r),encode(linear.g),encode(linear.b),texture(uAlpha,uv).r);
 }

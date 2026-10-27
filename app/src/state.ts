@@ -1,4 +1,10 @@
 import { download, type ExportProgress, exportPng, exportVideo } from './export/video';
+import {
+  FOREGROUND_DEFAULTS,
+  type Foreground,
+  type ForegroundSettings,
+  loadForeground,
+} from './foreground';
 import { decodeImage } from './image';
 import { preprocessInWorker } from './palette/client';
 import { curate, type Island, materializeIslands, splitIsland } from './palette/islands';
@@ -22,6 +28,9 @@ export interface LoadedImage {
 }
 export interface AppState {
   image?: LoadedImage;
+  foreground?: Foreground;
+  foregroundLoading: boolean;
+  foregroundError?: string;
   seconds: number;
   playing: boolean;
   loading: boolean;
@@ -61,6 +70,7 @@ export class AppStore {
       seconds: 0,
       playing: false,
       loading: false,
+      foregroundLoading: false,
       reducedMotion,
       selected: -1,
       preset: DAYLIGHT,
@@ -86,7 +96,7 @@ export class AppStore {
     }
   }
   async load(source: string | File, name: string, id?: string): Promise<void> {
-    if (this.state.exporting) return;
+    if (this.state.exporting || this.state.foregroundLoading) return;
     this.pending?.abort();
     const controller = new AbortController();
     this.pending = controller;
@@ -153,12 +163,78 @@ export class AppStore {
       if (this.pending === controller) this.pending = undefined;
     }
   }
+  async addForeground(source: string | File, name: string): Promise<void> {
+    if (
+      this.state.loading ||
+      this.state.foregroundLoading ||
+      this.state.checking ||
+      this.state.exporting
+    )
+      return;
+    this.update({ foregroundLoading: true, playing: false, foregroundError: undefined });
+    try {
+      const data = await loadForeground(source);
+      if (this.disposed) return;
+      const thumbnail = typeof source === 'string' ? source : URL.createObjectURL(source);
+      this.releaseForeground();
+      this.update({
+        foreground: { ...FOREGROUND_DEFAULTS, data, name: imageName(name), thumbnail },
+        foregroundLoading: false,
+        exportError: undefined,
+        saved: undefined,
+      });
+    } catch (error) {
+      this.update({
+        foregroundLoading: false,
+        foregroundError: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  private releaseForeground(): void {
+    if (this.state.foreground?.thumbnail.startsWith('blob:'))
+      URL.revokeObjectURL(this.state.foreground.thumbnail);
+  }
+  removeForeground(): void {
+    if (
+      this.state.loading ||
+      this.state.foregroundLoading ||
+      this.state.checking ||
+      this.state.exporting
+    )
+      return;
+    this.releaseForeground();
+    this.update({
+      foreground: undefined,
+      foregroundError: undefined,
+      exportError: undefined,
+      saved: undefined,
+      playing: false,
+    });
+  }
+  setForeground(patch: Partial<ForegroundSettings>): void {
+    if (
+      !this.state.foreground ||
+      this.state.loading ||
+      this.state.foregroundLoading ||
+      this.state.checking ||
+      this.state.exporting
+    )
+      return;
+    if (Object.values(patch).some((x) => !Number.isFinite(x))) return;
+    const foreground = { ...this.state.foreground, ...patch };
+    foreground.size = Math.max(0.2, Math.min(1.2, foreground.size));
+    foreground.blend = Math.max(0, Math.min(1, foreground.blend));
+    foreground.x = Math.max(0, Math.min(1, foreground.x));
+    foreground.y = Math.max(0.2, Math.min(1 + foreground.size * 0.5, foreground.y));
+    this.update({ foreground, playing: false, exportError: undefined, saved: undefined });
+  }
   setPlaying(playing: boolean): void {
     this.update({
       playing:
         playing &&
         !!this.state.image &&
         !this.state.loading &&
+        !this.state.foregroundLoading &&
         !this.state.checking &&
         !this.state.exporting &&
         !!this.state.estimate?.pass &&
@@ -180,7 +256,7 @@ export class AppStore {
     if (preset) await this.acceptPreset({ ...preset });
   }
   private async acceptPreset(preset: Preset): Promise<boolean> {
-    if (this.state.exporting || this.state.loading) return false;
+    if (this.state.exporting || this.state.loading || this.state.foregroundLoading) return false;
     const revision = ++this.revision;
     this.update({ playing: false, checking: true, editError: undefined });
     try {
@@ -358,8 +434,15 @@ export class AppStore {
     if (now - this.lastPublish >= 100) this.lastPublish = now;
   }
   async exportVideo(): Promise<void> {
-    const { image, preset } = this.state;
-    if (!image || this.state.exporting || !this.state.estimate?.pass) return;
+    const { image, preset, foreground } = this.state;
+    if (
+      !image ||
+      this.state.exporting ||
+      this.state.loading ||
+      this.state.foregroundLoading ||
+      !this.state.estimate?.pass
+    )
+      return;
     this.exportControl = new AbortController();
     this.update({
       playing: false,
@@ -370,6 +453,7 @@ export class AppStore {
     });
     try {
       const result = await exportVideo(image.data, image.roles, preset, {
+        foreground,
         signal: this.exportControl.signal,
         progress: (progress) => this.update({ progress }),
       });
@@ -395,10 +479,11 @@ export class AppStore {
     this.exportControl?.abort();
   }
   async savePng(): Promise<void> {
-    const { image, preset, seconds } = this.state;
-    if (!image || this.state.exporting) return;
+    const { image, preset, seconds, foreground } = this.state;
+    if (!image || this.state.exporting || this.state.loading || this.state.foregroundLoading)
+      return;
     try {
-      const blob = await exportPng(image.data, image.roles, preset, seconds);
+      const blob = await exportPng(image.data, image.roles, preset, seconds, foreground);
       const name = outputName(image.name, Number(seconds.toFixed(1)), 'png');
       download(blob, name);
       this.update({ saved: `保存しました（${name}、${(blob.size / 1e6).toFixed(1)}MB）` });
@@ -417,6 +502,7 @@ export class AppStore {
   dispose(): void {
     this.disposed = true;
     this.pending?.abort();
+    this.releaseForeground();
     this.safety?.dispose();
     this.exportControl?.abort();
     if (this.savedTimer) clearTimeout(this.savedTimer);

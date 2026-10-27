@@ -82,7 +82,7 @@ export async function selectionFixture(page) {
     });
     return c.toDataURL().split(',')[1];
   });
-  await page.getByLabel('画像ファイル').setInputFiles({
+  await page.getByLabel('画像ファイル', { exact: true }).setInputFiles({
     name: 'island-regression.png',
     mimeType: 'image/png',
     buffer: Buffer.from(base64, 'base64'),

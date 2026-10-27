@@ -1,3 +1,4 @@
+import { foregroundLight } from '../foreground';
 import type { Decomposition } from '../palette/types';
 import { rolePaletteAt } from '../script';
 import type { AppStore } from '../state';
@@ -68,14 +69,22 @@ export class Player {
       this.uploaded = image.data;
       this.renderer.size(image.data.metadata.width, image.data.metadata.height);
     }
-    this.renderer.draw(
-      rolePaletteAt(image.data.metadata.palette, image.roles, state.seconds, state.preset),
-      {
-        selected: state.selected,
-        splitAt: state.splitPreview?.at,
-        splitLower: state.splitPreview?.side === 'lower',
-      },
+    this.renderer.uploadForeground(state.foreground?.data);
+    const palette = rolePaletteAt(
+      image.data.metadata.palette,
+      image.roles,
+      state.seconds,
+      state.preset,
     );
+    this.renderer.draw(palette, {
+      selected: state.selected,
+      splitAt: state.splitPreview?.at,
+      splitLower: state.splitPreview?.side === 'lower',
+      foreground: state.foreground && {
+        ...state.foreground,
+        light: foregroundLight(image.data.metadata, image.roles, palette),
+      },
+    });
   }
   dispose(): void {
     this.unsubscribe();
