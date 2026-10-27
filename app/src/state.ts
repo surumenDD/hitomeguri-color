@@ -28,7 +28,7 @@ export interface LoadedImage {
 }
 export interface AppState {
   image?: LoadedImage;
-  foreground?: Foreground;
+  foreground?: Foreground & { origin: 'sample' | 'user' };
   foregroundLoading: boolean;
   foregroundError?: string;
   seconds: number;
@@ -101,6 +101,8 @@ export class AppStore {
     const controller = new AbortController();
     this.pending = controller;
     const revision = ++this.revision;
+    const sample = typeof source === 'string' ? SAMPLES.find((s) => s.url === source) : undefined;
+    let safety: SafetyClient | undefined;
     this.update({
       playing: false,
       loading: true,
@@ -109,7 +111,10 @@ export class AppStore {
       status: '色を調べています',
     });
     try {
-      const pixels = await decodeImage(source);
+      const [pixels, person] = await Promise.all([
+        decodeImage(source),
+        sample?.foreground ? loadForeground(sample.foreground.url) : undefined,
+      ]);
       if (controller.signal.aborted) return;
       if (Math.max(pixels.width, pixels.height) > 4096)
         throw new Error(
@@ -117,17 +122,29 @@ export class AppStore {
         );
       const base = await preprocessInWorker(pixels, controller.signal);
       if (controller.signal.aborted || this.disposed) return;
-      const sampleId =
-        id ?? (typeof source === 'string' ? SAMPLES.find((s) => s.url === source)?.id : undefined);
+      const sampleId = id ?? sample?.id;
       const inference = inferRoles(base.metadata),
         islands = curate(sampleId ?? '', base.metadata),
         data = materializeIslands(base, islands),
         roles = islands.map((i) => i.role);
-      this.safety?.dispose();
-      this.safety = new SafetyClient(data);
-      const estimate = await this.safety.evaluate(roles, this.state.preset);
+      safety = new SafetyClient(data);
+      const estimate = await safety.evaluate(roles, this.state.preset);
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
+      this.safety?.dispose();
+      this.safety = safety;
+      safety = undefined;
+      let foreground = this.state.foreground;
+      if (person && sample?.foreground) {
+        this.releaseForeground();
+        const { url, ...settings } = sample.foreground;
+        foreground = { ...settings, data: person, thumbnail: url, origin: 'sample' };
+      } else if (foreground?.origin === 'sample') {
+        this.releaseForeground();
+        foreground = undefined;
+      }
       this.update({
+        foreground,
+        foregroundError: undefined,
         image: {
           name: typeof source === 'string' ? name : imageName(name),
           id: sampleId,
@@ -160,6 +177,7 @@ export class AppStore {
           status: '画像を開けませんでした。',
         });
     } finally {
+      safety?.dispose();
       if (this.pending === controller) this.pending = undefined;
     }
   }
@@ -176,9 +194,19 @@ export class AppStore {
       const data = await loadForeground(source);
       if (this.disposed) return;
       const thumbnail = typeof source === 'string' ? source : URL.createObjectURL(source);
+      const settings = this.state.foreground ?? FOREGROUND_DEFAULTS;
       this.releaseForeground();
       this.update({
-        foreground: { ...FOREGROUND_DEFAULTS, data, name: imageName(name), thumbnail },
+        foreground: {
+          x: settings.x,
+          y: settings.y,
+          size: settings.size,
+          blend: settings.blend,
+          data,
+          name: imageName(name),
+          thumbnail,
+          origin: 'user',
+        },
         foregroundLoading: false,
         exportError: undefined,
         saved: undefined,

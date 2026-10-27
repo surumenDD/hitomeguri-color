@@ -62,6 +62,10 @@ try {
     null,
     { timeout: 30000 },
   );
+  await page.getByRole('button', { name: '運河の街', exact: true }).click();
+  await page.waitForFunction(
+    () => document.querySelector('input[aria-label="長さ"]')?.disabled === false,
+  );
   const canalBefore = await selectionPixels(page);
   const canalSwatch = page.getByRole('button', { name: /^空、/ }).first();
   report.canalIndex = await canalSwatch.getAttribute('data-testid');
@@ -104,10 +108,10 @@ try {
   await timeline.press('Home');
   for (let i = 0; i < 3; i++) await timeline.press('Shift+ArrowRight');
   await canalSwatch.click();
-  await page.screenshot({ path: path.join(root, 'reports/V02-v2-production-island.png') });
+  await page.screenshot({ path: path.join(root, 'test/results/V02S-production-island.png') });
   await page.getByRole('button', { name: '上下の線で分ける', exact: true }).click();
   await page.getByRole('combobox', { name: '下の役割' }).focus();
-  await page.screenshot({ path: path.join(root, 'reports/V02-v2-production-split.png') });
+  await page.screenshot({ path: path.join(root, 'test/results/V02S-production-split.png') });
   await page.getByRole('button', { name: 'やめる', exact: true }).click();
   await canalSwatch.click();
   report.cspViolations = await page.evaluate(() => window.cspViolations);

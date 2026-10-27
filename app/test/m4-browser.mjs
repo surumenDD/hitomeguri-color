@@ -125,9 +125,9 @@ try {
       await page.waitForTimeout(200);
       row.initialImages = requests.slice();
       assert.equal(
-        requests.filter((r) => r.bytes > 100000).length,
-        1,
-        'Only the selected full image may load',
+        new Set(requests.filter((r) => r.bytes > 100000).map((r) => r.url)).size,
+        2,
+        'Only the selected background and person may load',
       );
       row.startupTiming = await page.evaluate(() => ({
         navigation: performance.getEntriesByType('navigation')[0].toJSON(),
@@ -373,7 +373,7 @@ try {
         for (const label of ['GitHub にあります', '素材のライセンス'])
           await tabTo(page.getByRole('link', { name: label, exact: true }));
         await page.screenshot({
-          path: path.join(root, `reports/V02-v2-${name}-${width}.png`),
+          path: path.join(root, `test/results/V02S-compat-${name}-${width}.png`),
           fullPage: true,
         });
       }

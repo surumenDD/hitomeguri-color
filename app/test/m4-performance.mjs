@@ -113,7 +113,7 @@ try {
     const { decodeImage } = await import('/src/image.ts'),
       { SAMPLES } = await import('/src/samples.ts'),
       { preprocessInWorker } = await import('/src/palette/client.ts');
-    const source = await decodeImage(SAMPLES[0].url),
+    const source = await decodeImage(SAMPLES.find((s) => s.id === 'canal').url),
       a = new OffscreenCanvas(source.width, source.height);
     a.getContext('2d').putImageData(source, 0, 0);
     const b = new OffscreenCanvas(1732, 1155),
@@ -132,7 +132,7 @@ try {
       const { preprocess } = await import('/src/palette/preprocess.ts');
       const { decodeImage } = await import('/src/image.ts');
       const { SAMPLES } = await import('/src/samples.ts');
-      const source = await decodeImage(SAMPLES[0].url);
+      const source = await decodeImage(SAMPLES.find((s) => s.id === 'canal').url);
       const original = new OffscreenCanvas(source.width, source.height);
       original.getContext('2d').putImageData(source, 0, 0);
       const canvas = new OffscreenCanvas(1732, 1155);

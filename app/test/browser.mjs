@@ -85,7 +85,7 @@ try {
     canvasData = () => ui.locator('canvas').evaluate((c) => c.toDataURL());
   await ready();
   assert.equal(await ui.title(), 'ひとめぐり');
-  assert.equal(await ui.locator('.thumb').count(), 5);
+  assert.equal(await ui.locator('.thumb').count(), 7);
   const first = await canvasData();
   await ui.waitForTimeout(300);
   assert.equal(await clock.textContent(), '0.0 / 24 秒');
