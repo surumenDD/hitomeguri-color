@@ -17,6 +17,7 @@ import { DAYLIGHT, type Inference, inferRoles, PRESETS, type Preset, type Role }
 
 export interface LoadedImage {
   name: string;
+  originalSize?: { width: number; height: number };
   id?: string;
   base: Decomposition;
   data: Decomposition;
@@ -26,6 +27,7 @@ export interface LoadedImage {
   roles: Role[];
   splits: { parent: Island; upper: string; lower: string }[];
 }
+type Parameter = 'durationSec' | 'nightDepth' | 'glow';
 export interface AppState {
   image?: LoadedImage;
   foreground?: Foreground & { origin: 'sample' | 'user' };
@@ -38,6 +40,7 @@ export interface AppState {
   selected: number;
   splitPreview?: { at: number; side: 'upper' | 'lower' };
   preset: Preset;
+  drafts: Partial<Record<Parameter, number>>;
   status: string;
   error?: string;
   checking: boolean;
@@ -62,6 +65,9 @@ export class AppStore {
   private pending?: AbortController;
   private safety?: SafetyClient;
   private revision = 0;
+  private parameterQueue: Parameter[] = [];
+  private parameterVersions = { durationSec: 0, nightDepth: 0, glow: 0 };
+  private parameterRun?: { done: Promise<void> };
   private disposed = false;
   private exportControl?: AbortController;
   private savedTimer?: ReturnType<typeof setTimeout>;
@@ -74,6 +80,7 @@ export class AppStore {
       reducedMotion,
       selected: -1,
       preset: DAYLIGHT,
+      drafts: {},
       status: '画像を読み込んでください。',
       checking: false,
       exporting: false,
@@ -95,12 +102,18 @@ export class AppStore {
       for (const listener of this.listeners) listener();
     }
   }
+  private beginEdit(): number {
+    this.parameterQueue = [];
+    this.parameterRun = undefined;
+    this.update({ drafts: {} }, false);
+    return ++this.revision;
+  }
   async load(source: string | File, name: string, id?: string): Promise<void> {
     if (this.state.exporting || this.state.foregroundLoading) return;
     this.pending?.abort();
     const controller = new AbortController();
     this.pending = controller;
-    const revision = ++this.revision;
+    const revision = this.beginEdit();
     const sample = typeof source === 'string' ? SAMPLES.find((s) => s.url === source) : undefined;
     let safety: SafetyClient | undefined;
     this.update({
@@ -112,14 +125,10 @@ export class AppStore {
     });
     try {
       const [pixels, person] = await Promise.all([
-        decodeImage(source),
+        decodeImage(source, { maxEdge: 2048, resize: true }),
         sample?.foreground ? loadForeground(sample.foreground.url) : undefined,
       ]);
       if (controller.signal.aborted) return;
-      if (Math.max(pixels.width, pixels.height) > 4096)
-        throw new Error(
-          `画像が大きすぎます（${pixels.width}×${pixels.height}）。長辺4096px以下にしてから開いてください。`,
-        );
       const base = await preprocessInWorker(pixels, controller.signal);
       if (controller.signal.aborted || this.disposed) return;
       const sampleId = id ?? sample?.id;
@@ -147,6 +156,7 @@ export class AppStore {
         foregroundError: undefined,
         image: {
           name: typeof source === 'string' ? name : imageName(name),
+          originalSize: pixels.originalSize,
           id: sampleId,
           base,
           data,
@@ -244,7 +254,6 @@ export class AppStore {
       !this.state.foreground ||
       this.state.loading ||
       this.state.foregroundLoading ||
-      this.state.checking ||
       this.state.exporting
     )
       return;
@@ -285,13 +294,14 @@ export class AppStore {
   }
   private async acceptPreset(preset: Preset): Promise<boolean> {
     if (this.state.exporting || this.state.loading || this.state.foregroundLoading) return false;
-    const revision = ++this.revision;
+    const revision = this.beginEdit();
     this.update({ playing: false, checking: true, editError: undefined });
     try {
       const result = await this.safety?.evaluate(this.state.image?.roles ?? [], preset);
       if (revision !== this.revision) return false;
       if (result && !result.pass) {
         this.update({ checking: false, editError: result.reason });
+        await this.flushParameters();
         return false;
       }
       this.update({
@@ -303,55 +313,135 @@ export class AppStore {
         exportError: undefined,
         saved: undefined,
       });
+      await this.flushParameters();
       return true;
     } catch (error) {
-      if (revision === this.revision) this.update({ checking: false, editError: String(error) });
+      if (revision === this.revision) {
+        this.update({ checking: false, editError: String(error) });
+        await this.flushParameters();
+      }
       return false;
     }
   }
-  async setParameter(key: 'durationSec' | 'nightDepth' | 'glow', value: number): Promise<void> {
-    const before = this.state.preset,
-      started = this.revision;
-    if (!Number.isFinite(value)) return;
-    if (await this.acceptPreset({ ...before, [key]: value })) return;
-    if (!this.safety || !this.state.image || this.state.exporting || this.revision !== started + 1)
+  async setParameter(key: Parameter, value: number): Promise<void> {
+    if (
+      !Number.isFinite(value) ||
+      !this.state.image ||
+      this.disposed ||
+      this.state.loading ||
+      this.state.foregroundLoading ||
+      this.state.exporting
+    )
       return;
-    // Find the last acceptable setting, rather than applying and then painting an unsafe one.
-    const revision = ++this.revision;
-    this.update({ checking: true });
-    let safe = before[key],
-      unsafe = value;
-    for (let i = 0; i < 7; i++) {
-      const mid = (safe + unsafe) / 2;
-      const result = await this.safety.evaluate(this.state.image.roles, { ...before, [key]: mid });
-      if (revision !== this.revision) return;
-      if (result.pass) safe = mid;
-      else unsafe = mid;
-    }
-    const preset = { ...before, [key]: safe },
-      estimate = await this.safety.evaluate(this.state.image.roles, preset);
-    if (revision !== this.revision) return;
-    const range = [...this.state.limits[key]] as [number, number];
-    range[value > before[key] ? 1 : 0] = safe;
+    if (!this.parameterQueue.includes(key)) this.parameterQueue.push(key);
+    this.parameterVersions[key]++;
+    this.update({
+      drafts: { ...this.state.drafts, [key]: value },
+      playing: false,
+      editError: undefined,
+    });
+    await this.flushParameters();
+  }
+  private flushParameters(): Promise<void> {
+    if (this.parameterRun) return this.parameterRun.done;
+    // A preset/role/island check owns the scene until it finishes. Inputs can still be drafted.
+    if (this.state.checking || !this.parameterQueue.length || this.disposed)
+      return Promise.resolve();
+    const run = { done: Promise.resolve() };
+    this.parameterRun = run;
+    run.done = this.checkParameters(this.revision).finally(() => {
+      if (this.parameterRun === run) {
+        this.parameterRun = undefined;
+        return this.flushParameters();
+      }
+    });
+    return run.done;
+  }
+  private commitParameter(preset: Preset, estimate: Estimate): void {
     this.update({
       preset,
       estimate,
-      checking: false,
-      limits: { ...this.state.limits, [key]: range },
-      editError: 'これ以上動かすと、点滅または明るさの基準を超えます。',
+      seconds: (this.state.seconds / this.state.preset.durationSec) * preset.durationSec,
+      exportError: undefined,
+      saved: undefined,
     });
+  }
+  private clearDraft(key: Parameter): void {
+    const drafts = { ...this.state.drafts };
+    delete drafts[key];
+    this.parameterQueue.shift();
+    this.update({ drafts });
+  }
+  private async checkParameters(revision: number): Promise<void> {
+    const current = () => revision === this.revision && !this.disposed;
+    this.update({ checking: true });
+    while (current() && this.parameterQueue.length) {
+      const key = this.parameterQueue[0],
+        value = this.state.drafts[key],
+        before = this.state.preset,
+        image = this.state.image,
+        safety = this.safety;
+      if (value === undefined || !image || !safety) {
+        this.parameterQueue = [];
+        this.update({ drafts: {} });
+        break;
+      }
+      try {
+        const preset = { ...before, [key]: value };
+        const result = await safety.evaluate(image.roles, preset);
+        if (!current()) return;
+        if (result.pass) {
+          this.commitParameter(preset, result);
+          if (this.state.drafts[key] === value) this.clearDraft(key);
+          continue;
+        }
+        // A rejected intermediate value never starts a search or moves the latest thumb.
+        if (this.state.drafts[key] !== value) continue;
+        const version = this.parameterVersions[key];
+        let safe = before[key],
+          unsafe = value,
+          estimate = this.state.estimate;
+        // Only this slider's next input interrupts its search; other sliders keep their order.
+        for (let i = 0; i < 7; i++) {
+          const mid = (safe + unsafe) / 2;
+          const candidate = await safety.evaluate(image.roles, { ...before, [key]: mid });
+          if (!current()) return;
+          if (this.parameterVersions[key] !== version) break;
+          if (candidate.pass) {
+            safe = mid;
+            estimate = candidate;
+          } else unsafe = mid;
+        }
+        if (this.parameterVersions[key] !== version) continue;
+        if (estimate?.pass) this.commitParameter({ ...before, [key]: safe }, estimate);
+        const range = [...this.state.limits[key]] as [number, number];
+        range[value > before[key] ? 1 : 0] = safe;
+        this.update({
+          limits: { ...this.state.limits, [key]: range },
+          editError: 'これ以上動かすと、点滅または明るさの基準を超えます。',
+        });
+        this.clearDraft(key);
+      } catch (error) {
+        if (!current()) return;
+        if (this.state.drafts[key] !== value) continue;
+        this.update({ editError: String(error) });
+        this.clearDraft(key);
+      }
+    }
+    if (current()) this.update({ checking: false });
   }
   async setRole(index: number, role: Role): Promise<void> {
     const image = this.state.image;
     if (!image?.islands[index] || this.state.exporting) return;
     const roles = [...image.roles];
     roles[index] = role;
+    const revision = this.beginEdit();
     this.update({ playing: false, checking: true });
-    const revision = ++this.revision;
     const estimate = await this.safety?.evaluate(roles, this.state.preset);
     if (revision !== this.revision) return;
     if (!estimate?.pass) {
       this.update({ checking: false, editError: estimate?.reason });
+      await this.flushParameters();
       return;
     }
     const islands = image.islands.map((island, k) => (k === index ? { ...island, role } : island));
@@ -362,6 +452,7 @@ export class AppStore {
       editError: undefined,
       exportError: undefined,
     });
+    await this.flushParameters();
   }
   async resetRoles(): Promise<void> {
     const image = this.state.image;
@@ -381,7 +472,7 @@ export class AppStore {
   private async acceptIslands(islands: Island[], splits: LoadedImage['splits']): Promise<void> {
     const image = this.state.image;
     if (!image || this.state.exporting) return;
-    const revision = ++this.revision;
+    const revision = this.beginEdit();
     this.update({ playing: false, checking: true });
     const data = materializeIslands(image.base, islands),
       client = new SafetyClient(data),
@@ -390,8 +481,10 @@ export class AppStore {
     try {
       const estimate = await client.evaluate(roles, this.state.preset);
       if (revision !== this.revision || !estimate.pass) {
-        if (revision === this.revision)
+        if (revision === this.revision) {
           this.update({ checking: false, editError: estimate.reason });
+          await this.flushParameters();
+        }
         return;
       }
       this.safety?.dispose();
@@ -405,8 +498,12 @@ export class AppStore {
         editError: undefined,
         exportError: undefined,
       });
+      await this.flushParameters();
     } catch (error) {
-      if (revision === this.revision) this.update({ checking: false });
+      if (revision === this.revision) {
+        this.update({ checking: false });
+        await this.flushParameters();
+      }
       throw error;
     } finally {
       if (!accepted) client.dispose();
@@ -520,6 +617,7 @@ export class AppStore {
     }
   }
   fail(error: unknown): void {
+    this.beginEdit();
     this.update({
       playing: false,
       loading: false,

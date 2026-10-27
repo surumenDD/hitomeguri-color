@@ -45,6 +45,7 @@ export function App() {
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot),
     image = state.image;
   const presetDefaults = PRESETS[state.preset.id];
+  const draftPreset = { ...state.preset, ...state.drafts };
   const canvas = useRef<HTMLCanvasElement>(null),
     file = useRef<HTMLInputElement>(null),
     cancel = useRef<HTMLButtonElement>(null),
@@ -105,6 +106,7 @@ export function App() {
     ? horizonAt(image.data.metadata, image.roles, state.preset, state.seconds)
     : '#ECECEC';
   const busy = state.loading || state.foregroundLoading || state.checking || state.exporting,
+    slidersDisabled = state.loading || state.foregroundLoading || state.exporting || !image,
     selected = image?.islands[state.selected];
   const initial = selected ? image?.initial.find((i) => i.base === selected.base)?.role : undefined;
   const splitGroup = selected
@@ -287,6 +289,12 @@ export function App() {
           {state.reducedMotion && (
             <p className="note">動きを減らす設定が有効です。帯で時刻を選べます。</p>
           )}
+          {image?.originalSize && !state.loading && (
+            <p className="note">
+              長辺 2048 px に縮めて開きました（元の大きさは {image.originalSize.width}×
+              {image.originalSize.height}）。
+            </p>
+          )}
           <span className="sr-only" role="status">
             {state.status}
             {state.checking ? ' 設定を確かめています' : ''}
@@ -309,16 +317,16 @@ export function App() {
               ))}
             </fieldset>
             <label className="slider">
-              長さ<output>{Number(state.preset.durationSec.toFixed(1))} 秒</output>
+              長さ<output>{Number(draftPreset.durationSec.toFixed(1))} 秒</output>
               <input
                 aria-label="長さ"
-                aria-valuetext={`${Number(state.preset.durationSec.toFixed(1))} 秒`}
+                aria-valuetext={`${Number(draftPreset.durationSec.toFixed(1))} 秒`}
                 type="range"
                 min={durationPosition(state.limits.durationSec[0], presetDefaults.durationSec)}
                 max={durationPosition(state.limits.durationSec[1], presetDefaults.durationSec)}
                 step={1}
-                value={durationPosition(state.preset.durationSec, presetDefaults.durationSec)}
-                disabled={busy || !image}
+                value={durationPosition(draftPreset.durationSec, presetDefaults.durationSec)}
+                disabled={slidersDisabled}
                 onChange={(e) =>
                   run(
                     store.setParameter(
@@ -331,16 +339,16 @@ export function App() {
             </label>
             <label className="slider">
               夜の深さ
-              <output>{nightLabel(state.preset.nightDepth, presetDefaults.nightDepth)}</output>
+              <output>{nightLabel(draftPreset.nightDepth, presetDefaults.nightDepth)}</output>
               <input
                 aria-label="夜の深さ"
-                aria-valuetext={nightLabel(state.preset.nightDepth, presetDefaults.nightDepth)}
+                aria-valuetext={nightLabel(draftPreset.nightDepth, presetDefaults.nightDepth)}
                 type="range"
                 min={nightPosition(state.limits.nightDepth[0], presetDefaults.nightDepth)}
                 max={nightPosition(state.limits.nightDepth[1], presetDefaults.nightDepth)}
                 step={1}
-                value={nightPosition(state.preset.nightDepth, presetDefaults.nightDepth)}
-                disabled={busy || !image}
+                value={nightPosition(draftPreset.nightDepth, presetDefaults.nightDepth)}
+                disabled={slidersDisabled}
                 onChange={(e) =>
                   run(
                     store.setParameter(
@@ -353,16 +361,16 @@ export function App() {
             </label>
             <label className="slider">
               灯りの強さ
-              <output>{glowLabel(state.preset.glow, presetDefaults.glow)}</output>
+              <output>{glowLabel(draftPreset.glow, presetDefaults.glow)}</output>
               <input
                 aria-label="灯りの強さ"
-                aria-valuetext={glowLabel(state.preset.glow, presetDefaults.glow)}
+                aria-valuetext={glowLabel(draftPreset.glow, presetDefaults.glow)}
                 type="range"
                 min={glowPosition(state.limits.glow[0], presetDefaults.glow)}
                 max={glowPosition(state.limits.glow[1], presetDefaults.glow)}
                 step={1}
-                value={glowPosition(state.preset.glow, presetDefaults.glow)}
-                disabled={busy || !image}
+                value={glowPosition(draftPreset.glow, presetDefaults.glow)}
+                disabled={slidersDisabled}
                 onChange={(e) =>
                   run(
                     store.setParameter(

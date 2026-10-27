@@ -28,7 +28,8 @@ export function ForegroundPanel({
     if (previous.current && !state.foreground) add.current?.focus();
     previous.current = !!state.foreground;
   }, [state.foreground]);
-  const fg = state.foreground;
+  const fg = state.foreground,
+    slidersDisabled = state.loading || state.foregroundLoading || state.exporting || !state.image;
   return (
     <section className="foreground-panel" aria-label="人物" aria-busy={state.foregroundLoading}>
       <h2>人物</h2>
@@ -57,7 +58,7 @@ export function ForegroundPanel({
               max={120}
               step={1}
               value={Math.round(fg.size * 100)}
-              disabled={busy}
+              disabled={slidersDisabled}
               onChange={(e) => store.setForeground({ size: Number(e.target.value) / 100 })}
             />
           </label>
@@ -72,7 +73,7 @@ export function ForegroundPanel({
               max={100}
               step={1}
               value={blendPosition(fg.blend)}
-              disabled={busy}
+              disabled={slidersDisabled}
               onChange={(e) =>
                 store.setForeground({ blend: positionBlend(Number(e.target.value)) })
               }

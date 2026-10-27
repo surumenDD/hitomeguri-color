@@ -234,6 +234,134 @@ try {
   await ready();
   assert.equal(await ui.locator('canvas').getAttribute('aria-label'), 'dropの色の台本');
   report.sampleFileDrop = true;
+  // Observe the real store and Worker client without adding a test API to the product.
+  await ui.evaluate(async () => {
+    const { AppStore } = await import('/src/state.ts');
+    const load = AppStore.prototype.load;
+    AppStore.prototype.load = function (...args) {
+      window.largeImageStore = this;
+      return load.apply(this, args);
+    };
+    const { SafetyClient } = await import('/src/safety/client.ts');
+    const evaluate = SafetyClient.prototype.evaluate;
+    window.largeImageChecks = [];
+    SafetyClient.prototype.evaluate = function (roles, preset) {
+      const job = { preset: { ...preset }, started: performance.now() };
+      window.largeImageChecks.push(job);
+      return evaluate.call(this, roles, preset).then((result) => {
+        Object.assign(job, { finished: performance.now(), result });
+        return result;
+      });
+    };
+  });
+  const generatedJpeg = await ui.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 3000;
+    const ctx = canvas.getContext('2d');
+    const sky = ctx.createLinearGradient(0, 0, 0, 3000);
+    sky.addColorStop(0, '#538fac');
+    sky.addColorStop(0.5, '#c7976d');
+    sky.addColorStop(0.51, '#34556c');
+    sky.addColorStop(1, '#1d344c');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 3000, 3000);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    for (let y = 40; y < 2960; y += 50) {
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(2940, y + 30);
+      ctx.stroke();
+    }
+    return canvas.toDataURL('image/jpeg', 0.94).split(',')[1];
+  });
+  const loadStarted = performance.now();
+  await ui.getByLabel('画像ファイル', { exact: true }).setInputFiles({
+    name: 'generated-white-lines-3000.jpg',
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from(generatedJpeg, 'base64'),
+  });
+  await ready();
+  const openMs = performance.now() - loadStarted;
+  const large = await ui.evaluate(() => {
+    const state = window.largeImageStore.getState();
+    return {
+      width: state.image.data.metadata.width,
+      height: state.image.data.metadata.height,
+      originalSize: state.image.originalSize,
+      error: state.error,
+      estimate: state.estimate,
+    };
+  });
+  assert.deepEqual([large.width, large.height], [2048, 2048]);
+  assert.deepEqual(large.originalSize, { width: 3000, height: 3000 });
+  assert.equal(large.error, undefined);
+  assert.equal(
+    await ui
+      .getByText('長辺 2048 px に縮めて開きました（元の大きさは 3000×3000）。', { exact: true })
+      .count(),
+    1,
+  );
+  await ui.evaluate(() => {
+    window.largeImageChecks = [];
+  });
+  const night = ui.getByRole('slider', { name: '夜の深さ', exact: true });
+  const inputs = [];
+  let lastInputAt;
+  for (const position of [51, 52, 53, 54, 55, 56]) {
+    await night.fill(String(position));
+    lastInputAt = performance.now();
+    const immediate = await night.evaluate((control) => {
+      const state = window.largeImageStore.getState();
+      return {
+        position: Number(control.value),
+        disabled: control.disabled,
+        checking: state.checking,
+        draft: state.drafts.nightDepth,
+        accepted: state.preset.nightDepth,
+        output: control.closest('label').querySelector('output').textContent,
+        valueText: control.getAttribute('aria-valuetext'),
+      };
+    });
+    assert.equal(immediate.disabled, false);
+    assert.equal(immediate.position, position);
+    assert.equal(immediate.checking, true);
+    assert.ok(Number.isFinite(immediate.draft));
+    assert.equal(immediate.output, immediate.valueText);
+    inputs.push(immediate);
+  }
+  await ready();
+  const settleMs = performance.now() - lastInputAt;
+  const settled = await ui.evaluate(async () => {
+    const { nightPosition } = await import('/src/ui/scales.ts');
+    const { PRESETS } = await import('/src/script/index.ts');
+    const state = window.largeImageStore.getState();
+    return {
+      drafts: state.drafts,
+      checking: state.checking,
+      accepted: state.preset.nightDepth,
+      position: nightPosition(state.preset.nightDepth, PRESETS[state.preset.id].nightDepth),
+      limit: state.limits.nightDepth,
+      error: state.editError,
+      pass: state.estimate.pass,
+      checks: window.largeImageChecks,
+    };
+  });
+  assert.deepEqual(settled.drafts, {});
+  assert.equal(settled.checking, false);
+  assert.equal(settled.pass, true);
+  assert.ok(Math.abs(Number(await night.inputValue()) - settled.position) <= 1);
+  if (settled.error) assert.equal(settled.accepted, settled.limit[1]);
+  else assert.equal(Number(await night.inputValue()), 56);
+  // All six inputs landed before the first result: only the first and last were checked.
+  assert.equal(settled.checks.length, settled.error ? 9 : 2);
+  report.largeImage = { openMs, settleMs, ...large, inputs, settled };
+  console.log(
+    `Large image: 3000×3000 → 2048×2048, open ${openMs.toFixed(0)}ms, final input → accepted ${settleMs.toFixed(0)}ms.`,
+  );
+  await ui.getByRole('button', { name: '港町', exact: true }).click();
+  await ready();
+  assert.equal(await ui.getByText(/長辺 2048 px に縮めて開きました/).count(), 0);
   const beforeBad = await canvasData();
   await ui
     .getByLabel('画像ファイル', { exact: true })
