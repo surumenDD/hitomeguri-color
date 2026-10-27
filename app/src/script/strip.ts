@@ -10,7 +10,7 @@ const warm = (p: Lab): number => {
 };
 
 // The overhead band follows the most widespread sky colour; without a sky it falls back to index 0.
-function pickOverhead(roles: Role[], counts: number[]): number {
+export function pickOverhead(roles: Role[], counts: number[]): number {
   let best = 0;
   let bestCount = 0;
   let found = false;
@@ -27,7 +27,7 @@ function pickOverhead(roles: Role[], counts: number[]): number {
 
 // The horizon band follows the warmest sky or water colour weighted by the square root of its
 // area; without a candidate it falls back to index 0.
-function pickHorizon(palette: Lab[], roles: Role[], counts: number[]): number {
+export function pickHorizon(palette: Lab[], roles: Role[], counts: number[]): number {
   let best = 0;
   let bestScore = 0;
   let found = false;

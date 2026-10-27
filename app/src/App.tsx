@@ -16,6 +16,7 @@ import { SAMPLES } from './samples';
 import { PRESETS, ROLES, type Role } from './script';
 import { buildStrip, horizonAt } from './script/strip';
 import { AppStore } from './state';
+import { ForegroundPanel, ForegroundPosition } from './ui/Foreground';
 import {
   durationPosition,
   glowLabel,
@@ -103,7 +104,7 @@ export function App() {
   const accent = image
     ? horizonAt(image.data.metadata, image.roles, state.preset, state.seconds)
     : '#ECECEC';
-  const busy = state.loading || state.checking || state.exporting,
+  const busy = state.loading || state.foregroundLoading || state.checking || state.exporting,
     selected = image?.islands[state.selected];
   const initial = selected ? image?.initial.find((i) => i.base === selected.base)?.role : undefined;
   const splitGroup = selected
@@ -197,6 +198,7 @@ export function App() {
               style={{ display: state.loading ? 'none' : 'block' }}
             />
             {state.loading && <div className="skeleton picture-skeleton" aria-hidden="true" />}
+            <ForegroundPosition state={state} store={store} busy={busy} />
             {split && !state.loading && (
               <div
                 className="split-line"
@@ -499,6 +501,12 @@ export function App() {
               </div>
             )}
           </div>
+          <ForegroundPanel
+            state={state}
+            store={store}
+            busy={busy}
+            notice={state.foregroundError && <Notice>{state.foregroundError}</Notice>}
+          />
           <div className="actions">
             {state.progress ? (
               <>
@@ -543,7 +551,7 @@ export function App() {
               <button
                 type="button"
                 className="secondary"
-                disabled={state.loading || !image}
+                disabled={state.loading || state.foregroundLoading || !image}
                 onClick={() => run(store.savePng())}
               >
                 この瞬間を画像で保存

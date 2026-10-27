@@ -11,6 +11,7 @@ import {
   webkit,
 } from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 import { assertSelection, measureSelection, selectionFixture } from './selection.mjs';
+import { foregroundOperations } from './v02-ui.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const out = path.join(root, 'test/results/m4-browsers');
@@ -332,6 +333,14 @@ try {
       await ready();
       assert.equal(await page.locator('canvas').getAttribute('aria-label'), 'dropの色の台本');
       row.drop = true;
+      row.foreground = await foregroundOperations(page, {
+        root,
+        name,
+        activate,
+        tabTo,
+        audit,
+        ready,
+      });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.waitForFunction(() => document.querySelector('.play').disabled);
       await tabTo(timeline);
@@ -364,7 +373,7 @@ try {
         for (const label of ['GitHub にあります', '素材のライセンス'])
           await tabTo(page.getByRole('link', { name: label, exact: true }));
         await page.screenshot({
-          path: path.join(root, `reports/M4-${name}-${width}.png`),
+          path: path.join(root, `reports/V02-${name}-${width}.png`),
           fullPage: true,
         });
       }
@@ -398,6 +407,7 @@ try {
     report.browsers.every((r) => r.passed),
     'Every browser must complete its operation checks',
   );
+  assert.equal(report.pendingVisualViolations.length, 0, 'Every audited state must pass axe');
 } finally {
   await dev?.close();
   if (server) await new Promise((resolve) => server.httpServer.close(resolve));

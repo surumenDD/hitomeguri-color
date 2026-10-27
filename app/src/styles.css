@@ -564,6 +564,56 @@ select:disabled {
 .footer a:hover {
   color: var(--ink);
 }
+.foreground-description {
+  color: var(--ink-quiet);
+  font-size: 14px;
+  line-height: 20px;
+  margin: 0 0 var(--s100);
+}
+.foreground-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--s100);
+  font-size: 14px;
+  line-height: 20px;
+}
+.foreground-summary img {
+  height: 48px;
+  max-width: 80px;
+  object-fit: contain;
+  background: var(--control);
+  border-radius: 8px;
+}
+.foreground-summary span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.foreground-panel .notice {
+  margin-top: var(--s100);
+}
+.foreground-placement {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 4px;
+}
+.foreground-position {
+  position: absolute;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  touch-action: none;
+  pointer-events: auto;
+  cursor: move;
+}
+.foreground-position:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -1px;
+}
 @media (max-width: 960px) {
   .footer {
     /* The mobile stage has 24px of bottom padding. */

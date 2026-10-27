@@ -12,7 +12,7 @@ npm ci --ignore-scripts --no-audit --no-fund
 npm run dev
 ```
 
-表示されたループバック URL を開く。運河の街が静止画で出る。見本5枚、自分の画像の選択・ドロップ、台本3種、再生・一時停止、帯での時刻の移動、3本のスライダー、島の役割の付け替えと上下の分割、MP4 と PNG の保存を使える。動きを減らす設定では自走せず、帯で時刻を選べる。終了は Ctrl+C。
+表示されたループバック URL を開く。運河の街が静止画で出る。見本5枚、自分の画像の選択・ドロップ、台本3種、再生・一時停止、帯での時刻の移動、3本のスライダー、島の役割の付け替えと上下の分割、MP4 と PNG の保存を使える。試作の人物の重ねは「色の島」の下の「人物」から開く。背景が透けた PNG・WebP を1枚置き、大きさ・夜のなじみ・位置を変えられる。位置はドラッグか、人物へ Tab で移って矢印キー（1%、Shift と一緒で10%）で動かす。背景を替えても人物の設定は残る。動きを減らす設定では自走せず、帯で時刻を選べる。終了は Ctrl+C。
 
 ```powershell
 npm run check             # strict 型検査、Biome、Vitest、開発・配布版Chrome、依存ライセンス
@@ -28,7 +28,28 @@ node test/showcase-render.mjs <出力先> 名前=<見本のid か画像のパス
 npm run test:secrets      # 全refのパッチ・コミットメッセージと追跡ファイルの走査
 npm run test:captures     # 島の8時点と UI の画面写真
 node test/seam.mjs        # test:matrix の1080p動画の継ぎ目を測定
+node test/v02-foreground.mjs # 人物の線形合成・元に戻る・人物なしの画素一致、PNG、2048px縮小、1080p
+node test/v02-browser.mjs # 配布版3ブラウザの人物の操作だけを検査（先に build）
+node test/v02-captures.mjs # 配布版・実素材2枚の人物あり/なし、夕方・深夜・昼、スマホ
+node test/v02-touch.mjs   # 390pxのChromeで実際のタッチ入力を送り、人物をドラッグ
+node test/v02-flash.mjs   # 下の6本を出力した後、保存したMP4を復号してWCAG/ITUを検査
 ```
+
+### 人物つきの README のループ
+
+既存の `名前=背景:台本@島番号=役割,...` に、任意で `#foreground=人物のパス&x=0.68&y=1&size=0.7&blend=0.8` を続ける。`@` の役割指定と併用でき、人物を指定しないジョブは前の人物を引き継がない。大きさ `size` は絵の高さの割合（0.2〜1.2）、`blend` は夜のなじみ（0〜1）。`x,y` は下端の中心で、`x` は0〜1、`y` は0.2〜`1 + size/2`。省いた値は画面と同じ標準値になる。`#` 以降は URLSearchParams の形式なので、パス中の `&`、`#`、`+` などはパーセント符号化する。PowerShell では指定全体を引用符で囲む。
+
+```powershell
+node test/showcase-render.mjs test/results/v02/videos `
+  'seaside-day=../assets/showcase/layer/seaside.png:day#foreground=../assets/showcase/layer/girl.png' `
+  'seaside-longDusk=../assets/showcase/layer/seaside.png:longDusk#foreground=../assets/showcase/layer/girl.png' `
+  'seaside-nightLights=../assets/showcase/layer/seaside.png:nightLights#foreground=../assets/showcase/layer/girl.png' `
+  'riverbank-day=../assets/showcase/layer/riverbank.png:day#foreground=../assets/showcase/layer/girl.png&x=0.25' `
+  'riverbank-longDusk=../assets/showcase/layer/riverbank.png:longDusk#foreground=../assets/showcase/layer/girl.png&x=0.25' `
+  'riverbank-nightLights=../assets/showcase/layer/riverbank.png:nightLights#foreground=../assets/showcase/layer/girl.png&x=0.25'
+```
+
+人物の式・範囲・試作の判定は [V02報告](reports/V02-foreground-report.md)。人物の絵も端末の外へ送らない。
 
 Chrome の検査には既存の `../tools/visual-qa/node_modules/playwright-core` と `chromium.launch({ channel: 'chrome' })` を使う。Chrome本体はダウンロードしない。結果の詳細と MP4 は Git 管理外の `test/results/` に出る。行列検査は既にあるファイル名を再開の目印にするため、実装や条件を変えて測り直すときは `test/validate-m2.mjs` の出力ディレクトリを新しい名前にする。各検査は成功・失敗のどちらでもサーバーと Chrome を閉じる。
 
@@ -50,6 +71,7 @@ Viteのbaseは `/hitomeguri-color/`。`npm run dev` と `npx --no-install vite p
 - `src/color/`: sRGB・線形 sRGB・OKLab・OKLCH と、L・色相を保つ彩度の二分探索。
 - `src/palette/`: Worker 内の希少色を残す16色 k-means と固定 Shepard 重み。`islands.ts` は色の重みを位置のゲートで二分する。矩形・半平面は3pxでぼかし、全島の総和を1に保つ。最大32島。
 - `src/render/`: `Renderer.upload(data)` と `draw(palette)`。元の OKLab に重み付きのパレット差分を加算する。`diagnostic: true` は丸め前の L 範囲外を赤、色域外を緑で示す。通常の描画では最後の砦として L を [0,1] に収める。島選択・分割プレビューは、色域変換前のOKLabで、非選択のLを0.6倍・彩度を0.25倍にする。保存にはプレビューを入れない。
+- `src/foreground.ts` と `src/ui/Foreground.tsx`: 人物の1枚のOKLab+透明度の画像、空の基準、置き方と操作。長辺2048pxへ縮小し、透過の割合を調べる。`Renderer.uploadForeground(data)` は1枚だけ転送し、`draw` の人物の指定にはコマごとの `foregroundLight` を渡す。背景と同じ描画の最後に線形の光で合成する。保存前の実コマ判定も同じ人物の指定を受け取る。
 - `src/script/`: v4.2 の台本と推定規則。`rolePaletteAt` は3つのプリセットと長さ12〜48秒・夜0.2〜4・灯り0〜2を扱う。`strip.ts` は面積最大の空と暖かい空／水から2段の帯を作る。
 - `src/safety/estimate.ts`: 描画せずにパレットの運動と元画像の固定重みから編集設定を判定する。L の包絡にかかる画素を60fpsの式で精査し、各フレーム0.5%・逸脱0.08の予算を検査する。パレット色の点滅も視野の全面を占める条件で検査する。`SafetyClient` が Worker で動かす。
 - `src/safety/flash.ts`: node 版と全フィールドで一致する WCAG・ITU の解析。書き出し前には長辺384px・30fpsの実描画を検査し、両方に合格したときだけ保存する。

@@ -1,4 +1,10 @@
 import type { Lab } from '../color';
+import {
+  type ForegroundData,
+  type ForegroundLight,
+  type ForegroundSettings,
+  foregroundBounds,
+} from '../foreground';
 import type { Decomposition } from '../palette/types';
 import fragment from './fragment.glsl?raw';
 
@@ -13,6 +19,8 @@ export class Renderer {
   private readonly loc: Record<string, WebGLUniformLocation | null>;
   private textures: WebGLTexture[] = [];
   private source?: Decomposition;
+  private foreground?: ForegroundData;
+  private foregroundTexture?: WebGLTexture;
   private lost = false;
   private readonly contextLost = (event: Event) => {
     event.preventDefault();
@@ -81,6 +89,12 @@ export class Renderer {
         'uViewport',
         'uImageSize',
         'uContain',
+        'uForeground',
+        'uHasForeground',
+        'uForegroundBounds',
+        'uForegroundK',
+        'uForegroundShift',
+        'uForegroundBlend',
       ].map((key) => [key, gl.getUniformLocation(program, key)]),
     );
     const debug = gl.getExtension('WEBGL_debug_renderer_info');
@@ -92,6 +106,37 @@ export class Renderer {
     gl.disable(gl.BLEND);
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     canvas.addEventListener('webglcontextlost', this.contextLost);
+    this.uploadForeground();
+  }
+  uploadForeground(data?: ForegroundData): void {
+    if (this.foregroundTexture && this.foreground === data) return;
+    const gl = this.gl;
+    if (this.foregroundTexture) gl.deleteTexture(this.foregroundTexture);
+    const texture = gl.createTexture();
+    if (!texture) throw new Error('人物用の GPU メモリを確保できません。');
+    this.foregroundTexture = texture;
+    gl.activeTexture(gl.TEXTURE0 + 10);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA32F,
+      data?.width ?? 1,
+      data?.height ?? 1,
+      0,
+      gl.RGBA,
+      gl.FLOAT,
+      data?.lab ?? new Float32Array(4),
+    );
+    // biome-ignore lint/correctness/useHookAtTopLevel: WebGL API, not a React hook.
+    gl.useProgram(this.program);
+    gl.uniform1i(this.loc.uForeground, 10);
+    if (gl.getError() !== gl.NO_ERROR) throw new Error('人物の GPU 転送に失敗しました。');
+    this.foreground = data;
   }
   upload(data: Decomposition): void {
     const gl = this.gl;
@@ -157,12 +202,14 @@ export class Renderer {
       contain = false,
       splitAt = 0,
       splitLower = false,
+      foreground,
     }: {
       selected?: number;
       diagnostic?: boolean;
       contain?: boolean;
       splitAt?: number;
       splitLower?: boolean;
+      foreground?: ForegroundSettings & { light: ForegroundLight };
     } = {},
   ): void {
     if (this.lost) throw new Error('GPU の接続が失われました。ページを再読み込みしてください。');
@@ -181,6 +228,21 @@ export class Renderer {
     gl.uniform1f(this.loc.uSplitAt, splitAt);
     gl.uniform1i(this.loc.uSplitLower, splitLower ? 1 : 0);
     gl.uniform1i(this.loc.uDiagnostic, diagnostic ? 1 : 0);
+    const hasForeground = !!foreground && !!this.foreground;
+    gl.uniform1i(this.loc.uHasForeground, hasForeground ? 1 : 0);
+    if (foreground && this.foreground) {
+      gl.activeTexture(gl.TEXTURE0 + 10);
+      gl.bindTexture(gl.TEXTURE_2D, this.foregroundTexture ?? null);
+      const bounds = foregroundBounds(
+        this.foreground,
+        this.source.metadata.width / this.source.metadata.height,
+        foreground,
+      );
+      gl.uniform4f(this.loc.uForegroundBounds, bounds.x, bounds.y, bounds.width, bounds.height);
+      gl.uniform1f(this.loc.uForegroundK, foreground.light.k);
+      gl.uniform2fv(this.loc.uForegroundShift, foreground.light.shift);
+      gl.uniform1f(this.loc.uForegroundBlend, foreground.blend);
+    }
     gl.uniform3fv(
       this.loc['uPalette[0]'],
       new Float32Array([...palette.flat(), ...new Array((32 - palette.length) * 3).fill(0)]),
@@ -200,6 +262,7 @@ export class Renderer {
   dispose(): void {
     this.canvas.removeEventListener('webglcontextlost', this.contextLost);
     for (const texture of this.textures) this.gl.deleteTexture(texture);
+    if (this.foregroundTexture) this.gl.deleteTexture(this.foregroundTexture);
     this.gl.deleteProgram(this.program);
     this.gl.getExtension('WEBGL_lose_context')?.loseContext();
     this.source = undefined;

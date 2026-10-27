@@ -20,6 +20,12 @@ uniform bool uSplitLower;
 uniform vec4 uViewport;
 uniform vec2 uImageSize;
 uniform bool uContain;
+uniform sampler2D uForeground;
+uniform bool uHasForeground;
+uniform vec4 uForegroundBounds;
+uniform float uForegroundK;
+uniform vec2 uForegroundShift;
+uniform float uForegroundBlend;
 out vec4 outColor;
 vec3 labToLinear(vec3 p){
   float l=p.x+.3963377774*p.y+.2158037573*p.z;
@@ -73,5 +79,23 @@ void main(){
   // Preview emphasis belongs to OKLab, before gamut mapping, and is omitted from exports.
   lab*=mix(vec3(.6,.25,.25),vec3(1.),kept);
   vec3 linear=gamutMap(lab);
+  if(uHasForeground){
+    vec2 fgUV=(uv-uForegroundBounds.xy)/uForegroundBounds.zw;
+    if(all(greaterThanEqual(fgUV,vec2(0.)))&&all(lessThanEqual(fgUV,vec2(1.)))){
+      vec4 fg=texture(uForeground,fgUV);
+      if(fg.a>0.){
+        float f=uForegroundBlend,k=uForegroundK;
+        fg.x=clamp(fg.x*(1.+f*(k-1.)),.35*fg.x,1.);
+        float c=1.-.35*f*(1.-min(k,1.));
+        fg.yz=fg.yz*c+.5*f*uForegroundShift;
+        bool dim=uSelected>=0||(uSplitAt>0.&&(uSplitLower?uv.y<uSplitAt:uv.y>uSplitAt));
+        if(dim)fg.xyz*=vec3(.6,.25,.25);
+        linear=linear*(1.-fg.a)+gamutMap(fg.xyz)*fg.a;
+        float alpha=fg.a+texture(uAlpha,uv).r*(1.-fg.a);
+        outColor=vec4(encode(linear.r),encode(linear.g),encode(linear.b),alpha);
+        return;
+      }
+    }
+  }
   outColor=vec4(encode(linear.r),encode(linear.g),encode(linear.b),texture(uAlpha,uv).r);
 }

@@ -1,4 +1,5 @@
 import { ArrayBufferTarget, Muxer } from 'mp4-muxer';
+import { type Foreground, foregroundLight } from '../foreground';
 import type { Decomposition } from '../palette/types';
 import { Renderer } from '../render';
 import { estimateSetting } from '../safety/estimate';
@@ -15,6 +16,7 @@ export interface ExportOptions {
   height?: number;
   signal?: AbortSignal;
   progress?: (value: ExportProgress) => void;
+  foreground?: Foreground;
 }
 export const exportSize = (width: number, height: number, maxEdge = 1920): [number, number] => {
   const scale = Math.min(1, maxEdge / Math.max(width, height));
@@ -50,10 +52,17 @@ export async function checkFrames(
     count = Math.round(fps * preset.durationSec);
   try {
     renderer.upload(data);
+    renderer.uploadForeground(options.foreground?.data);
     renderer.size(width, height);
     for (let frame = 0; frame < count; frame++) {
       abort(options.signal);
-      renderer.draw(rolePaletteAt(data.metadata.palette, roles, frame / fps, preset));
+      const palette = rolePaletteAt(data.metadata.palette, roles, frame / fps, preset);
+      renderer.draw(palette, {
+        foreground: options.foreground && {
+          ...options.foreground,
+          light: foregroundLight(data.metadata, roles, palette),
+        },
+      });
       frames.push(rgb(renderer.read()));
       if (frame % 15 === 0) {
         options.progress?.({ phase: 'analysis', fraction: frame / count });
@@ -139,13 +148,19 @@ export async function exportVideo(
   const frames = Math.round(preset.durationSec * fps);
   try {
     renderer.upload(data);
+    renderer.uploadForeground(options.foreground?.data);
     renderer.size(width, height);
     encoder.configure(config);
     for (let i = 0; i < frames; i++) {
       abort(options.signal);
       if (error) throw error;
-      renderer.draw(rolePaletteAt(data.metadata.palette, roles, i / fps, preset), {
+      const palette = rolePaletteAt(data.metadata.palette, roles, i / fps, preset);
+      renderer.draw(palette, {
         contain: true,
+        foreground: options.foreground && {
+          ...options.foreground,
+          light: foregroundLight(data.metadata, roles, palette),
+        },
       });
       const frame = new VideoFrame(canvas, {
         timestamp: Math.round((i * 1e6) / fps),
@@ -188,13 +203,21 @@ export async function exportPng(
   roles: Role[],
   preset: Preset,
   seconds: number,
+  foreground?: Foreground,
 ): Promise<Blob> {
   const canvas = document.createElement('canvas'),
     renderer = new Renderer(canvas);
   try {
     renderer.upload(data);
+    renderer.uploadForeground(foreground?.data);
     renderer.size(data.metadata.width, data.metadata.height);
-    renderer.draw(rolePaletteAt(data.metadata.palette, roles, seconds, preset));
+    const palette = rolePaletteAt(data.metadata.palette, roles, seconds, preset);
+    renderer.draw(palette, {
+      foreground: foreground && {
+        ...foreground,
+        light: foregroundLight(data.metadata, roles, palette),
+      },
+    });
     return await new Promise<Blob>((resolve, reject) =>
       canvas.toBlob(
         (blob) => (blob ? resolve(blob) : reject(new Error('静止画を保存できません。'))),

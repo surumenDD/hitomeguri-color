@@ -104,10 +104,10 @@ try {
   await timeline.press('Home');
   for (let i = 0; i < 3; i++) await timeline.press('Shift+ArrowRight');
   await canalSwatch.click();
-  await page.screenshot({ path: path.join(root, 'reports/M2-ui-island.png') });
+  await page.screenshot({ path: path.join(root, 'reports/V02-production-island.png') });
   await page.getByRole('button', { name: '上下の線で分ける', exact: true }).click();
   await page.getByRole('combobox', { name: '下の役割' }).focus();
-  await page.screenshot({ path: path.join(root, 'reports/M2-ui-split.png') });
+  await page.screenshot({ path: path.join(root, 'reports/V02-production-split.png') });
   await page.getByRole('button', { name: 'やめる', exact: true }).click();
   await canalSwatch.click();
   report.cspViolations = await page.evaluate(() => window.cspViolations);

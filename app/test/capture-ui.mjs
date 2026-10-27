@@ -60,7 +60,7 @@ try {
   await page.getByRole('button', { name: '中止', exact: true }).click();
   await page.getByRole('button', { name: '動画を書き出す', exact: true }).waitFor();
   await page
-    .getByLabel('画像ファイル')
+    .getByLabel('画像ファイル', { exact: true })
     .setInputFiles({ name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('invalid') });
   await page.getByRole('alert').first().waitFor();
   await page.screenshot({ path: path.join(out, 'M2-ui-error.png') });
