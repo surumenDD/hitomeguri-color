@@ -72,7 +72,7 @@ try {
       row.failure = e.stack;
       console.error(name, e.stack);
       await page.screenshot({
-        path: path.join(root, `reports/V02-${name}-failure.png`),
+        path: path.join(root, `reports/V02-v2-${name}-failure.png`),
         fullPage: true,
       });
     } finally {

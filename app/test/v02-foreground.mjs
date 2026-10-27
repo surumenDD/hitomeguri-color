@@ -20,7 +20,7 @@ const server = await createServer({
   logLevel: 'error',
 });
 let browser;
-const report = { scenes: [], errors: [] };
+const report = { formula: 'v2', specCommit: 'b6e3f17', scenes: [], errors: [] };
 try {
   await server.listen();
   browser = await chromium.launch({ channel: 'chrome' });
@@ -47,6 +47,14 @@ try {
     assert.ok(
       result.noForeground.every((e) => e.max === 0),
       `${id}: no foreground shader parity`,
+    );
+    assert.ok(
+      result.backgroundEndpoints.every((e) => e.max === 0),
+      `${id}: background endpoints match original image exactly`,
+    );
+    assert.ok(
+      result.loopSeams.every((e) => e.max === 0),
+      `${id}: foreground loop seam exact`,
     );
     assert.ok(
       result.adaptation.every((e) => e.max <= 1),

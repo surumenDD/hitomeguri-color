@@ -16,7 +16,10 @@ export async function foregroundOperations(page, { root, name, activate, tabTo, 
       () => document.querySelector('.foreground-panel')?.getAttribute('aria-busy') === 'false',
     );
   const capture = (state) =>
-    page.screenshot({ path: path.join(root, `reports/V02-${name}-${state}.png`), fullPage: true });
+    page.screenshot({
+      path: path.join(root, `reports/V02-v2-${name}-${state}.png`),
+      fullPage: true,
+    });
   await capture('empty');
   await choose(path.join(root, 'src/assets/samples/flat.webp'));
   await settled();
@@ -56,7 +59,7 @@ export async function foregroundOperations(page, { root, name, activate, tabTo, 
   await settled();
   assert.equal(await page.locator('.foreground-summary span').textContent(), 'girl');
   assert.equal(await page.getByRole('slider', { name: '大きさ', exact: true }).inputValue(), '70');
-  const blend = page.getByRole('slider', { name: '夜のなじみ', exact: true });
+  const blend = page.getByRole('slider', { name: '光のなじみ', exact: true });
   assert.equal(await blend.inputValue(), '50');
   assert.equal(await blend.getAttribute('aria-valuetext'), 'ふつう');
   await tabTo(blend);
@@ -65,7 +68,7 @@ export async function foregroundOperations(page, { root, name, activate, tabTo, 
   await page.keyboard.press('ArrowRight');
   assert.equal(await blend.getAttribute('aria-valuetext'), '弱め');
   await page.keyboard.press('End');
-  assert.equal(await blend.getAttribute('aria-valuetext'), '同じ');
+  assert.equal(await blend.getAttribute('aria-valuetext'), '最大');
   await page.keyboard.press('ArrowLeft');
   assert.equal(await blend.getAttribute('aria-valuetext'), '強め');
   await blend.fill('50');

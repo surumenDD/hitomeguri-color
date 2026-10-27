@@ -1,4 +1,4 @@
-import { type Lab, rgbToLab } from './color';
+import { type Lab, labToLinear, rgbToLab } from './color';
 import { decodeImage } from './image';
 import type { Metadata } from './palette/types';
 import type { Role } from './script';
@@ -22,8 +22,8 @@ export interface Foreground extends ForegroundSettings {
   thumbnail: string;
 }
 export interface ForegroundLight {
-  k: number;
-  shift: [number, number];
+  exposure: number;
+  color: Lab;
 }
 export const FOREGROUND_DEFAULTS: ForegroundSettings = { x: 0.68, y: 1, size: 0.7, blend: 0.8 };
 export const OPAQUE_FOREGROUND =
@@ -35,25 +35,25 @@ export function foregroundLight(
   roles: Role[],
   palette: Lab[],
 ): ForegroundLight {
-  if (!roles.includes('sky')) return { k: 1, shift: [0, 0] };
+  if (!roles.includes('sky')) return { exposure: 1, color: [1, 1, 1] };
   const overhead = pickOverhead(roles, metadata.counts);
   const horizon = pickHorizon(metadata.palette, roles, metadata.counts);
-  const start = metadata.palette[overhead].map((v, i) => (v + metadata.palette[horizon][i]) / 2),
-    current = palette[overhead].map((v, i) => (v + palette[horizon][i]) / 2);
+  const current = palette[overhead].map((v, i) => (v + palette[horizon][i]) / 2);
+  const color = labToLinear([0.85, 1.3 * current[1], 1.3 * current[2]]).map((v) =>
+    v < 0 ? 0.0001 : v,
+  );
+  const maximum = Math.max(...color);
   return {
-    k: start[0] > 0 ? Math.max(0.05, Math.min(1.25, current[0] / start[0])) : 1,
-    shift: [current[1] - start[1], current[2] - start[2]],
+    exposure: Math.max(0.3, Math.min(1.15, current[0] / 0.7)),
+    color: color.map((v) => v / maximum) as Lab,
   };
 }
 
-/** CPU reference for the shader's ADR-0009 formula; gamut mapping follows this step. */
-export function adaptForeground([L, a, b]: Lab, { k, shift }: ForegroundLight, f: number): Lab {
-  const c = 1 - 0.35 * f * (1 - Math.min(k, 1));
-  return [
-    Math.max(0.35 * L, Math.min(1, L * (1 + f * (k - 1)))),
-    a * c + 0.5 * f * shift[0],
-    b * c + 0.5 * f * shift[1],
-  ];
+/** CPU reference for ADR-0009 v2. Input and output are linear sRGB tuples. */
+export function adaptForeground(linear: Lab, { exposure, color }: ForegroundLight, f: number): Lab {
+  return linear.map((v, i) =>
+    Math.max(0, Math.min(1, v * (1 + f * (exposure * color[i] - 1)))),
+  ) as Lab;
 }
 
 export function foregroundBounds(

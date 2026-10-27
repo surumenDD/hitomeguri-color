@@ -55,7 +55,10 @@ try {
   }));
   assert.ok(after.left > before.left && after.top < before.top);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-  await page.screenshot({ path: path.join(root, 'reports/V02-touch-mobile.png'), fullPage: true });
+  await page.screenshot({
+    path: path.join(root, 'reports/V02-v2-touch-mobile.png'),
+    fullPage: true,
+  });
   await writeFile(
     path.join(root, 'test/results/v02/touch.json'),
     `${JSON.stringify({ before, after, pass: true }, null, 2)}\n`,

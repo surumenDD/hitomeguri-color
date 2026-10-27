@@ -8,7 +8,7 @@ const blendPosition = (f: number) =>
 const positionBlend = (p: number) =>
   p <= 50 ? (p / 50) * normal : normal + ((p - 50) / 50) * (1 - normal);
 const blendLabel = (f: number) =>
-  f === 0 ? 'なし' : f < normal ? '弱め' : f === normal ? 'ふつう' : f < 1 ? '強め' : '同じ';
+  f === 0 ? 'なし' : f < normal ? '弱め' : f === normal ? 'ふつう' : f < 1 ? '強め' : '最大';
 
 export function ForegroundPanel({
   state,
@@ -62,11 +62,11 @@ export function ForegroundPanel({
             />
           </label>
           <label className="slider">
-            <span>夜のなじみ</span>
+            <span>光のなじみ</span>
             <output>{blendLabel(fg.blend)}</output>
             <input
               type="range"
-              aria-label="夜のなじみ"
+              aria-label="光のなじみ"
               aria-valuetext={blendLabel(fg.blend)}
               min={0}
               max={100}

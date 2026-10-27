@@ -24,7 +24,9 @@ const encode = (c) =>
     ) * 255,
   );
 async function load(source, fgSource, x = 0.68) {
-  const base = await preprocessInWorker(await decodeImage(source));
+  const image = await decodeImage(source);
+  const originalBackground = image.data.slice();
+  const base = await preprocessInWorker(image);
   const islands = curate('', base.metadata),
     data = materializeIslands(base, islands);
   let fgData;
@@ -44,6 +46,7 @@ async function load(source, fgSource, x = 0.68) {
   }
   scene = {
     data,
+    originalBackground,
     roles: islands.map((i) => i.role),
     foreground: { ...FOREGROUND_DEFAULTS, x, data: fgData, name: '人物', thumbnail: '' },
   };
@@ -99,6 +102,7 @@ function verify() {
     ref = renderer(true),
     { data, foreground: fg } = scene;
   const bounds = foregroundBounds(fg.data, data.metadata.width / data.metadata.height, fg);
+  const startLight = foregroundLight(data.metadata, scene.roles, data.metadata.palette);
   const expected = new Uint8Array(data.metadata.width * data.metadata.height * 4);
   for (let y = 0; y < data.metadata.height; y++)
     for (let x = 0; x < data.metadata.width; x++) {
@@ -112,13 +116,19 @@ function verify() {
         const j =
           (Math.floor(fy * fg.data.height) * fg.data.width + Math.floor(fx * fg.data.width)) * 4;
         const a = fg.data.lab[j + 3],
-          fgLinear = labToLinear(gamutMap(Array.from(fg.data.lab.subarray(j, j + 3))));
+          fgLinear = adaptForeground(
+            labToLinear(Array.from(fg.data.lab.subarray(j, j + 3))),
+            startLight,
+            fg.blend,
+          );
         linear = bg.map((v, k) => v * (1 - a) + fgLinear[k] * a);
         alpha = a + alpha * (1 - a);
       }
       expected.set([...linear.map(encode), Math.round(alpha * 255)], offset);
     }
   const endpoints = [],
+    backgroundEndpoints = [],
+    loopSeams = [],
     noForeground = [],
     adaptation = [];
   let sampleX, sampleY, sampleLab, sampleAlpha;
@@ -175,7 +185,7 @@ function verify() {
           }
           bgLab[0] = Math.max(0, Math.min(1, bgLab[0]));
           const bgLinear = labToLinear(gamutMap(bgLab));
-          const fgLinear = labToLinear(gamutMap(adaptForeground(sampleLab, light, blend)));
+          const fgLinear = adaptForeground(labToLinear(sampleLab), light, blend);
           const alpha = sampleAlpha + (data.alpha[bgOffset / 4] / 255) * (1 - sampleAlpha);
           const expectedPixel = [
             ...bgLinear.map((v, k) => encode(v * (1 - sampleAlpha) + fgLinear[k] * sampleAlpha)),
@@ -188,12 +198,22 @@ function verify() {
             ...difference(actual, expectedPixel),
           });
         }
-      for (const seconds of [0, preset.durationSec])
+      for (const seconds of [0, preset.durationSec]) {
         endpoints.push({
           preset: preset.id,
           seconds,
           ...difference(pixels(r, preset, seconds), expected),
         });
+        backgroundEndpoints.push({
+          preset: preset.id,
+          seconds,
+          ...difference(pixels(r, preset, seconds, false), scene.originalBackground),
+        });
+      }
+      loopSeams.push({
+        preset: preset.id,
+        ...difference(pixels(r, preset, 0), pixels(r, preset, preset.durationSec)),
+      });
       for (const fraction of [0, 0.1, 0.25, 0.5, 0.75, 1])
         noForeground.push({
           preset: preset.id,
@@ -219,6 +239,8 @@ function verify() {
     };
     return {
       endpoints,
+      backgroundEndpoints,
+      loopSeams,
       adaptation,
       noForeground,
       preview: [sample(0.4), sample(0.8)],

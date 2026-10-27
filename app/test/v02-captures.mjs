@@ -21,7 +21,7 @@ try {
   const timeline = page.getByRole('slider', { name: '1周の中の時刻', exact: true });
   const capture = async (name) => {
     await page.locator('.name').click();
-    await page.screenshot({ path: path.join(root, `reports/V02-${name}.png`), fullPage: true });
+    await page.screenshot({ path: path.join(root, `reports/V02-v2-${name}.png`), fullPage: true });
   };
   const seek = async (seconds) => {
     await timeline.press('Home');

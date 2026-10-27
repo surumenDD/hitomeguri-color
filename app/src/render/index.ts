@@ -92,8 +92,8 @@ export class Renderer {
         'uForeground',
         'uHasForeground',
         'uForegroundBounds',
-        'uForegroundK',
-        'uForegroundShift',
+        'uForegroundExposure',
+        'uForegroundColor',
         'uForegroundBlend',
       ].map((key) => [key, gl.getUniformLocation(program, key)]),
     );
@@ -239,8 +239,8 @@ export class Renderer {
         foreground,
       );
       gl.uniform4f(this.loc.uForegroundBounds, bounds.x, bounds.y, bounds.width, bounds.height);
-      gl.uniform1f(this.loc.uForegroundK, foreground.light.k);
-      gl.uniform2fv(this.loc.uForegroundShift, foreground.light.shift);
+      gl.uniform1f(this.loc.uForegroundExposure, foreground.light.exposure);
+      gl.uniform3fv(this.loc.uForegroundColor, foreground.light.color);
       gl.uniform1f(this.loc.uForegroundBlend, foreground.blend);
     }
     gl.uniform3fv(

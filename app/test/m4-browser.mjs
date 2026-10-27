@@ -373,7 +373,7 @@ try {
         for (const label of ['GitHub にあります', '素材のライセンス'])
           await tabTo(page.getByRole('link', { name: label, exact: true }));
         await page.screenshot({
-          path: path.join(root, `reports/V02-${name}-${width}.png`),
+          path: path.join(root, `reports/V02-v2-${name}-${width}.png`),
           fullPage: true,
         });
       }

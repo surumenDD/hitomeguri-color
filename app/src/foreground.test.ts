@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type Lab, rgbToLab } from './color';
+import { type Lab, labToLinear, rgbToLab } from './color';
 import {
   adaptForeground,
   FOREGROUND_DEFAULTS,
@@ -19,31 +19,43 @@ const palette: Lab[] = [
 const roles: Role[] = ['sky', 'water', 'middle', 'sky'];
 const metadata = { palette, counts: [1200, 500, 300, 200] };
 
-describe('foreground light at the script endpoints', () => {
-  it('is identity at the beginning and end of all three presets, using both strip colours', () => {
+function expectedLight([L, a, b]: Lab) {
+  const linear = labToLinear([0.85, 1.3 * a, 1.3 * b]).map((v) => (v < 0 ? 0.0001 : v));
+  const maximum = Math.max(...linear);
+  return {
+    exposure: Math.max(0.3, Math.min(1.15, L / 0.7)),
+    color: linear.map((v) => v / maximum),
+  };
+}
+
+describe('foreground v2 at the script endpoints', () => {
+  it('lights the material from the first frame and returns to that same light for all presets', () => {
     expect(FOREGROUND_DEFAULTS.blend).toBe(0.8);
-    const sample: Lab = [0.42, 0.04, -0.03];
+    const sample: Lab = [0.42, 0.04, 0.03];
     for (const preset of Object.values(PRESETS)) {
-      for (const seconds of [0, preset.durationSec]) {
-        const current = rolePaletteAt(palette, roles, seconds, preset);
-        const light = foregroundLight(metadata, roles, current);
-        expect(light.k).toBe(1);
-        expect(light.shift).toEqual([0, 0]);
-        expect(adaptForeground(sample, light, FOREGROUND_DEFAULTS.blend)).toEqual(sample);
-      }
+      const start = foregroundLight(metadata, roles, rolePaletteAt(palette, roles, 0, preset));
+      const end = foregroundLight(
+        metadata,
+        roles,
+        rolePaletteAt(palette, roles, preset.durationSec, preset),
+      );
+      expect(end).toEqual(start);
+      expect(adaptForeground(sample, start, 0.8)).not.toEqual(sample);
+      expect(adaptForeground(sample, end, 0.8)).toEqual(adaptForeground(sample, start, 0.8));
     }
   });
 });
 
 describe('zero blend', () => {
-  it('keeps every foreground pixel unchanged at arbitrary times', () => {
+  it('keeps linear foreground material unchanged at arbitrary times', () => {
     const colors: Lab[] = [
-      [0.1, 0.02, -0.01],
-      [0.5, 0.08, 0.03],
-      [0.95, -0.02, 0.04],
+      [0, 0, 0],
+      [0.1, 0.02, 0.01],
+      [0.5, 0.8, 0.03],
+      [1, 1, 1],
     ];
     for (const preset of Object.values(PRESETS)) {
-      for (const fraction of [0.11, 0.37, 0.81]) {
+      for (const fraction of [0, 0.11, 0.37, 0.81, 1]) {
         const current = rolePaletteAt(palette, roles, preset.durationSec * fraction, preset);
         const light = foregroundLight(metadata, roles, current);
         for (const color of colors) expect(adaptForeground(color, light, 0)).toEqual(color);
@@ -52,73 +64,82 @@ describe('zero blend', () => {
   });
 });
 
-describe('lightness guardrail', () => {
-  it('keeps L between 0.35 L and 1 over the whole k, L and f range', () => {
-    for (const L of [0, 0.08, 0.2, 0.35, 0.5, 0.73, 0.9, 1]) {
-      for (const k of [0.05, 0.2, 0.5, 0.99, 1, 1.0001, 1.16, 1.25]) {
-        for (const f of [0, 0.2, 0.65, 0.85, 1]) {
-          const [out] = adaptForeground([L, 0.03, -0.02], { k, shift: [0.02, -0.01] }, f);
-          expect(out).toBeGreaterThanOrEqual(0.35 * L - 1e-12);
-          expect(out).toBeLessThanOrEqual(1 + 1e-12);
-        }
+describe('v2 exposure and colour bounds', () => {
+  it('bounds exposure and normalizes the maximum colour component to one throughout all presets', () => {
+    for (const preset of Object.values(PRESETS)) {
+      for (let step = 0; step <= 100; step++) {
+        const current = rolePaletteAt(palette, roles, (preset.durationSec * step) / 100, preset);
+        const light = foregroundLight(metadata, roles, current);
+        expect(light.exposure).toBeGreaterThanOrEqual(0.3);
+        expect(light.exposure).toBeLessThanOrEqual(1.15);
+        expect(Math.max(...light.color)).toBe(1);
+        expect(light.color.every((v) => Number.isFinite(v) && v >= 0 && v <= 1)).toBe(true);
       }
     }
   });
 
-  it('floors a night-dark pixel at 0.35 L and caps a brightened white at 1', () => {
-    expect(adaptForeground([0.9, 0, 0], { k: 0.05, shift: [0, 0] }, 1)[0]).toBeCloseTo(0.315, 12);
-    expect(adaptForeground([1, 0, 0], { k: 1.25, shift: [0, 0] }, 1)[0]).toBe(1);
+  it('uses absolute exposure even for an originally black sky', () => {
+    const black = { palette: [[0, 0, 0]] as Lab[], counts: [10] };
+    const darkLight = foregroundLight(black, ['sky'], [[0, 0, 0]]);
+    expect(darkLight.exposure).toBe(0.3);
+    for (const component of darkLight.color) expect(component).toBeCloseTo(1, 12);
+    expect(foregroundLight(black, ['sky'], [[0.7, 0, 0]]).exposure).toBe(1);
+    expect(foregroundLight(black, ['sky'], [[1, 0, 0]]).exposure).toBe(1.15);
   });
 
-  it('clamps the brightness ratio to 0.05..1.25 and keeps k = 1 for a black start sky', () => {
-    const dim = foregroundLight({ palette: [[0.2, 0, 0]], counts: [10] }, ['sky'], [[0.01, 0, 0]]);
-    const bright = foregroundLight(
-      { palette: [[0.2, 0, 0]], counts: [10] },
-      ['sky'],
-      [[0.9, 0, 0]],
-    );
-    const black = foregroundLight(
-      { palette: [[0, 0, 0]], counts: [10] },
-      ['sky'],
-      [[0, 0.02, -0.04]],
-    );
-    expect(dim.k).toBe(0.05);
-    expect(bright.k).toBe(1.25);
-    expect(black.k).toBe(1);
-    expect(black.shift).toEqual([0.02, -0.04]);
+  it('replaces negative linear light components with 0.0001 before normalization', () => {
+    const source: Lab = [0.7, 0.4, 0.4];
+    const raw = labToLinear([0.85, 0.52, 0.52]);
+    expect(raw.some((v) => v < 0)).toBe(true);
+    const light = foregroundLight({ palette: [source], counts: [10] }, ['sky'], [source]);
+    expect(light).toEqual(expectedLight(source));
+    for (let i = 0; i < 3; i++)
+      if (raw[i] < 0) expect(light.color[i]).toBeCloseTo(0.0001 / Math.max(...raw), 12);
+  });
+
+  it('keeps every linear output component in 0..1 for the full light and blend ranges', () => {
+    for (const channel of [0, 0.08, 0.2, 0.35, 0.5, 0.73, 0.9, 1]) {
+      for (const exposure of [0.3, 0.5, 0.99, 1, 1.15]) {
+        for (const f of [0, 0.2, 0.8, 0.85, 1]) {
+          const out = adaptForeground(
+            [channel, channel, channel],
+            {
+              exposure,
+              color: [0.00001, 0.7, 1],
+            },
+            f,
+          );
+          expect(out.every((v) => v >= 0 && v <= 1)).toBe(true);
+        }
+      }
+    }
+    expect(adaptForeground([1, 0.5, 0], { exposure: 1.15, color: [1, 1, 1] }, 1)).toEqual([
+      1, 0.575, 0,
+    ]);
   });
 });
 
-describe('foreground adaptation formula', () => {
-  it('applies the documented darkening, desaturation and half sky shift exactly', () => {
-    const f = 0.8;
-    const k = 0.33;
-    const [L, a, b] = adaptForeground([0.6, 0.04, 0.03], { k, shift: [0.05, -0.02] }, f);
-    const c = 1 - 0.35 * f * (1 - k);
-    expect(L).toBeCloseTo(0.2784, 12);
-    expect(L / 0.6).toBeCloseTo(0.464, 12);
-    expect(a).toBeCloseTo(0.04 * c + 0.5 * f * 0.05, 12);
-    expect(b).toBeCloseTo(0.03 * c + 0.5 * f * -0.02, 12);
+describe('foreground v2 adaptation formula', () => {
+  it('multiplies each linear component by the blended exposure and light colour', () => {
+    const out = adaptForeground([0.6, 0.4, 0.2], { exposure: 0.5, color: [1, 0.5, 0.25] }, 0.8);
+    expect(out[0]).toBeCloseTo(0.36, 12);
+    expect(out[1]).toBeCloseTo(0.16, 12);
+    expect(out[2]).toBeCloseTo(0.06, 12);
   });
 
-  it('keeps full chroma when the sky is not darker than at the start', () => {
-    const [L, a, b] = adaptForeground([0.5, 0.08, 0.02], { k: 1.2, shift: [0.04, -0.02] }, 1);
-    expect(L).toBeCloseTo(0.6, 12);
-    expect(a).toBeCloseTo(0.08 + 0.02, 12);
-    expect(b).toBeCloseTo(0.02 - 0.01, 12);
+  it('applies full light at f=1 and preserves black without any additive colour shift', () => {
+    const light = { exposure: 0.3, color: [1, 0.5, 0.25] as Lab };
+    expect(adaptForeground([0, 0, 0], light, 1)).toEqual([0, 0, 0]);
+    expect(adaptForeground([1, 1, 1], light, 1)[0]).toBeCloseTo(0.3, 12);
+    expect(adaptForeground([1, 1, 1], light, 1)[2]).toBeCloseTo(0.075, 12);
   });
 });
 
 describe('foreground light without a sky', () => {
-  it('returns k = 1 and no shift, leaving the foreground untouched', () => {
-    const noSky: Role[] = ['water', 'light', 'middle'];
-    const light = foregroundLight({ palette: palette.slice(0, 3), counts: [10, 20, 30] }, noSky, [
-      [0.2, 0.01, 0.02],
-      [0.8, 0.1, 0.05],
-      [0.4, 0, 0],
-    ]);
-    expect(light).toEqual({ k: 1, shift: [0, 0] });
-    expect(adaptForeground([0.37, 0.06, -0.04], light, 1)).toEqual([0.37, 0.06, -0.04]);
+  it('returns neutral light, leaving the material untouched', () => {
+    const light = foregroundLight(metadata, ['water', 'light', 'middle', 'shadow'], palette);
+    expect(light).toEqual({ exposure: 1, color: [1, 1, 1] });
+    expect(adaptForeground([0.37, 0.06, 0.04], light, 1)).toEqual([0.37, 0.06, 0.04]);
   });
 });
 
@@ -138,24 +159,21 @@ describe('overhead and horizon reference light', () => {
   ];
 
   it('averages the largest sky and the warm water horizon in OKLab', () => {
-    const light = foregroundLight(skyMetadata, ['sky', 'sky', 'water', 'sky'], current);
-    expect(light.k).toBeCloseTo((0.56 + 0.5) / (0.7 + 0.75), 12);
-    expect(light.shift[0]).toBeCloseTo((-0.04 + 0) / 2 - (-0.01 + 0.12) / 2, 12);
-    expect(light.shift[1]).toBeCloseTo((0.05 + 0) / 2 - (-0.08 + 0.1) / 2, 12);
+    expect(foregroundLight(skyMetadata, ['sky', 'sky', 'water', 'sky'], current)).toEqual(
+      expectedLight([0.53, -0.02, 0.025]),
+    );
   });
 
   it('follows a role change to the larger of the changed skies', () => {
-    const light = foregroundLight(skyMetadata, ['sky', 'water', 'water', 'sky'], current);
-    expect(light.k).toBeCloseTo((0.4 + 0.5) / (0.8 + 0.75), 12);
-    expect(light.shift[0]).toBeCloseTo(0.2 / 2 - (0.02 + 0.12) / 2, 12);
-    expect(light.shift[1]).toBeCloseTo(0.1 / 2 - (-0.04 + 0.1) / 2, 12);
+    expect(foregroundLight(skyMetadata, ['sky', 'water', 'water', 'sky'], current)).toEqual(
+      expectedLight([0.45, 0.1, 0.05]),
+    );
   });
 
   it('follows a role change to a sky that was not the largest picture colour', () => {
-    const light = foregroundLight(skyMetadata, ['water', 'water', 'water', 'sky'], current);
-    expect(light.k).toBeCloseTo((0.3 + 0.5) / (0.6 + 0.75), 12);
-    expect(light.shift[0]).toBeCloseTo(0.01 / 2 - (0.01 + 0.12) / 2, 12);
-    expect(light.shift[1]).toBeCloseTo(0.01 / 2 - (0.01 + 0.1) / 2, 12);
+    expect(foregroundLight(skyMetadata, ['water', 'water', 'water', 'sky'], current)).toEqual(
+      expectedLight([0.4, 0.005, 0.005]),
+    );
   });
 });
 
