@@ -1,15 +1,226 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inflateSync } from 'node:zlib';
 import { createServer } from 'vite';
-import { chromium } from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
+import {
+  chromium,
+  firefox,
+  webkit,
+} from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url)),
   out = path.join(root, 'test/results');
 await mkdir(out, { recursive: true });
 const report = { when: new Date().toISOString(), samples: [], errors: [], externalRequests: [] };
 let server, browser;
+
+// Read PNG scanlines directly; a canvas round-trip would conceal translucent RGB changes.
+function pngPixels(base64) {
+  const png = Buffer.from(base64, 'base64');
+  const chunks = [];
+  let width, height, channels;
+  for (let at = 8; at < png.length; ) {
+    const size = png.readUInt32BE(at);
+    const type = png.toString('ascii', at + 4, at + 8);
+    const data = png.subarray(at + 8, at + 8 + size);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      assert.equal(data[8], 8, '8-bit PNG');
+      assert.ok([2, 6].includes(data[9]), 'RGB/RGBA PNG');
+      assert.equal(data[12], 0, 'non-interlaced PNG');
+      channels = data[9] === 6 ? 4 : 3;
+    } else if (type === 'IDAT') chunks.push(data);
+    at += size + 12;
+  }
+  const encoded = inflateSync(Buffer.concat(chunks));
+  const stride = width * channels;
+  const raw = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y++) {
+    const filter = encoded[y * (stride + 1)];
+    for (let x = 0; x < stride; x++) {
+      const at = y * stride + x;
+      const a = x >= channels ? raw[at - channels] : 0;
+      const b = y ? raw[at - stride] : 0;
+      const c = y && x >= channels ? raw[at - stride - channels] : 0;
+      const p = a + b - c;
+      const pa = Math.abs(p - a),
+        pb = Math.abs(p - b),
+        pc = Math.abs(p - c);
+      const predictor = [
+        0,
+        a,
+        b,
+        Math.floor((a + b) / 2),
+        pa <= pb && pa <= pc ? a : pb <= pc ? b : c,
+      ][filter];
+      assert.notEqual(predictor, undefined, 'PNG row filter');
+      raw[at] = encoded[y * (stride + 1) + 1 + x] + predictor;
+    }
+  }
+  const rgba = Buffer.alloc(width * height * 4, 255);
+  for (let i = 0; i < width * height; i++) raw.copy(rgba, i * 4, i * channels, (i + 1) * channels);
+  return rgba;
+}
+
+async function pngExportChecks(page, alphaOnly = false, webkitAlpha = false) {
+  const workers = [];
+  const observe = (worker) => workers.push(worker.url());
+  page.on('worker', observe);
+  const result = await page.evaluate(async (alphaOnly) => {
+    const { exportPng } = await import('/src/export/video.ts');
+    const { Renderer } = await import('/src/render/index.ts');
+    const { decodeImage } = await import('/src/image.ts');
+    const { preprocessInWorker } = await import('/src/palette/client.ts');
+    const { DAYLIGHT, inferRoles, rolePaletteAt } = await import('/src/script/index.ts');
+    const { foregroundLight, loadForeground } = await import('/src/foreground.ts');
+    const { SAMPLES } = await import('/src/samples.ts');
+    const base64 = async (blob) => {
+      // Also exercise a real PNG decoder, including the new encoder's chunk checksums.
+      const bitmap = await createImageBitmap(blob);
+      bitmap.close();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    };
+    const sample = SAMPLES.find((s) => s.id === 'seaside');
+    const generated = (width, height, alpha) => {
+      const rgba = new Uint8ClampedArray(width * height * 4);
+      for (let i = 0; i < rgba.length; i += 4) {
+        rgba[i] = (i * 13 + 17) % 256;
+        rgba[i + 1] = (Math.floor(i / (width * 4)) * 7 + 51) % 256;
+        rgba[i + 2] = (i * 3 + 122) % 256;
+        rgba[i + 3] = alpha ? (i / 4) % 256 : 255;
+      }
+      return new ImageData(rgba, width, height);
+    };
+    const cases = [
+      ...(alphaOnly
+        ? [{ name: 'opaque-64x48', pixels: generated(64, 48, false) }]
+        : [
+            {
+              name: 'seaside-with-person',
+              pixels: await decodeImage(sample.url),
+              foreground: {
+                ...sample.foreground,
+                data: await loadForeground(sample.foreground.url),
+              },
+            },
+            { name: 'generated-2048x1536', pixels: generated(2048, 1536, false) },
+          ]),
+      { name: 'translucent-64x48', pixels: generated(64, 48, true) },
+    ];
+    const rows = [];
+    for (const { name, pixels, foreground } of cases) {
+      const data = await preprocessInWorker(pixels);
+      const roles = inferRoles(data.metadata).map((i) => i.role);
+      const seconds = 13.25;
+      // Frozen pre-worker exportPng: a fresh Renderer followed by HTMLCanvasElement.toBlob.
+      const canvas = document.createElement('canvas');
+      const renderer = new Renderer(canvas);
+      try {
+        renderer.upload(data);
+        renderer.uploadForeground(foreground?.data);
+        renderer.size(data.metadata.width, data.metadata.height);
+        const palette = rolePaletteAt(data.metadata.palette, roles, seconds, DAYLIGHT);
+        renderer.draw(palette, {
+          foreground: foreground && {
+            ...foreground,
+            light: foregroundLight(data.metadata, roles, palette),
+          },
+        });
+        const before = await base64(
+          await new Promise((resolve) => canvas.toBlob(resolve, 'image/png')),
+        );
+        const after = await base64(
+          await exportPng(data, roles, DAYLIGHT, seconds, foreground, renderer),
+        );
+        rows.push({
+          name,
+          before,
+          after,
+          raw: name.startsWith('translucent') ? Array.from(renderer.read()) : undefined,
+        });
+        if (name.startsWith('translucent')) {
+          const compression = window.CompressionStream;
+          const Worker = window.Worker;
+          try {
+            window.CompressionStream = undefined;
+            rows.push({
+              name: 'no-CompressionStream',
+              before,
+              after: await base64(
+                await exportPng(data, roles, DAYLIGHT, seconds, foreground, renderer),
+              ),
+            });
+            window.CompressionStream = compression;
+            window.Worker = class {
+              postMessage() {
+                setTimeout(() => this.onmessage({ data: {} }), 0);
+              }
+              terminate() {}
+            };
+            rows.push({
+              name: 'worker-failure',
+              before,
+              after: await base64(
+                await exportPng(data, roles, DAYLIGHT, seconds, foreground, renderer),
+              ),
+            });
+          } finally {
+            window.CompressionStream = compression;
+            window.Worker = Worker;
+          }
+        }
+      } finally {
+        renderer.dispose();
+      }
+    }
+    return rows;
+  }, alphaOnly);
+  page.off('worker', observe);
+  assert.ok(
+    workers.some((url) => url.includes('png.worker')),
+    'PNG worker was not started',
+  );
+  for (const row of result) {
+    const before = pngPixels(row.before),
+      after = pngPixels(row.after);
+    row.before = createHash('sha256').update(before).digest('hex');
+    row.after = createHash('sha256').update(after).digest('hex');
+    if (webkitAlpha && row.raw) {
+      const raw = Buffer.from(row.raw);
+      row.renderer = createHash('sha256').update(raw).digest('hex');
+      row.opaquePixelsChecked = 0;
+      row.beforeError = row.afterError = 0;
+      for (let i = 0; i < raw.length; i++) {
+        row.beforeError += Math.abs(before[i] - raw[i]);
+        row.afterError += Math.abs(after[i] - raw[i]);
+        if (raw[i - (i % 4) + 3] === 255) {
+          assert.equal(after[i], before[i], `WebKit opaque byte ${i}`);
+          if (i % 4 === 3) row.opaquePixelsChecked++;
+        }
+      }
+      assert.ok(row.opaquePixelsChecked > 0);
+      assert.ok(
+        row.afterError <= row.beforeError,
+        'WebKit PNG must be at least as close to readPixels',
+      );
+      assert.equal(row.after, row.renderer, 'WebKit PNG must preserve exact readPixels bytes');
+    } else assert.equal(row.after, row.before, `${row.name}: PNG pixel hash`);
+    delete row.raw;
+  }
+  console.log(
+    `PNG export: ${result.length} pixel checks passed (native equality, fallback,${webkitAlpha ? ' WebKit readPixels equality,' : ''} translucent pixels).`,
+  );
+  return result;
+}
 
 async function imageDecodingChecks(page) {
   const samples = (await readdir(path.join(root, 'src/assets/samples')))
@@ -139,6 +350,18 @@ try {
   await harness.goto(`${origin}/test/harness.html`);
   await harness.waitForFunction(() => window.harness);
   report.imageDecoding = await imageDecodingChecks(harness);
+  report.pngExport = await pngExportChecks(harness);
+  report.pngExportCrossBrowser = {};
+  for (const [name, launcher] of Object.entries({ firefox, webkit })) {
+    const engine = await launcher.launch();
+    try {
+      const page = await engine.newPage();
+      await page.goto(`${origin}/test/harness.html`);
+      report.pngExportCrossBrowser[name] = await pngExportChecks(page, true, name === 'webkit');
+    } finally {
+      await engine.close();
+    }
+  }
   report.gpu = await harness.evaluate(() => window.harness.gpu);
   for (const id of [
     'canal',
@@ -302,12 +525,14 @@ try {
   await ready();
   assert.equal(await ui.locator('.swatch').count(), originalCount);
   report.splitUndo = true;
+  const previewBeforeSave = await canvasData();
   const pngWait = ui.waitForEvent('download');
   await ui.getByRole('button', { name: 'この瞬間を画像で保存' }).click();
   const png = await pngWait;
   assert.ok(png.suggestedFilename().startsWith('ひとめぐり'));
   await png.saveAs(path.join(out, 'saved.png'));
   assert.equal((await readFile(path.join(out, 'saved.png'))).subarray(1, 4).toString(), 'PNG');
+  assert.equal(await canvasData(), previewBeforeSave, 'PNG saving must restore preview overlays');
   report.pngDownload = true;
   await ui.getByRole('button', { name: '動画を書き出す', exact: true }).click();
   await ui.getByRole('button', { name: '中止', exact: true }).waitFor();

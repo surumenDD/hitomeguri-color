@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { labHex } from './color';
 import { legibleOn } from './color/legible';
+import { VIDEO_UNSUPPORTED } from './export/video';
 import { PRODUCT } from './product';
 import { Player } from './render/player';
 import { SAMPLES } from './samples';
@@ -540,7 +541,13 @@ export function App() {
               <button
                 type="button"
                 className="primary"
-                disabled={busy || !image || !state.estimate?.pass || !!state.exportError}
+                disabled={
+                  busy ||
+                  !image ||
+                  state.videoSupported !== true ||
+                  !state.estimate?.pass ||
+                  !!state.exportError
+                }
                 onClick={() => run(store.exportVideo())}
               >
                 動画を書き出す
@@ -565,8 +572,8 @@ export function App() {
                 この瞬間を画像で保存
               </button>
             )}
-            {state.exportError ? (
-              <Notice>{state.exportError}</Notice>
+            {state.exportError || state.videoSupported === false ? (
+              <Notice>{state.exportError ?? VIDEO_UNSUPPORTED}</Notice>
             ) : (
               <p className="note" aria-live="polite">
                 {state.saved ?? '点滅の基準に通った動画だけを書き出します。画像は外へ送りません。'}

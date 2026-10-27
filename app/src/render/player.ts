@@ -1,3 +1,4 @@
+import { exportPng } from '../export/video';
 import { foregroundLight } from '../foreground';
 import type { Decomposition } from '../palette/types';
 import { rolePaletteAt } from '../script';
@@ -21,6 +22,14 @@ export class Player {
     private store: AppStore,
   ) {
     this.renderer = new Renderer(canvas);
+    store.setPngExporter((data, roles, preset, seconds, foreground) => {
+      try {
+        return exportPng(data, roles, preset, seconds, foreground, this.renderer);
+      } finally {
+        // exportPng snapshots synchronously; restore selection/split overlays before the next paint.
+        this.draw();
+      }
+    });
     store.setReducedMotion(this.media.matches);
     this.unsubscribe = store.subscribe(this.changed);
     this.media.addEventListener('change', this.motionChanged);
@@ -87,6 +96,7 @@ export class Player {
     });
   }
   dispose(): void {
+    this.store.setPngExporter();
     this.unsubscribe();
     if (this.frame !== undefined) cancelAnimationFrame(this.frame);
     this.media.removeEventListener('change', this.motionChanged);

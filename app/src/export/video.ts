@@ -5,6 +5,7 @@ import { Renderer } from '../render';
 import { estimateSetting } from '../safety/estimate';
 import { analyzeFrames, type FlashReport } from '../safety/flash';
 import { type Preset, type Role, rolePaletteAt } from '../script';
+import { canvasPng, encodePng } from './png';
 
 export interface ExportProgress {
   phase: 'analysis' | 'encoding';
@@ -25,6 +26,27 @@ export const exportSize = (width: number, height: number, maxEdge = 1920): [numb
     Math.max(2, Math.floor((height * scale) / 2) * 2),
   ];
 };
+export const VIDEO_UNSUPPORTED =
+  'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。';
+const videoConfig = (width: number, height: number): VideoEncoderConfig => ({
+  // Baseline has no B-frames: all browsers can feed the muxer in presentation order.
+  codec: 'avc1.420033',
+  width,
+  height,
+  bitrate: 12_000_000,
+  framerate: 30,
+  latencyMode: 'quality',
+  avc: { format: 'avc' },
+});
+export async function supportsVideoExport(width: number, height: number): Promise<boolean> {
+  if (typeof VideoEncoder === 'undefined') return false;
+  try {
+    const [w, h] = exportSize(width, height);
+    return !!(await VideoEncoder.isConfigSupported(videoConfig(w, h))).supported;
+  } catch {
+    return false;
+  }
+}
 const abort = (signal?: AbortSignal) => {
   if (signal?.aborted) throw new DOMException('中止しました。', 'AbortError');
 };
@@ -95,20 +117,8 @@ export async function exportVideo(
     fps = 30;
   if (width % 2 || height % 2 || Math.max(width, height) > 1920)
     throw new Error('動画の大きさは長辺1920px以内の偶数にしてください。');
-  if (typeof VideoEncoder === 'undefined')
-    throw new Error(
-      'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。',
-    );
-  const config: VideoEncoderConfig = {
-    // Baseline has no B-frames: all browsers can feed the muxer in presentation order.
-    codec: 'avc1.420033',
-    width,
-    height,
-    bitrate: 12_000_000,
-    framerate: fps,
-    latencyMode: 'quality',
-    avc: { format: 'avc' },
-  };
+  if (typeof VideoEncoder === 'undefined') throw new Error(VIDEO_UNSUPPORTED);
+  const config = videoConfig(width, height);
   if (!(await VideoEncoder.isConfigSupported(config)).supported)
     throw new Error(
       'この端末はH.264の動画の書き出しに対応していません。静止画の保存はこのまま使えます。',
@@ -204,28 +214,36 @@ export async function exportPng(
   preset: Preset,
   seconds: number,
   foreground?: Foreground,
+  preview?: Renderer,
 ): Promise<Blob> {
-  const canvas = document.createElement('canvas'),
-    renderer = new Renderer(canvas);
-  try {
-    renderer.upload(data);
-    renderer.uploadForeground(foreground?.data);
-    renderer.size(data.metadata.width, data.metadata.height);
+  const renderer = preview ?? new Renderer(document.createElement('canvas'));
+  const draw = (target: Renderer, upload = true) => {
+    if (upload) target.upload(data);
+    target.uploadForeground(foreground?.data);
+    target.size(data.metadata.width, data.metadata.height);
     const palette = rolePaletteAt(data.metadata.palette, roles, seconds, preset);
-    renderer.draw(palette, {
+    target.draw(palette, {
       foreground: foreground && {
         ...foreground,
         light: foregroundLight(data.metadata, roles, palette),
       },
     });
-    return await new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob(
-        (blob) => (blob ? resolve(blob) : reject(new Error('静止画を保存できません。'))),
-        'image/png',
-      ),
-    );
+  };
+  const fallback = async () => {
+    // The preview may now show another scene. Re-render the captured inputs only on worker failure.
+    const copy = new Renderer(document.createElement('canvas'));
+    try {
+      draw(copy);
+      return await canvasPng(copy.canvas);
+    } finally {
+      copy.dispose();
+    }
+  };
+  try {
+    draw(renderer, !preview);
+    return await encodePng(renderer, fallback);
   } finally {
-    renderer.dispose();
+    if (!preview) renderer.dispose();
   }
 }
 export function download(blob: Blob, name: string): void {

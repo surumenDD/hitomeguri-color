@@ -61,7 +61,73 @@ beforeEach(() => {
   safety.evaluate.mockResolvedValue({ pass: true });
   store = new AppStore();
 });
-afterEach(() => store.dispose());
+afterEach(() => {
+  store.dispose();
+  vi.unstubAllGlobals();
+});
+
+describe('video availability while opening a picture', () => {
+  it('retains the displayed picture capability when overlapping replacement loads fail', async () => {
+    vi.stubGlobal('VideoEncoder', {
+      isConfigSupported: vi.fn().mockResolvedValue({ supported: true }),
+    });
+    await open(canal);
+    let finish!: (image: DecodedImage) => void;
+    vi.mocked(decodeImage)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      )
+      .mockRejectedValueOnce(new Error('invalid image'));
+    const abandoned = open(seaside);
+    await open(festival);
+    finish({ width: 1, height: 1 } as DecodedImage);
+    await abandoned;
+    expect(store.getState()).toMatchObject({
+      image: { id: canal.id },
+      loading: false,
+      videoSupported: true,
+    });
+  });
+  it('keeps availability pending until the codec query completes', async () => {
+    let finish!: (value: { supported: boolean }) => void;
+    const isConfigSupported = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    vi.stubGlobal('VideoEncoder', { isConfigSupported });
+    const opening = open(canal);
+    await vi.waitFor(() => expect(isConfigSupported).toHaveBeenCalled());
+    expect(store.getState().loading).toBe(true);
+    expect(store.getState().videoSupported).toBeUndefined();
+    finish({ supported: true });
+    await opening;
+    expect(store.getState()).toMatchObject({ loading: false, videoSupported: true });
+  });
+  it('does not publish a stale query after another image opens', async () => {
+    let finish!: (value: { supported: boolean }) => void;
+    const isConfigSupported = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      )
+      .mockResolvedValue({ supported: false });
+    vi.stubGlobal('VideoEncoder', { isConfigSupported });
+    const first = open(canal);
+    await vi.waitFor(() => expect(isConfigSupported).toHaveBeenCalledTimes(1));
+    await open(seaside);
+    finish({ supported: true });
+    await first;
+    expect(store.getState()).toMatchObject({ image: { id: seaside.id }, videoSupported: false });
+  });
+});
 
 describe('sample people', () => {
   it('loads the approved person and resets every setting on each sample open', async () => {

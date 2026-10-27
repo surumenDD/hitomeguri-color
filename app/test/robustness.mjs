@@ -17,6 +17,8 @@ import {
 const root = fileURLToPath(new URL('..', import.meta.url));
 const out = path.join(root, 'test/results');
 const presets = ['1日の光', '長い夕暮れ', '夜の灯り'];
+const videoUnsupported =
+  'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。';
 const fixtures = [
   ['white-person', '白い背景40%・人物の塊', 'person'],
   ['white-border', '白い縁15%', 'white-border'],
@@ -236,7 +238,7 @@ function installProbe() {
     settledAt: null,
     events: [],
     longTasks: [],
-    frames: { count: 0, maxGapMs: 0, over50Ms: 0, over200Ms: 0, worstStage: null },
+    frames: { count: 0, maxGapMs: 0, over50Ms: 0, over200Ms: 0, worstStage: null, byStage: {} },
     input: { touchStarts: 0, pointerTypes: {} },
   };
   window.__robustness = probe;
@@ -278,6 +280,15 @@ function installProbe() {
         }
         if (gap > 50) probe.frames.over50Ms++;
         if (gap > 200) probe.frames.over200Ms++;
+        probe.frames.byStage[probe.stage] ??= {
+          count: 0,
+          maxGapMs: 0,
+          over200Ms: 0,
+        };
+        const stage = probe.frames.byStage[probe.stage];
+        stage.count++;
+        stage.maxGapMs = Math.max(stage.maxGapMs, gap);
+        if (gap > 200) stage.over200Ms++;
       }
     }
     lastFrame = document.hidden ? undefined : now;
@@ -317,6 +328,10 @@ function snapshot() {
   return {
     status: text('.sr-only[role="status"]'),
     alerts: [...document.querySelectorAll('[role="alert"]')].map((e) => e.textContent.trim()),
+    videoEnabled: document.querySelector('.actions .primary')?.disabled === false,
+    videoGuidance: [...document.querySelectorAll('.actions [role="alert"]')].map((e) =>
+      e.textContent.trim(),
+    ),
     editNote: text('.edit-note'),
     selectedPreset: text('.presets [aria-pressed="true"]'),
     playEnabled: document.querySelector('.play')?.disabled === false,
@@ -563,11 +578,11 @@ async function testFixture(browser, url, fixture, file, settings) {
     const downloadWait = page.waitForEvent('download', { timeout: 0 }).then((item) => ({ item }));
     const errorWait = page
       .waitForFunction(
-        () => {
+        (videoUnsupported) => {
           const error = document.querySelector('.actions [role="alert"]');
-          return error?.textContent;
+          return error?.textContent !== videoUnsupported && error?.textContent;
         },
-        null,
+        videoUnsupported,
         { timeout: 0 },
       )
       .then(async (handle) => ({ error: await handle.jsonValue() }));
@@ -580,6 +595,10 @@ async function testFixture(browser, url, fixture, file, settings) {
     const failure = await outcome.item.failure();
     const downloadedPath = failure ? null : await outcome.item.path();
     const bytes = downloadedPath ? (await stat(downloadedPath)).size : 0;
+    // Include the paint after completion in this stage's rAF measurement.
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
     return {
       enabled,
       downloaded: !failure && bytes > 0,
@@ -630,11 +649,31 @@ async function testFixture(browser, url, fixture, file, settings) {
     const video = page.getByRole('button', { name: '動画を書き出す', exact: true });
     result.video = {
       enabled: await video.isEnabled(),
+      initial: { enabled: open.state.videoEnabled, guidance: open.state.videoGuidance },
       requested: settings.export,
-      ...(await page.evaluate(() => {
+      ...(await page.evaluate(async () => {
         const notes = [...document.querySelectorAll('.actions p, .actions [role="alert"]')];
+        const canvas = document.querySelector('.picture canvas');
+        const scale = Math.min(1, 1920 / Math.max(canvas.width, canvas.height));
+        let configSupported = false;
+        try {
+          configSupported =
+            typeof VideoEncoder !== 'undefined' &&
+            !!(
+              await VideoEncoder.isConfigSupported({
+                codec: 'avc1.420033',
+                width: Math.max(2, Math.floor((canvas.width * scale) / 2) * 2),
+                height: Math.max(2, Math.floor((canvas.height * scale) / 2) * 2),
+                bitrate: 12_000_000,
+                framerate: 30,
+                latencyMode: 'quality',
+                avc: { format: 'avc' },
+              })
+            ).supported;
+        } catch {}
         return {
           videoEncoder: typeof VideoEncoder !== 'undefined',
+          configSupported,
           guidance: notes
             .filter((e) => e.getClientRects().length > 0)
             .map((e) => e.textContent.trim())
@@ -781,20 +820,26 @@ function problems(result) {
     if (operation.skipped || operation.detail?.skipped)
       issues.push(`${operation.stage}: 未実施（${operation.reason ?? operation.detail?.reason}）`);
     for (const alert of operation.state?.alerts ?? []) {
+      if (alert === videoUnsupported && result.video?.configSupported === false) continue;
       if (alert !== operation.state.editNote) issues.push(`${operation.stage}: ${alert}`);
     }
   }
   if (result.maxLongTaskMs > 200) issues.push(`long task: ${result.maxLongTaskMs} ms`);
-  if (result.longTaskObserver?.supported === false && result.frameIntervals?.maxGapMs > 200)
-    issues.push(
-      `rAF間隔: ${result.frameIntervals.maxGapMs} ms（${result.frameIntervals.worstStage}）`,
-    );
+  if (result.longTaskObserver?.supported === false)
+    for (const [stage, frames] of Object.entries(result.frameIntervals?.byStage ?? {}))
+      if (frames.maxGapMs > 200) issues.push(`rAF間隔: ${round(frames.maxGapMs)} ms（${stage}）`);
   if (result.save && !result.save.downloaded) issues.push('PNGを保存できない');
   if (result.video?.attempted && result.video.enabled && !result.video.downloaded)
     issues.push('動画を書き出せない');
-  if (result.video?.videoEncoder === false) {
+  if (result.video?.configSupported === false) {
     if (result.video.enabled) issues.push('VideoEncoder 非対応なのに動画ボタンが有効');
     if (!result.video.guidance.length) issues.push('VideoEncoder 非対応の案内が出ない');
+    if (result.video.initial.enabled)
+      issues.push('VideoEncoder 非対応なのに開いた直後の動画ボタンが有効');
+    if (!result.video.initial.guidance.includes(videoUnsupported))
+      issues.push('VideoEncoder 非対応の案内が開いた直後に出ない');
+  } else if (result.video?.configSupported === true && !result.video.initial.enabled) {
+    issues.push('VideoEncoder 対応なのに開いた直後の動画ボタンが無効');
   }
   for (const error of result.errors) {
     if (!(result.timedOut && error.type === 'case'))
@@ -807,13 +852,13 @@ function problems(result) {
 function causes(result) {
   const findings = [];
   if (
-    result.video?.videoEncoder === false &&
+    result.video?.configSupported === false &&
     (result.video.enabled || !result.video.guidance.length)
   )
     findings.push({
       stage: 'video-availability',
       cause:
-        'App.tsx の動画ボタンは busy・画像・点滅検査・exportError のみで無効化される。VideoEncoder の判定は export/video.ts の exportVideo 内で押下後に行い、事前の案内はない。',
+        'state.ts load のH.264事前判定と、App.tsx の動画ボタン・非対応案内が一致していない。API不在・実寸法の設定非対応・判定待ちの区別を確認する。',
     });
   if (result.issues.some((issue) => /WebGL|GPU|シェーダ/.test(issue)))
     findings.push({
@@ -829,7 +874,7 @@ function causes(result) {
         operation.stage === 'open'
           ? 'state.ts load → image.ts decodeImage の縮小・palette Worker の分解・safety Worker の点滅推定を待つ。転送・デコード・計算・描画のどれが支配するかはこの計測だけでは断定できない。'
           : operation.stage === 'save-png'
-            ? 'export/video.ts exportPng は別の WebGL Renderer に転送し、フル解析寸法で描画後 canvas.toBlob とダウンロード完了を待つ。GPU/PNG圧縮の寄与は未分離。'
+            ? 'export/video.ts exportPng はプレビューの Renderer を再利用して画素を読み、Worker の CompressionStream で PNG を圧縮する。Worker・圧縮 API 非対応や失敗時は toBlob に戻る。readPixels・Worker処理・代替経路・ダウンロードを分けて確認する。'
             : 'UI入力・スクロール・Worker による点滅推定・描画・準備状態の待機を含む。操作時刻と statusHistory を参照し、タップの待機と計算を分けて再確認する必要がある。',
     });
   }
@@ -931,7 +976,7 @@ function markdown(report) {
     '生成画像は全環境とも Chrome の独立ページで同じ seed から作り、test/results/robustness-inputs/ の実行別フォルダーに保存し、setInputFiles(path) で渡す。buffer渡しのブラウザー内File組み立てによるlong taskを混ぜず、生成物も再確認できる。',
     '端末指定時はボタンとスライダーをスクロールしてタップする。ファイル入力は setInputFiles、OS の選択肢 UI は selectOption を使う。JSON の input に実際に観測したタッチ回数と pointerType を残す。',
     'メモリは Chrome の開く処理直後の performance.memory と CDP Runtime.getHeapUsage（main と同じ browserContext の Worker）を記録。単位 MiB（2^20 bytes）、GC 強制なし。performance.memory は丸められることがあり、ArrayBuffer 等の backingStorage は JS heap と分ける。プロセス全体・GPU・ピーク・連続使用によるリークは測っていない。',
-    'VideoEncoder 非対応で動画ボタンが無効かつ案内が出る場合は正常。API の存在だけでは H.264 の実書き出し可否を保証しない。--export なしでは動画は実際には書き出さない。',
+    'VideoEncoder の不在または実寸法の H.264 設定非対応で、開いた直後から動画ボタンが無効かつ案内が出る場合は正常。isConfigSupported の成功だけでは実書き出しの完了まで保証しない。--export なしでは動画は実際には書き出さない。rAF は frameIntervals.byStage に段階別の最大間隔と200ms超の回数を残す。',
     '設定の拒否・スライダーの制限はすべてJSONに残す。問題判定: 開けない、時間切れ、既定で再生できない、操作3秒超、long task 200ms超、保存失敗、エラー。通常の範囲制限だけでは問題に数えない。',
     `開いた直後のメモリ範囲（MiB）: ${Object.entries(report.summary.memoryMiB)
       .map(

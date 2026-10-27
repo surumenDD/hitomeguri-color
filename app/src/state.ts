@@ -1,4 +1,10 @@
-import { download, type ExportProgress, exportPng, exportVideo } from './export/video';
+import {
+  download,
+  type ExportProgress,
+  exportPng,
+  exportVideo,
+  supportsVideoExport,
+} from './export/video';
 import {
   FOREGROUND_DEFAULTS,
   type Foreground,
@@ -49,6 +55,7 @@ export interface AppState {
   exportError?: string;
   progress?: ExportProgress;
   exporting: boolean;
+  videoSupported?: boolean;
   saved?: string;
   limits: { nightDepth: [number, number]; glow: [number, number]; durationSec: [number, number] };
 }
@@ -72,6 +79,7 @@ export class AppStore {
   private disposed = false;
   private exportControl?: AbortController;
   private savedTimer?: ReturnType<typeof setTimeout>;
+  private pngExporter: typeof exportPng = exportPng;
   constructor(reducedMotion = false) {
     this.state = {
       seconds: 0,
@@ -131,6 +139,7 @@ export class AppStore {
         sample?.foreground ? loadForeground(sample.foreground.url) : undefined,
       ]);
       if (controller.signal.aborted) return;
+      const videoSupport = supportsVideoExport(pixels.width, pixels.height);
       palette = new PaletteClient(controller.signal);
       const base = await palette.preprocess(pixels);
       if (controller.signal.aborted || this.disposed) return;
@@ -142,6 +151,7 @@ export class AppStore {
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
       safety = new SafetyClient(groups);
       const estimate = await safety.evaluate(roles, this.state.preset);
+      const videoSupported = await videoSupport;
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
       this.safety?.dispose();
       this.safety = safety;
@@ -176,6 +186,7 @@ export class AppStore {
         estimate,
         checking: false,
         loading: false,
+        videoSupported,
         seconds: 0,
         selected: -1,
         limits: limits(),
@@ -576,6 +587,7 @@ export class AppStore {
       this.state.exporting ||
       this.state.loading ||
       this.state.foregroundLoading ||
+      this.state.videoSupported !== true ||
       !this.state.estimate?.pass
     )
       return;
@@ -614,12 +626,15 @@ export class AppStore {
   cancelExport(): void {
     this.exportControl?.abort();
   }
+  setPngExporter(exporter: typeof exportPng = exportPng): void {
+    this.pngExporter = exporter;
+  }
   async savePng(): Promise<void> {
     const { image, preset, seconds, foreground } = this.state;
     if (!image || this.state.exporting || this.state.loading || this.state.foregroundLoading)
       return;
     try {
-      const blob = await exportPng(image.data, image.roles, preset, seconds, foreground);
+      const blob = await this.pngExporter(image.data, image.roles, preset, seconds, foreground);
       const name = outputName(image.name, Number(seconds.toFixed(1)), 'png');
       download(blob, name);
       this.update({ saved: `保存しました（${name}、${(blob.size / 1e6).toFixed(1)}MB）` });
