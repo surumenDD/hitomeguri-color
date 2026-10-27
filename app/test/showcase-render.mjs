@@ -1,5 +1,6 @@
 // Exports one day of each picture as a 960x640 MP4 with the app's exporter, for the README loop.
-// Usage: node test/showcase-render.mjs <outDir> <name>=<sample id | image path>:<preset> ...
+// Usage: node test/showcase-render.mjs <outDir> <name>=<sample id | image path>:<preset>[@<island>=<role>,...] ...
+// The optional @ list overrides the automatic role of an island (by palette index).
 // An image path is copied under test/results/showcase-src/ so Vite can serve it.
 import { existsSync } from 'node:fs';
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
@@ -26,15 +27,22 @@ try {
   await page.goto(`${server.resolvedUrls.local[0]}test/showcase-engine.html`);
   await page.waitForFunction(() => window.showcase);
   for (const job of jobs) {
-    const [name, spec] = job.split('=');
+    const name = job.slice(0, job.indexOf('='));
+    const spec = job.slice(job.indexOf('=') + 1);
     const split = spec.lastIndexOf(':');
     let source = spec.slice(0, split);
-    const preset = spec.slice(split + 1);
+    const [preset, roleList = ''] = spec.slice(split + 1).split('@');
+    const overrides = Object.fromEntries(
+      roleList
+        .split(',')
+        .filter(Boolean)
+        .map((x) => x.split('=')),
+    );
     if (existsSync(source)) {
       await copyFile(source, path.join(sources, path.basename(source)));
       source = `/test/results/showcase-src/${path.basename(source)}`;
     }
-    await page.evaluate((s) => window.showcase.load(s), source);
+    await page.evaluate(([s, o]) => window.showcase.load(s, o), [source, overrides]);
     const video = await page.evaluate(
       (p) => window.showcase.video(p, { width: 960, height: 640 }),
       preset,

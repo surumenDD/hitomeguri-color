@@ -8,10 +8,11 @@ import { SAMPLES } from '../src/samples';
 import { PRESETS } from '../src/script';
 
 let scene;
-async function load(source) {
+async function load(source, overrides = {}) {
   const sample = SAMPLES.find((s) => s.id === source);
   const base = await preprocessInWorker(await decodeImage(sample ? sample.url : source));
   const islands = curate(sample ? sample.id : '', base.metadata);
+  for (const [k, role] of Object.entries(overrides)) islands[Number(k)].role = role;
   scene = { data: materializeIslands(base, islands), roles: islands.map((i) => i.role) };
   return scene.roles;
 }

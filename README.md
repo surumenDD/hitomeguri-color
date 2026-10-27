@@ -2,7 +2,9 @@
 
 絵の色が、1日をひとめぐりする。
 
-![運河の街の絵の色が、夕方から夜、朝、昼へと移っていくループ](docs/showcase/hitomeguri-800x500.webp)
+![海辺で空を見上げる色鉛筆の女の子の絵と、雪の村の絵の色が、夕方から夜、朝、昼へと移っていくループ](docs/showcase/hitomeguri-800x500.webp)
+
+上の女の子の絵は、ChatGPT で作った絵を「自分の絵を開く」で読み込んで動かしたものです。雪の村は見本の絵の1枚です。
 
 サイト: https://surumendd.github.io/hitomeguri-color/
 
@@ -66,4 +68,4 @@ npm run dev
 - **Try**: open your own picture. It is split into 16 colour islands, each given a role (sky, light, celestial, water, shadow, middle) that you can change. Pick one of three scripts and adjust length, night depth and lamp strength.
 - **Export**: save a looping MP4 or a PNG of any moment. Videos are checked against the photosensitive-seizure guidelines (WCAG 2.3.1, ITU-R BT.1702) before they are written.
 
-Your picture never leaves your device; everything runs in the browser. Video export needs WebCodecs `VideoEncoder` and has been tested in Chrome and Firefox on Windows; elsewhere you can still save PNGs. The UI is in Japanese. The sample pictures were made with ChatGPT image generation. Everything in this repository is MIT-licensed, to the extent of the author's rights.
+Your picture never leaves your device; everything runs in the browser. Video export needs WebCodecs `VideoEncoder` and has been tested in Chrome and Firefox on Windows; elsewhere you can still save PNGs. The UI is in Japanese. The sample pictures were made with ChatGPT image generation; so was the girl in the loop at the top, which was opened as one's own picture. Everything in this repository is MIT-licensed, to the extent of the author's rights.
