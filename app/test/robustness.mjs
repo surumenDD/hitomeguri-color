@@ -1,12 +1,18 @@
-// Real Chrome UI regression matrix. No private app API, network upload, or external artwork.
-// npm run test:robustness -- [--url URL] [--only name,...] [--timeout seconds] [--export] [--strict]
+// Real browser UI regression matrix. No private app API, network upload, or external artwork.
+// npm run test:robustness -- [--browser chrome|firefox|webkit] [--device "iPhone 15"]
+// [--url URL] [--only name,...] [--timeout seconds] [--export] [--strict]
 // --list prints fixture IDs. Results are overwritten; previous runs are archived first.
 import { execFileSync } from 'node:child_process';
 import { copyFile, mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
-import { chromium } from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
+import {
+  chromium,
+  devices,
+  firefox,
+  webkit,
+} from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const out = path.join(root, 'test/results');
@@ -43,6 +49,8 @@ const fixtures = [
     [4096, 4096],
   ].map(([w, h]) => [`size-${w}x${h}`, `${w}×${h}`, 'scene', w, h]),
   ['jpeg', 'JPEGの絵', 'scene', 640, 480, 'image/jpeg'],
+  ['photo-landscape', 'スマホ写真風・横長JPEG', 'photo', 4032, 3024, 'image/jpeg'],
+  ['photo-portrait', 'スマホ写真風・縦長JPEG', 'photo', 3024, 4032, 'image/jpeg'],
   ['webp', 'WebPの絵', 'scene', 640, 480, 'image/webp'],
   ['transparent', '全体が透明なPNG', 'transparent'],
   ['half-transparent', '半分が透明なPNG', 'half-transparent'],
@@ -62,12 +70,22 @@ function options(args) {
     const [flag, inline] = args[i].split(/=(.*)/s);
     if (['--export', '--strict', '--list', '--help'].includes(flag)) {
       parsed[flag.slice(2)] = true;
-    } else if (['--url', '--only', '--timeout'].includes(flag)) {
+    } else if (['--url', '--only', '--timeout', '--browser', '--device'].includes(flag)) {
       const value = inline ?? args[++i];
       if (!value || value.startsWith('--')) throw new Error(`${flag} の値が必要です。`);
       parsed[flag.slice(2)] = flag === '--timeout' ? Number(value) : value;
     } else throw new Error(`未対応の引数: ${flag}`);
   }
+  if (parsed.device && !devices[parsed.device])
+    throw new Error(`未知の端末: ${parsed.device}（Playwright devices の名前を指定）`);
+  parsed.browser ??=
+    { chromium: 'chrome', firefox: 'firefox', webkit: 'webkit' }[
+      devices[parsed.device]?.defaultBrowserType
+    ] ?? 'chrome';
+  if (!['chrome', 'firefox', 'webkit'].includes(parsed.browser))
+    throw new Error('--browser は chrome・firefox・webkit のいずれかです。');
+  if (parsed.browser === 'firefox' && devices[parsed.device]?.isMobile)
+    throw new Error('Playwright Firefox は isMobile の端末エミュレーションに対応していません。');
   if (!Number.isFinite(parsed.timeout) || parsed.timeout <= 0)
     throw new Error('--timeout は1枚の上限秒数（正の数）です。');
   if (parsed.url && !['http:', 'https:'].includes(new URL(parsed.url).protocol))
@@ -218,12 +236,16 @@ function installProbe() {
     settledAt: null,
     events: [],
     longTasks: [],
+    frames: { count: 0, maxGapMs: 0, over50Ms: 0, over200Ms: 0, worstStage: null },
+    input: { touchStarts: 0, pointerTypes: {} },
   };
   window.__robustness = probe;
   const emit = (data) => {
     void window.robustnessTelemetry(data).catch(() => {});
   };
   try {
+    if (!PerformanceObserver.supportedEntryTypes?.includes('longtask'))
+      throw new Error('PerformanceObserver.supportedEntryTypes に longtask がない');
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const task = {
@@ -244,6 +266,29 @@ function installProbe() {
   } catch (error) {
     emit({ type: 'observer', supported: false, error: String(error) });
   }
+  let lastFrame;
+  function frame(now) {
+    if (lastFrame !== undefined && probe.measurementStart !== null && !document.hidden) {
+      const gap = now - Math.max(lastFrame, probe.measurementStart);
+      if (gap >= 0) {
+        probe.frames.count++;
+        if (gap > probe.frames.maxGapMs) {
+          probe.frames.maxGapMs = gap;
+          probe.frames.worstStage = probe.stage;
+        }
+        if (gap > 50) probe.frames.over50Ms++;
+        if (gap > 200) probe.frames.over200Ms++;
+      }
+    }
+    lastFrame = document.hidden ? undefined : now;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  document.addEventListener('touchstart', () => probe.input.touchStarts++, { passive: true });
+  document.addEventListener('pointerdown', (event) => {
+    probe.input.pointerTypes[event.pointerType] =
+      (probe.input.pointerTypes[event.pointerType] ?? 0) + 1;
+  });
   for (const type of ['input', 'change', 'click']) {
     document.addEventListener(
       type,
@@ -321,6 +366,85 @@ function message(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
+// CDP measures individual V8 isolates; backing storage is separate from usedSize.
+// No forced GC: these are post-open samples, not a process/GPU peak or leak test.
+async function memorySnapshot(context, browser, page) {
+  const memory = await page.evaluate(() => {
+    const value = performance.memory;
+    return value
+      ? {
+          supported: true,
+          usedJSHeapSize: value.usedJSHeapSize,
+          totalJSHeapSize: value.totalJSHeapSize,
+          jsHeapSizeLimit: value.jsHeapSizeLimit,
+        }
+      : { supported: false };
+  });
+  let pageSession, session;
+  try {
+    pageSession = await context.newCDPSession(page);
+    memory.main = await pageSession.send('Runtime.getHeapUsage');
+    const { targetInfo: owner } = await pageSession.send('Target.getTargetInfo');
+    session = await browser.newBrowserCDPSession();
+    const { targetInfos } = await session.send('Target.getTargets');
+    memory.workers = [];
+    for (const target of targetInfos.filter(
+      (target) => target.type === 'worker' && target.browserContextId === owner.browserContextId,
+    )) {
+      const worker = { url: target.url };
+      let sessionId;
+      try {
+        ({ sessionId } = await session.send('Target.attachToTarget', {
+          targetId: target.targetId,
+          flatten: false,
+        }));
+        worker.heap = await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => {
+            session.off('Target.receivedMessageFromTarget', receive);
+            reject(new Error('Worker heap sample timeout (5s)'));
+          }, 5000);
+          function receive(event) {
+            if (event.sessionId !== sessionId) return;
+            const reply = JSON.parse(event.message);
+            if (reply.id !== 1) return;
+            clearTimeout(timer);
+            session.off('Target.receivedMessageFromTarget', receive);
+            if (reply.error) reject(new Error(reply.error.message));
+            else resolve(reply.result);
+          }
+          session.on('Target.receivedMessageFromTarget', receive);
+          void session
+            .send('Target.sendMessageToTarget', {
+              sessionId,
+              message: JSON.stringify({ id: 1, method: 'Runtime.getHeapUsage' }),
+            })
+            .catch((error) => {
+              clearTimeout(timer);
+              session.off('Target.receivedMessageFromTarget', receive);
+              reject(error);
+            });
+        });
+      } catch (error) {
+        worker.error = message(error);
+      } finally {
+        if (sessionId) await session.send('Target.detachFromTarget', { sessionId });
+      }
+      memory.workers.push(worker);
+    }
+    memory.workerUsedBytes = memory.workers.reduce((sum, w) => sum + (w.heap?.usedSize ?? 0), 0);
+    memory.workerBackingBytes = memory.workers.reduce(
+      (sum, w) => sum + (w.heap?.backingStorageSize ?? 0),
+      0,
+    );
+  } catch (error) {
+    memory.cdpError = message(error);
+  } finally {
+    await pageSession?.detach();
+    await session?.detach();
+  }
+  return memory;
+}
+
 async function testFixture(browser, url, fixture, file, settings) {
   const result = {
     ...fixture,
@@ -340,11 +464,15 @@ async function testFixture(browser, url, fixture, file, settings) {
     playback: null,
     save: null,
     video: null,
+    memory: null,
+    frameIntervals: null,
+    input: null,
   };
   const started = performance.now();
   const context = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
     deviceScaleFactor: 1,
+    ...devices[settings.device],
     reducedMotion: 'no-preference',
     serviceWorkers: 'block',
     acceptDownloads: true,
@@ -371,8 +499,15 @@ async function testFixture(browser, url, fixture, file, settings) {
       result.errors.push({ type: 'console.error', stage: result.stage, message: entry.text() });
   });
   page.on('crash', () =>
-    result.errors.push({ type: 'crash', stage: result.stage, message: 'Chrome page crashed' }),
+    result.errors.push({ type: 'crash', stage: result.stage, message: 'Browser page crashed' }),
   );
+
+  const touch = devices[settings.device]?.hasTouch === true;
+  async function activate(control) {
+    await control.scrollIntoViewIfNeeded();
+    if (touch) await control.tap();
+    else await control.click();
+  }
 
   async function stage(name, action, settle = true) {
     if (result.timedOut) throw new Error(`画像の時間切れ後の操作は中止: ${name}`);
@@ -383,7 +518,7 @@ async function testFixture(browser, url, fixture, file, settings) {
     try {
       await page.evaluate((name) => {
         if (name === 'open') window.__robustness.measurementStart = performance.now();
-        return Object.assign(window.__robustness, {
+        Object.assign(window.__robustness, {
           stage: name,
           lastEventAt: null,
           settledAt: null,
@@ -439,7 +574,7 @@ async function testFixture(browser, url, fixture, file, settings) {
     // The context is closed after this case; both losing promises are always observed.
     void downloadWait.catch(() => {});
     void errorWait.catch(() => {});
-    await button.click();
+    await activate(button);
     const outcome = await Promise.race([downloadWait, errorWait]);
     if (outcome.error) return { enabled, downloaded: false, reason: outcome.error };
     const failure = await outcome.item.failure();
@@ -472,6 +607,7 @@ async function testFixture(browser, url, fixture, file, settings) {
     result.default = open.state
       ? { ...open.state, passed: open.state.playEnabled, reason: open.state.editNote }
       : null;
+    if (settings.browser === 'chrome') result.memory = await memorySnapshot(context, browser, page);
     if (!result.opened) return;
     const playback = await stage(
       'playback',
@@ -480,10 +616,10 @@ async function testFixture(browser, url, fixture, file, settings) {
         if (!enabled)
           return { enabled, advanced: false, reason: open.state.editNote ?? '再生ボタンが無効' };
         const before = Number.parseFloat(await page.locator('.when span').textContent());
-        await page.getByRole('button', { name: '再生', exact: true }).click();
+        await activate(page.getByRole('button', { name: '再生', exact: true }));
         await page.waitForTimeout(1000);
         const after = Number.parseFloat(await page.locator('.when span').textContent());
-        await page.getByRole('button', { name: '一時停止', exact: true }).click();
+        await activate(page.getByRole('button', { name: '一時停止', exact: true }));
         return { enabled, before, after, advanced: after > before, observationMs: 1000 };
       },
       false,
@@ -492,7 +628,20 @@ async function testFixture(browser, url, fixture, file, settings) {
     const save = await stage('save-png', () => download('この瞬間を画像で保存'), false);
     result.save = save.detail;
     const video = page.getByRole('button', { name: '動画を書き出す', exact: true });
-    result.video = { enabled: await video.isEnabled(), requested: settings.export };
+    result.video = {
+      enabled: await video.isEnabled(),
+      requested: settings.export,
+      ...(await page.evaluate(() => {
+        const notes = [...document.querySelectorAll('.actions p, .actions [role="alert"]')];
+        return {
+          videoEncoder: typeof VideoEncoder !== 'undefined',
+          guidance: notes
+            .filter((e) => e.getClientRects().length > 0)
+            .map((e) => e.textContent.trim())
+            .filter((text) => /ブラウザ|対応|書き出せません/.test(text)),
+        };
+      })),
+    };
     result.video.attempted = settings.export && result.video.enabled;
     if (settings.export && result.video.enabled) {
       const exported = await stage('export-video', () => download('動画を書き出す'));
@@ -501,7 +650,7 @@ async function testFixture(browser, url, fixture, file, settings) {
     for (const label of ['夜の深さ', '灯りの強さ']) {
       // Each slider starts from the default preset; the other one stays at its default.
       await stage(`reset-before-${label}`, () =>
-        page.getByRole('button', { name: presets[0], exact: true }).click(),
+        activate(page.getByRole('button', { name: presets[0], exact: true })),
       );
       for (const endpoint of ['min', 'max']) {
         await stage(`slider-${label}-${endpoint}`, async () => {
@@ -511,8 +660,15 @@ async function testFixture(browser, url, fixture, file, settings) {
             min: Number(e.min),
             max: Number(e.max),
           }));
-          await control.press(endpoint === 'min' ? 'Home' : 'End');
-          return { requested: before[endpoint], before };
+          if (touch) {
+            await control.scrollIntoViewIfNeeded();
+            const box = await control.boundingBox();
+            if (!box) throw new Error('スライダーが画面にない');
+            await control.tap({
+              position: { x: endpoint === 'min' ? 1 : box.width - 1, y: box.height / 2 },
+            });
+          } else await control.press(endpoint === 'min' ? 'Home' : 'End');
+          return { requested: before[endpoint], before, input: touch ? 'touch' : 'keyboard' };
         });
         const operation = result.operations.at(-1);
         operation.accepted = operation.state?.controls.find((c) => c.name === label) ?? null;
@@ -521,7 +677,7 @@ async function testFixture(browser, url, fixture, file, settings) {
     }
     for (const name of [presets[1], presets[2], presets[0]]) {
       const operation = await stage(`preset-${name}`, () =>
-        page.getByRole('button', { name, exact: true }).click(),
+        activate(page.getByRole('button', { name, exact: true })),
       );
       operation.passed =
         operation.completed && !operation.state.editNote && operation.state.selectedPreset === name;
@@ -530,10 +686,11 @@ async function testFixture(browser, url, fixture, file, settings) {
       const swatch = page.locator('.swatch').first();
       if (!(await swatch.count())) return { skipped: true, reason: '選択できる島がない' };
       const island = await swatch.getAttribute('data-testid');
-      await swatch.click();
+      await activate(swatch);
       const control = page.getByRole('combobox', { name: '役割', exact: true });
       const before = await control.inputValue();
       const requested = before === 'sky' ? 'water' : 'sky';
+      await control.scrollIntoViewIfNeeded();
       await control.selectOption(requested);
       return { island, before, requested };
     });
@@ -548,11 +705,11 @@ async function testFixture(browser, url, fixture, file, settings) {
       );
       const split = await stage('island-split', async () => {
         const before = await page.locator('.swatch').count();
-        await page.getByRole('button', { name: '上下の線で分ける', exact: true }).click();
+        await activate(page.getByRole('button', { name: '上下の線で分ける', exact: true }));
         const line = page.getByRole('slider', { name: '島を分ける線', exact: true });
         const position = await line.getAttribute('aria-valuenow');
         // Keep both roles unchanged to isolate the cost/acceptance of the split itself.
-        await page.getByRole('button', { name: '分ける', exact: true }).click();
+        await activate(page.getByRole('button', { name: '分ける', exact: true }));
         return { before, position: Number(position) };
       });
       split.passed =
@@ -583,6 +740,18 @@ async function testFixture(browser, url, fixture, file, settings) {
     result.errors.push({ type: 'case', stage: result.stage, message: message(error) });
   } finally {
     clearTimeout(timer);
+    if (!result.timedOut && !page.isClosed()) {
+      try {
+        const probe = await page.evaluate(() => ({
+          frames: window.__robustness.frames,
+          input: window.__robustness.input,
+        }));
+        result.frameIntervals = { ...probe.frames, maxGapMs: round(probe.frames.maxGapMs) };
+        result.input = probe.input;
+      } catch {
+        // A crashed page has no final rAF sample; the crash is already recorded.
+      }
+    }
     // Closing aborts outstanding Playwright calls, even if the renderer is in a long task.
     await context.close();
     result.totalMs = round(performance.now() - started);
@@ -616,16 +785,118 @@ function problems(result) {
     }
   }
   if (result.maxLongTaskMs > 200) issues.push(`long task: ${result.maxLongTaskMs} ms`);
-  if (result.longTaskObserver?.supported !== true) issues.push('long task の観測ができない');
+  if (result.longTaskObserver?.supported === false && result.frameIntervals?.maxGapMs > 200)
+    issues.push(
+      `rAF間隔: ${result.frameIntervals.maxGapMs} ms（${result.frameIntervals.worstStage}）`,
+    );
   if (result.save && !result.save.downloaded) issues.push('PNGを保存できない');
   if (result.video?.attempted && result.video.enabled && !result.video.downloaded)
     issues.push('動画を書き出せない');
+  if (result.video?.videoEncoder === false) {
+    if (result.video.enabled) issues.push('VideoEncoder 非対応なのに動画ボタンが有効');
+    if (!result.video.guidance.length) issues.push('VideoEncoder 非対応の案内が出ない');
+  }
   for (const error of result.errors) {
     if (!(result.timedOut && error.type === 'case'))
       issues.push(`${error.type} / ${error.stage}: ${error.message}`);
   }
   // Rejection/limit messages are recorded, but expected slider limits alone are not an error.
   return [...new Set(issues)];
+}
+
+function causes(result) {
+  const findings = [];
+  if (
+    result.video?.videoEncoder === false &&
+    (result.video.enabled || !result.video.guidance.length)
+  )
+    findings.push({
+      stage: 'video-availability',
+      cause:
+        'App.tsx の動画ボタンは busy・画像・点滅検査・exportError のみで無効化される。VideoEncoder の判定は export/video.ts の exportVideo 内で押下後に行い、事前の案内はない。',
+    });
+  if (result.issues.some((issue) => /WebGL|GPU|シェーダ/.test(issue)))
+    findings.push({
+      stage:
+        result.errors.find((error) => /WebGL|GPU|シェーダ/.test(error.message))?.stage ?? 'open',
+      cause:
+        'render/index.ts の Renderer は WebGL2 と RGBA32F テクスチャ転送を必要とする。Windows 上の Playwright エンジン・GPU 環境による制約の可能性があり、実機 Safari/Firefox での再確認が必要。',
+    });
+  for (const operation of result.operations.filter((op) => op.durationMs > 3000)) {
+    findings.push({
+      stage: operation.stage,
+      cause:
+        operation.stage === 'open'
+          ? 'state.ts load → image.ts decodeImage の縮小・palette Worker の分解・safety Worker の点滅推定を待つ。転送・デコード・計算・描画のどれが支配するかはこの計測だけでは断定できない。'
+          : operation.stage === 'save-png'
+            ? 'export/video.ts exportPng は別の WebGL Renderer に転送し、フル解析寸法で描画後 canvas.toBlob とダウンロード完了を待つ。GPU/PNG圧縮の寄与は未分離。'
+            : 'UI入力・スクロール・Worker による点滅推定・描画・準備状態の待機を含む。操作時刻と statusHistory を参照し、タップの待機と計算を分けて再確認する必要がある。',
+    });
+  }
+  if (result.issues.some((issue) => /^(long task:|rAF間隔:)/.test(issue)))
+    findings.push({
+      stage:
+        result.longTaskObserver?.supported === false
+          ? result.frameIntervals?.worstStage
+          : result.longTasks?.reduce(
+              (max, task) => (task.durationMs > (max?.durationMs ?? 0) ? task : max),
+              null,
+            )?.stage,
+      cause:
+        'main thread の停止またはフレーム配送の遅延。rAF は GPU 負荷・ブラウザの配送間隔も含み、long task と同じ意味ではない。画像デコード・WebGL転送・PNG保存の候補はあるが、トレースなしでは断定しない。',
+    });
+  if (result.issues.length && !findings.length)
+    findings.push({
+      stage: result.timeoutStage ?? result.stage,
+      cause:
+        '観測結果だけでは原因を特定できない。operations・errors・statusHistory に実行段階と詳細を記録した。',
+    });
+  return findings;
+}
+
+function summarize(results) {
+  const memoryFields = {
+    performanceMemory: (m) => m.usedJSHeapSize,
+    mainHeap: (m) => m.main?.usedSize,
+    mainBacking: (m) => m.main?.backingStorageSize,
+    workerHeap: (m) => m.workerUsedBytes,
+    workerBacking: (m) => m.workerBackingBytes,
+  };
+  const memoryMiB = {};
+  for (const [name, read] of Object.entries(memoryFields)) {
+    const samples = results
+      .map((r) => (r.memory ? read(r.memory) : undefined))
+      .filter(Number.isFinite);
+    memoryMiB[name] = samples.length
+      ? {
+          samples: samples.length,
+          min: round(Math.min(...samples) / 2 ** 20),
+          max: round(Math.max(...samples) / 2 ** 20),
+        }
+      : null;
+  }
+  return {
+    opened: results.filter((r) => r.opened).length,
+    playbackAdvanced: results.filter((r) => r.playback?.advanced).length,
+    pngSaved: results.filter((r) => r.save?.downloaded).length,
+    functionalProblems: results
+      .filter((r) =>
+        r.issues.some(
+          (issue) => !/^(?:[^:]+: [\d.]+ ms$|long task:|rAF間隔:|VideoEncoder )/.test(issue),
+        ),
+      )
+      .map((r) => r.name),
+    performanceProblems: results
+      .filter((r) =>
+        r.issues.some((issue) => /^(?:[^:]+: [\d.]+ ms$|long task:|rAF間隔:)/.test(issue)),
+      )
+      .map((r) => r.name),
+    videoAvailabilityProblems: results
+      .filter((r) => r.issues.some((issue) => issue.startsWith('VideoEncoder ')))
+      .map((r) => r.name),
+    longTaskSupported: results.filter((r) => r.longTaskObserver?.supported).length,
+    memoryMiB,
+  };
 }
 
 function markdown(report) {
@@ -638,21 +909,39 @@ function markdown(report) {
     return operations.length ? Math.max(...operations.map((op) => op.durationMs ?? 0)) : '—';
   };
   const lines = [
-    '# いろいろな絵の実機検査',
+    '# いろいろな絵のブラウザ検査',
     '',
-    `実行日時: ${report.when} / URL: ${report.url} / Chrome: ${report.browser ?? '起動失敗'}`,
+    `実行日時: ${report.when} / URL: ${report.url} / ${report.options.browser}: ${report.browser ?? '起動失敗'} / 端末: ${report.options.device ?? 'デスクトップ'}`,
     `検査ワークツリーHEAD: ${report.gitHead ?? '不明'}${report.options.url ? '（公開サイトの配信コミットは未確認）' : ''} / 1枚の上限: ${report.options.timeout} 秒 / 動画の実書き出し: ${report.options.export ? 'あり' : 'なし'}`,
     '',
     `全${report.results.length}枚、問題のある絵 ${report.problemCount}枚。実行時間 ${round(report.durationMs / 1000)} 秒。`,
+    `開けた絵 ${report.summary.opened}枚 / 再生で時刻が進んだ絵 ${report.summary.playbackAdvanced}枚 / PNG保存できた絵 ${report.summary.pngSaved}枚。操作・エラーの問題 ${report.summary.functionalProblems.length}枚 / 時間の問題 ${report.summary.performanceProblems.length}枚 / 動画非対応の扱いの問題 ${report.summary.videoAvailabilityProblems.length}枚（重複あり）。`,
+    `問題のある絵の一覧: ${
+      report.results
+        .filter((r) => r.issues.length)
+        .map((r) => r.name)
+        .join(', ') || 'なし'
+    }`,
+    'Windows 上の Playwright による検査。端末指定は画面寸法・DPR・UA・タッチのエミュレーションであり、iOS/Android の実機の CPU・メモリ上限・GPU・Safari アプリそのものは再現しない。',
     '',
     '時間は ms。開く時間はファイルを input に渡す直前から準備完了まで（ファイル転送を含む）。操作時間は操作開始から画面の検査完了まで。JSON の timing.lastInputToSettledMs はブラウザー内の最後の入力イベントから準備状態へ戻った時点まで（状態遷移がない場合は観測終了まで）。',
     '解析寸法は描画キャンバスのピクセル寸法。long task はファイルを渡す直前からページを閉じるまでの main thread の観測最大値。画像と無関係な初期起動は JSON の setupLongTasks に分け、生成用ページは含まない。時間切れで継続中の task は未観測のため下限値になる。',
+    'longtask 未対応は「取得不可」と記録し、問題に数えない。その場合は表示中の requestAnimationFrame 間隔200ms超を停止候補とする。rAF はスケジューリングと GPU 負荷も含む補助指標であり、実行中の JS の時間とは限らない。',
     'スライダーは1本ずつ既定の台本へ戻して min → max。台本は長い夕暮れ → 夜の灯り → 1日の光。最初の島を空または水へ変え、元に戻して同じ役割のまま上下に分割。PNG保存と動画ボタンの確認は既定状態で行う。',
-    '生成画像は test/results/robustness-inputs/ の実行別フォルダーに保存し、setInputFiles(path) で渡す。buffer渡しのブラウザー内File組み立てによるlong taskを混ぜず、生成物も再確認できる。',
+    '生成画像は全環境とも Chrome の独立ページで同じ seed から作り、test/results/robustness-inputs/ の実行別フォルダーに保存し、setInputFiles(path) で渡す。buffer渡しのブラウザー内File組み立てによるlong taskを混ぜず、生成物も再確認できる。',
+    '端末指定時はボタンとスライダーをスクロールしてタップする。ファイル入力は setInputFiles、OS の選択肢 UI は selectOption を使う。JSON の input に実際に観測したタッチ回数と pointerType を残す。',
+    'メモリは Chrome の開く処理直後の performance.memory と CDP Runtime.getHeapUsage（main と同じ browserContext の Worker）を記録。単位 MiB（2^20 bytes）、GC 強制なし。performance.memory は丸められることがあり、ArrayBuffer 等の backingStorage は JS heap と分ける。プロセス全体・GPU・ピーク・連続使用によるリークは測っていない。',
+    'VideoEncoder 非対応で動画ボタンが無効かつ案内が出る場合は正常。API の存在だけでは H.264 の実書き出し可否を保証しない。--export なしでは動画は実際には書き出さない。',
     '設定の拒否・スライダーの制限はすべてJSONに残す。問題判定: 開けない、時間切れ、既定で再生できない、操作3秒超、long task 200ms超、保存失敗、エラー。通常の範囲制限だけでは問題に数えない。',
+    `開いた直後のメモリ範囲（MiB）: ${Object.entries(report.summary.memoryMiB)
+      .map(
+        ([name, value]) =>
+          `${name} = ${value ? `${value.min}〜${value.max}（${value.samples}枚）` : '取得対象外/不可'}`,
+      )
+      .join(' / ')}`,
     '',
-    '| 絵 / 形式 / 元の寸法 | 開く | 解析寸法 | 既定再生 / 1秒後 | スライダー最大 | 台本最大 | 役割 / 分割 | PNG / 動画ボタン | long task最大 | 結果 |',
-    '|---|---:|---|---|---:|---:|---|---|---:|---|',
+    '| 絵 / 形式 / 元の寸法 | 開く | 解析寸法 | 既定再生 / 1秒後 | スライダー最大 | 台本最大 | 役割 / 分割 | PNG / 動画ボタン | long task最大 | rAF最大 | performance.memory / Worker heap / Worker backing MiB | 結果 |',
+    '|---|---:|---|---|---:|---:|---|---|---:|---:|---|---|',
   ];
   for (const result of report.results) {
     const operation = (name) => result.operations.find((op) => op.stage === name);
@@ -660,14 +949,18 @@ function markdown(report) {
     let video = result.video ? (result.video.enabled ? '可' : '不可') : '未確認';
     if (result.video?.attempted)
       video = result.video.downloaded ? `保存（${result.video.durationMs} ms）` : '書出失敗';
+    const mib = (value) => (value === undefined ? '—' : round(value / 2 ** 20));
+    const memory = result.memory;
     lines.push(
-      `| ${cell(`${result.name}: ${result.description} / ${result.mimeType} / ${result.width}×${result.height}`)} | ${result.openMs ?? '—'} | ${result.analysisSize ? `${result.analysisSize.width}×${result.analysisSize.height}` : '—'} | ${result.default?.playEnabled ? '可' : '不可'} / ${result.playback?.advanced ? '進む' : '—'} | ${maxTime(result, 'slider-')} | ${maxTime(result, 'preset-')} | ${operation('island-role')?.durationMs ?? '—'} / ${operation('island-split')?.durationMs ?? '—'} | ${png} / ${video} | ${result.maxLongTaskMs} | ${result.issues.length ? `問題${result.issues.length}件` : '通過'}${result.timedOut ? `・時間切れ(${cell(result.timeoutStage)})` : ''} |`,
+      `| ${cell(`${result.name}: ${result.description} / ${result.mimeType} / ${result.width}×${result.height}`)} | ${result.openMs ?? '—'} | ${result.analysisSize ? `${result.analysisSize.width}×${result.analysisSize.height}` : '—'} | ${result.default?.playEnabled ? '可' : '不可'} / ${result.playback?.advanced ? '進む' : '—'} | ${maxTime(result, 'slider-')} | ${maxTime(result, 'preset-')} | ${operation('island-role')?.durationMs ?? '—'} / ${operation('island-split')?.durationMs ?? '—'} | ${png} / ${video} | ${result.longTaskObserver?.supported ? result.maxLongTaskMs : '取得不可'} | ${result.frameIntervals?.maxGapMs ?? '—'} | ${mib(memory?.usedJSHeapSize)} / ${mib(memory?.workerUsedBytes)} / ${mib(memory?.workerBackingBytes)} | ${result.issues.length ? `問題${result.issues.length}件` : '通過'}${result.timedOut ? `・時間切れ(${cell(result.timeoutStage)})` : ''} |`,
     );
   }
   lines.push('', '## 問題のある絵', '');
   for (const result of report.results.filter((r) => r.issues.length)) {
     lines.push(`### ${result.name}（${result.description}）`, '');
     for (const issue of result.issues) lines.push(`- ${cell(issue)}`);
+    for (const finding of result.causes ?? [])
+      lines.push(`- 原因の見当（${cell(finding.stage)}）: ${cell(finding.cause)}`);
     lines.push('');
   }
   lines.push('## 拒否・制限・未実施の操作', '');
@@ -689,7 +982,7 @@ async function main() {
   const settings = options(process.argv.slice(2));
   if (settings.help) {
     console.log(
-      'npm run test:robustness -- [--url URL] [--only name,...] [--timeout seconds=180] [--export] [--strict] [--list]',
+      'npm run test:robustness -- [--browser chrome|firefox|webkit] [--device "iPhone 15"|"Pixel 7"] [--url URL] [--only name,...] [--timeout seconds=180] [--export] [--strict] [--list]',
     );
     return;
   }
@@ -702,17 +995,23 @@ async function main() {
   );
   await mkdir(out, { recursive: true });
   const when = new Date().toISOString();
+  const label = (settings.device ?? settings.browser).toLowerCase().replaceAll(/[^a-z0-9]+/g, '-');
+  const basename = `robustness-${label}`;
+  const outputNames = [basename];
+  if (!settings.device && settings.browser === 'chrome') outputNames.push('robustness');
   const inputDirectory = path.join(out, 'robustness-inputs', when.replaceAll(':', '-'));
   await mkdir(inputDirectory, { recursive: true });
   // Preserve measurements from previous invocations, including local vs public-site runs.
-  for (const extension of ['json', 'md']) {
-    try {
-      await copyFile(
-        path.join(out, `robustness.${extension}`),
-        path.join(out, `robustness-before-${when.replaceAll(':', '-')}.${extension}`),
-      );
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
+  for (const name of outputNames) {
+    for (const extension of ['json', 'md']) {
+      try {
+        await copyFile(
+          path.join(out, `${name}.${extension}`),
+          path.join(out, `${name}-before-${when.replaceAll(':', '-')}.${extension}`),
+        );
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+      }
     }
   }
   const report = {
@@ -731,13 +1030,16 @@ async function main() {
   } catch {
     report.gitHead = null;
   }
-  let browser, server;
+  let browser, generatorBrowser, server;
   const at = performance.now();
   async function saveReport() {
     report.problemCount = report.results.filter((r) => r.issues.length > 0).length;
+    report.summary = summarize(report.results);
     report.durationMs = round(performance.now() - at);
-    await writeFile(path.join(out, 'robustness.json'), `${JSON.stringify(report, null, 2)}\n`);
-    await writeFile(path.join(out, 'robustness.md'), markdown(report));
+    for (const name of outputNames) {
+      await writeFile(path.join(out, `${name}.json`), `${JSON.stringify(report, null, 2)}\n`);
+      await writeFile(path.join(out, `${name}.md`), markdown(report));
+    }
   }
   try {
     if (!settings.url) {
@@ -755,9 +1057,13 @@ async function main() {
       await server.listen();
     }
     report.url = settings.url ?? server.resolvedUrls.local[0];
-    browser = await chromium.launch({ channel: 'chrome' });
+    browser = await { chrome: chromium, firefox, webkit }[settings.browser].launch(
+      settings.browser === 'chrome' ? { channel: 'chrome' } : {},
+    );
     report.browser = browser.version();
-    const generator = await browser.newPage();
+    generatorBrowser =
+      settings.browser === 'chrome' ? browser : await chromium.launch({ channel: 'chrome' });
+    const generator = await generatorBrowser.newPage();
     for (const fixture of selected) {
       console.log(`[${report.results.length + 1}/${selected.length}] ${fixture.name}`);
       let result;
@@ -793,6 +1099,7 @@ async function main() {
         };
       }
       result.issues = problems(result);
+      result.causes = causes(result);
       report.results.push(result);
       await saveReport();
       console.log(
@@ -804,13 +1111,14 @@ async function main() {
     report.fatalError = message(error);
   } finally {
     await browser?.close();
+    if (generatorBrowser !== browser) await generatorBrowser?.close();
     await server?.close();
     await saveReport();
   }
   console.log(
     `問題のある絵: ${report.problemCount} / ${report.results.length}枚（${round(report.durationMs / 1000)}秒）`,
   );
-  console.log(path.join(out, 'robustness.md'));
+  console.log(path.join(out, `${basename}.md`));
   if (report.fatalError) {
     console.error(report.fatalError);
     process.exitCode = 1;
