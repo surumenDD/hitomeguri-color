@@ -1,0 +1,140 @@
+{
+  "when": "2026-10-27T19:22:47.868Z",
+  "evidence": [
+    {
+      "id": "canal",
+      "width": 1536,
+      "height": 1024,
+      "groups": 147041,
+      "largestGroup": 36114,
+      "comparisons": 3,
+      "ms": 1655.1306
+    },
+    {
+      "id": "festival",
+      "width": 1536,
+      "height": 1024,
+      "groups": 406319,
+      "largestGroup": 934,
+      "comparisons": 3,
+      "ms": 1826.4610999999995
+    },
+    {
+      "id": "flat",
+      "width": 1536,
+      "height": 1024,
+      "groups": 104903,
+      "largestGroup": 10171,
+      "comparisons": 3,
+      "ms": 1605.0972000000002
+    },
+    {
+      "id": "girl-yukata",
+      "width": 1024,
+      "height": 1536,
+      "groups": 236807,
+      "largestGroup": 1019188,
+      "comparisons": 3,
+      "ms": 1323.1169
+    },
+    {
+      "id": "girl",
+      "width": 1024,
+      "height": 1536,
+      "groups": 193208,
+      "largestGroup": 1076363,
+      "comparisons": 3,
+      "ms": 1329.4043999999994
+    },
+    {
+      "id": "lighthouse",
+      "width": 1536,
+      "height": 1024,
+      "groups": 98014,
+      "largestGroup": 72711,
+      "comparisons": 3,
+      "ms": 1561.3708000000006
+    },
+    {
+      "id": "oasis",
+      "width": 1536,
+      "height": 1024,
+      "groups": 151866,
+      "largestGroup": 38908,
+      "comparisons": 3,
+      "ms": 1618.1566000000003
+    },
+    {
+      "id": "seaside",
+      "width": 1536,
+      "height": 1024,
+      "groups": 262055,
+      "largestGroup": 3314,
+      "comparisons": 3,
+      "ms": 1662.9042000000009
+    },
+    {
+      "id": "snow",
+      "width": 1536,
+      "height": 1024,
+      "groups": 158748,
+      "largestGroup": 11872,
+      "comparisons": 3,
+      "ms": 1568.6265000000003
+    },
+    {
+      "id": "generated-border",
+      "width": 512,
+      "height": 512,
+      "groups": 5,
+      "largestGroup": 60416,
+      "comparisons": 4,
+      "ms": 576.1378000000004
+    },
+    {
+      "id": "generated-border-split",
+      "width": 512,
+      "height": 512,
+      "groups": 8,
+      "largestGroup": 60416,
+      "comparisons": 4,
+      "ms": 576.145199999999
+    },
+    {
+      "id": "generated-lines",
+      "width": 512,
+      "height": 512,
+      "groups": 5,
+      "largestGroup": 62087,
+      "comparisons": 4,
+      "ms": 547.3181000000004
+    },
+    {
+      "id": "generated-lines-split",
+      "width": 512,
+      "height": 512,
+      "groups": 8,
+      "largestGroup": 62087,
+      "comparisons": 4,
+      "ms": 547.3199999999997
+    },
+    {
+      "id": "generated-black",
+      "width": 512,
+      "height": 512,
+      "groups": 5,
+      "largestGroup": 157696,
+      "comparisons": 4,
+      "ms": 545.1239999999998
+    },
+    {
+      "id": "generated-black-split",
+      "width": 512,
+      "height": 512,
+      "groups": 12,
+      "largestGroup": 77924,
+      "comparisons": 4,
+      "ms": 545.1258000000016
+    }
+  ]
+}

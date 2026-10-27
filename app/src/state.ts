@@ -6,8 +6,8 @@ import {
   loadForeground,
 } from './foreground';
 import { decodeImage } from './image';
-import { preprocessInWorker } from './palette/client';
-import { curate, type Island, materializeIslands, splitIsland } from './palette/islands';
+import { PaletteClient } from './palette/client';
+import { curate, type Island, splitIsland } from './palette/islands';
 import type { Decomposition } from './palette/types';
 import { imageName, outputName } from './product';
 import { SafetyClient } from './safety/client';
@@ -64,6 +64,7 @@ export class AppStore {
   private lastPublish = 0;
   private pending?: AbortController;
   private safety?: SafetyClient;
+  private palette?: PaletteClient;
   private revision = 0;
   private parameterQueue: Parameter[] = [];
   private parameterVersions = { durationSec: 0, nightDepth: 0, glow: 0 };
@@ -116,6 +117,7 @@ export class AppStore {
     const revision = this.beginEdit();
     const sample = typeof source === 'string' ? SAMPLES.find((s) => s.url === source) : undefined;
     let safety: SafetyClient | undefined;
+    let palette: PaletteClient | undefined;
     this.update({
       playing: false,
       loading: true,
@@ -129,19 +131,24 @@ export class AppStore {
         sample?.foreground ? loadForeground(sample.foreground.url) : undefined,
       ]);
       if (controller.signal.aborted) return;
-      const base = await preprocessInWorker(pixels, controller.signal);
+      palette = new PaletteClient(controller.signal);
+      const base = await palette.preprocess(pixels);
       if (controller.signal.aborted || this.disposed) return;
       const sampleId = id ?? sample?.id;
       const inference = inferRoles(base.metadata),
         islands = curate(sampleId ?? '', base.metadata),
-        data = materializeIslands(base, islands),
         roles = islands.map((i) => i.role);
-      safety = new SafetyClient(data);
+      const { data, groups } = await palette.materialize(islands);
+      if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
+      safety = new SafetyClient(groups);
       const estimate = await safety.evaluate(roles, this.state.preset);
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
       this.safety?.dispose();
       this.safety = safety;
       safety = undefined;
+      this.palette?.dispose();
+      this.palette = palette;
+      palette = undefined;
       let foreground = this.state.foreground;
       if (person && sample?.foreground) {
         this.releaseForeground();
@@ -188,6 +195,7 @@ export class AppStore {
         });
     } finally {
       safety?.dispose();
+      palette?.dispose();
       if (this.pending === controller) this.pending = undefined;
     }
   }
@@ -471,14 +479,17 @@ export class AppStore {
   }
   private async acceptIslands(islands: Island[], splits: LoadedImage['splits']): Promise<void> {
     const image = this.state.image;
-    if (!image || this.state.exporting) return;
+    const palette = this.palette;
+    if (!image || !palette || this.state.exporting) return;
     const revision = this.beginEdit();
     this.update({ playing: false, checking: true });
-    const data = materializeIslands(image.base, islands),
-      client = new SafetyClient(data),
-      roles = islands.map((i) => i.role);
+    const roles = islands.map((i) => i.role);
+    let client: SafetyClient | undefined;
     let accepted = false;
     try {
+      const { data, groups } = await palette.materialize(islands);
+      if (revision !== this.revision || this.disposed) return;
+      client = new SafetyClient(groups);
       const estimate = await client.evaluate(roles, this.state.preset);
       if (revision !== this.revision || !estimate.pass) {
         if (revision === this.revision) {
@@ -506,7 +517,7 @@ export class AppStore {
       }
       throw error;
     } finally {
-      if (!accepted) client.dispose();
+      if (!accepted) client?.dispose();
     }
   }
   async split(index: number, at: number, upper: Role, lower: Role): Promise<void> {
@@ -630,6 +641,7 @@ export class AppStore {
     this.pending?.abort();
     this.releaseForeground();
     this.safety?.dispose();
+    this.palette?.dispose();
     this.exportControl?.abort();
     if (this.savedTimer) clearTimeout(this.savedTimer);
     this.listeners.clear();

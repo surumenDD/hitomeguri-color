@@ -1,11 +1,11 @@
-import type { Decomposition } from '../palette/types';
 import type { Preset, Role } from '../script';
 import { estimateSetting } from './estimate';
+import type { LightnessGroups } from './groups';
 
-let data: Decomposition | undefined;
+let data: LightnessGroups | undefined;
 self.onmessage = ({
   data: message,
-}: MessageEvent<{ data?: Decomposition; id?: number; roles?: Role[]; preset?: Preset }>) => {
+}: MessageEvent<{ data?: LightnessGroups; id?: number; roles?: Role[]; preset?: Preset }>) => {
   if (message.data) {
     data = message.data;
     return;

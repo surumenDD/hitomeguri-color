@@ -248,8 +248,10 @@ try {
     SafetyClient.prototype.evaluate = function (roles, preset) {
       const job = { preset: { ...preset }, started: performance.now() };
       window.largeImageChecks.push(job);
-      return evaluate.call(this, roles, preset).then((result) => {
+      const gate = window.largeImageGate;
+      return evaluate.call(this, roles, preset).then(async (result) => {
         Object.assign(job, { finished: performance.now(), result });
+        await gate;
         return result;
       });
     };
@@ -304,6 +306,10 @@ try {
   );
   await ui.evaluate(() => {
     window.largeImageChecks = [];
+    // Keep the queue test deterministic even when the first Worker reply is very fast.
+    window.largeImageGate = new Promise((resolve) => {
+      window.releaseLargeImageGate = resolve;
+    });
   });
   const night = ui.getByRole('slider', { name: '夜の深さ', exact: true });
   const inputs = [];
@@ -330,6 +336,10 @@ try {
     assert.equal(immediate.output, immediate.valueText);
     inputs.push(immediate);
   }
+  await ui.evaluate(() => {
+    window.largeImageGate = undefined;
+    window.releaseLargeImageGate();
+  });
   await ready();
   const settleMs = performance.now() - lastInputAt;
   const settled = await ui.evaluate(async () => {
@@ -359,6 +369,107 @@ try {
   console.log(
     `Large image: 3000×3000 → 2048×2048, open ${openMs.toFixed(0)}ms, final input → accepted ${settleMs.toFixed(0)}ms.`,
   );
+  // The performance fixture is generated here; no private artwork is checked into the repo.
+  const generatedPng = await ui.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 2048;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, 2048, 2048);
+    const colors = ['#538fac', '#447e9a', '#34556c', '#1d344c'];
+    for (let band = 0; band < 4; band++) {
+      ctx.fillStyle = colors[band];
+      ctx.fillRect(82, 82 + band * 471, 1884, 471);
+    }
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    for (let x = 100; x < 1940; x += 19) {
+      ctx.beginPath();
+      ctx.moveTo(x, 96);
+      ctx.lineTo(x + 15, 1948);
+      ctx.stroke();
+    }
+    window.safetyLongTasks = [];
+    window.safetyObserver = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries())
+        window.safetyLongTasks.push({ start: entry.startTime, duration: entry.duration });
+    });
+    window.safetyObserver.observe({ type: 'longtask' });
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  const beginTiming = () =>
+    ui.evaluate(() => {
+      window.safetyLongTasks = [];
+      window.safetyStart = performance.now();
+    });
+  const endTiming = async () => {
+    const elapsed = await ui.evaluate(() => performance.now() - window.safetyStart);
+    await ui.waitForTimeout(100);
+    return ui.evaluate(
+      (ms) => ({
+        ms,
+        longTasks: window.safetyLongTasks,
+        maxLongTask: Math.max(0, ...window.safetyLongTasks.map((t) => t.duration)),
+      }),
+      elapsed,
+    );
+  };
+  await beginTiming();
+  await ui.getByLabel('画像ファイル', { exact: true }).setInputFiles({
+    name: 'generated-white-border-rain-2048.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(generatedPng, 'base64'),
+  });
+  await ready();
+  const performanceOpen = await endTiming();
+  const estimateMs = await ui.evaluate(async () => {
+    const store = window.largeImageStore,
+      state = store.getState(),
+      start = performance.now();
+    const result = await store.safety.evaluate(state.image.roles, state.preset);
+    if (!result.pass) throw new Error(result.reason);
+    return performance.now() - start;
+  });
+  await beginTiming();
+  await night.fill('51');
+  await ready();
+  const performanceInput = await endTiming();
+  const editedIndex = await ui.evaluate(() =>
+    window.largeImageStore.getState().image.roles.findIndex((r) => r !== 'middle'),
+  );
+  assert.ok(editedIndex >= 0);
+  await ui.locator('.swatch').nth(editedIndex).click();
+  await beginTiming();
+  await role.selectOption('middle');
+  await ready();
+  const performanceRole = await endTiming();
+  assert.equal(await role.inputValue(), 'middle');
+  await ui.getByRole('button', { name: '上下の線で分ける', exact: true }).click();
+  await ui.getByRole('combobox', { name: '上の役割' }).selectOption('middle');
+  await ui.getByRole('combobox', { name: '下の役割' }).selectOption('middle');
+  const beforeSplit = await ui.locator('.swatch').count();
+  await beginTiming();
+  await ui.getByRole('button', { name: '分ける', exact: true }).click();
+  await ready();
+  const performanceSplit = await endTiming();
+  assert.equal(await ui.locator('.swatch').count(), beforeSplit + 1);
+  await ui.evaluate(() => window.safetyObserver.disconnect());
+  report.safetyPerformance = {
+    fixture: '2048×2048, white border >15%, antialiased white rain lines, four blue bands',
+    estimateMs,
+    open: performanceOpen,
+    input: performanceInput,
+    role: performanceRole,
+    split: performanceSplit,
+  };
+  console.log(`Safety performance: ${JSON.stringify(report.safetyPerformance)}`);
+  assert.ok(estimateMs <= 300, `estimate ${estimateMs}ms > 300ms`);
+  assert.ok(performanceOpen.ms <= 3000, `open ${performanceOpen.ms}ms > 3000ms`);
+  assert.ok(performanceInput.ms <= 1000, `input ${performanceInput.ms}ms > 1000ms`);
+  assert.ok(performanceRole.ms <= 2000, `role ${performanceRole.ms}ms > 2000ms`);
+  assert.ok(performanceSplit.ms <= 2000, `split ${performanceSplit.ms}ms > 2000ms`);
+  assert.ok(performanceOpen.maxLongTask <= 200, 'open blocked the UI for more than 200ms');
+  assert.ok(performanceSplit.maxLongTask <= 200, 'split blocked the UI for more than 200ms');
   await ui.getByRole('button', { name: '港町', exact: true }).click();
   await ready();
   assert.equal(await ui.getByText(/長辺 2048 px に縮めて開きました/).count(), 0);

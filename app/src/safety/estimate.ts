@@ -2,6 +2,10 @@ import { labToRgb } from '../color';
 import type { Decomposition } from '../palette/types';
 import { type Preset, type Role, rolePaletteAt, scriptLightnessBounds } from '../script';
 import { analyzeFrames, type FlashReport } from './flash';
+import { groupLightness, type LightnessGroups } from './groups';
+
+// Near white, 0.003 OKLab L is about one 8-bit sRGB step, below a visible clamp.
+export const LIGHTNESS_CLAMP_TOLERANCE = 0.003;
 
 export interface Estimate {
   pass: boolean;
@@ -18,7 +22,11 @@ export interface Estimate {
   paletteFlash?: FlashReport;
 }
 /** No image is rendered: fixed nonnegative weights bound every source pixel algebraically. */
-export function estimateSetting(data: Decomposition, roles: Role[], preset: Preset): Estimate {
+export function estimateSetting(
+  source: Decomposition | LightnessGroups,
+  roles: Role[],
+  preset: Preset,
+): Estimate {
   if (
     !Number.isFinite(preset.durationSec) ||
     preset.durationSec < 12 ||
@@ -38,7 +46,9 @@ export function estimateSetting(data: Decomposition, roles: Role[], preset: Pres
       minL: 0,
       maxL: 1,
     };
-  const palette = data.metadata.palette;
+  const data = 'values' in source ? source : groupLightness(source);
+  const palette = data.metadata.palette,
+    stride = palette.length + 1;
   const bounds = palette.map((p, k) =>
     scriptLightnessBounds(p, roles[k], preset).map((v) => v - p[0]),
   );
@@ -47,26 +57,28 @@ export function estimateSetting(data: Decomposition, roles: Role[], preset: Pres
     maxL = -Infinity,
     limit = 1;
   const candidates: number[] = [];
-  for (let i = 0; i < data.lab.length; i += 4) {
-    let lo = data.lab[i],
+  for (let g = 0; g < data.counts.length; g++) {
+    const i = g * stride;
+    let lo = data.values[i],
       hi = lo;
     for (let k = 0; k < palette.length; k++) {
-      const w = data.weights[Math.floor(k / 4)][i + (k % 4)];
+      const w = data.values[i + 1 + k];
       lo += w * bounds[k][0];
       hi += w * bounds[k][1];
     }
     minL = Math.min(minL, lo);
     maxL = Math.max(maxL, hi);
-    if (lo < -1e-7 || hi > 1 + 1e-7) {
-      count++;
-      candidates.push(i);
-      const L = data.lab[i];
+    if (lo < -LIGHTNESS_CLAMP_TOLERANCE || hi > 1 + LIGHTNESS_CLAMP_TOLERANCE) {
+      count += data.counts[g];
+      candidates.push(g);
+      const L = data.values[i];
       if (lo < 0) limit = Math.min(limit, L / (L - lo));
       if (hi > 1) limit = Math.min(limit, (1 - L) / (hi - L));
     }
   }
   const frames: Uint8Array[] = [];
   const actual = new Set<number>();
+  let sampledOutPixels = 0;
   let actualMin = Infinity,
     actualMax = -Infinity,
     maxClampedPixels = 0;
@@ -76,15 +88,18 @@ export function estimateSetting(data: Decomposition, roles: Role[], preset: Pres
       Uint8Array.from(q.flatMap((p) => labToRgb([Math.max(0, Math.min(1, p[0])), p[1], p[2]]))),
     );
     let frameOut = 0;
-    for (const i of candidates) {
-      let L = data.lab[i];
-      for (let k = 0; k < q.length; k++)
-        L += data.weights[Math.floor(k / 4)][i + (k % 4)] * (q[k][0] - palette[k][0]);
+    for (const g of candidates) {
+      const i = g * stride;
+      let L = data.values[i];
+      for (let k = 0; k < q.length; k++) L += data.values[i + 1 + k] * (q[k][0] - palette[k][0]);
       actualMin = Math.min(actualMin, L);
       actualMax = Math.max(actualMax, L);
-      if (L < -1e-7 || L > 1 + 1e-7) {
-        actual.add(i / 4);
-        frameOut++;
+      if (L < -LIGHTNESS_CLAMP_TOLERANCE || L > 1 + LIGHTNESS_CLAMP_TOLERANCE) {
+        if (!actual.has(g)) {
+          actual.add(g);
+          sampledOutPixels += data.counts[g];
+        }
+        frameOut += data.counts[g];
       }
     }
     maxClampedPixels = Math.max(maxClampedPixels, frameOut);
@@ -107,7 +122,7 @@ export function estimateSetting(data: Decomposition, roles: Role[], preset: Pres
         ? undefined
         : 'これより短くすると、点滅の基準を超えます。',
     lightnessPotentialPixels: count,
-    sampledOutPixels: actual.size,
+    sampledOutPixels,
     maxClampedPixels,
     maxExcursion,
     sampledMinL: actualMin,

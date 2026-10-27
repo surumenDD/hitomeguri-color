@@ -1,6 +1,6 @@
-import type { Decomposition } from '../palette/types';
 import type { Preset, Role } from '../script';
 import type { Estimate } from './estimate';
+import type { LightnessGroups } from './groups';
 export class SafetyClient {
   private worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
   private id = 0;
@@ -8,8 +8,8 @@ export class SafetyClient {
     number,
     { resolve: (r: Estimate) => void; reject: (e: Error) => void }
   >();
-  constructor(data: Decomposition) {
-    this.worker.postMessage({ data });
+  constructor(data: LightnessGroups) {
+    this.worker.postMessage({ data }, [data.values.buffer, data.counts.buffer]);
     this.worker.onmessage = ({
       data,
     }: {

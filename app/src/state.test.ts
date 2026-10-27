@@ -13,7 +13,17 @@ vi.mock('./foreground', async (original) => ({
   ...(await original<typeof import('./foreground')>()),
   loadForeground: vi.fn(),
 }));
-vi.mock('./palette/client', () => ({ preprocessInWorker: vi.fn(async () => ({})) }));
+vi.mock('./palette/client', () => ({
+  PaletteClient: class {
+    async preprocess() {
+      return {};
+    }
+    async materialize() {
+      return { data: {}, groups: {} };
+    }
+    dispose() {}
+  },
+}));
 vi.mock('./palette/islands', () => ({
   curate: vi.fn(() => []),
   materializeIslands: (base: unknown) => base,

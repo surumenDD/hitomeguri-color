@@ -29,6 +29,7 @@ npm run test:showcase     # 運河・24秒の展示用MP4/GIF。媒体はGit管�
 node test/showcase-render.mjs <出力先> 名前=<見本のid か画像のパス>:<台本>  # README のループの素材。作り方は ../experiments/brand/reel.sh
 npm run test:secrets      # 全refのパッチ・コミットメッセージと追跡ファイルの走査
 npm run test:captures     # 島の8時点と UI の画面写真
+$env:HITOMEGURI_NATIVE_ESTIMATE='1'; npx vitest run src/safety/estimate-native.test.ts # 見積もりが、見本の原寸と生成した絵で凍結した参照版と一致するか（約20秒）
 node test/seam.mjs        # test:matrix の1080p動画の継ぎ目を測定
 node test/v02-foreground.mjs # 人物の線形合成・元に戻る・人物なしの画素一致、PNG、2048px縮小、1080p
 node test/v02-browser.mjs # 配布版3ブラウザの人物の操作だけを検査（先に build）
