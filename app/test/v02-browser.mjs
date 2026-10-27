@@ -38,6 +38,8 @@ try {
           { timeout: 60000 },
         );
       await ready();
+      await page.getByRole('button', { name: '運河の街', exact: true }).click();
+      await ready();
       const tabTo = async (target) => {
         for (const key of ['Tab', 'Shift+Tab'])
           for (let i = 0; i < 150; i++) {
@@ -72,7 +74,7 @@ try {
       row.failure = e.stack;
       console.error(name, e.stack);
       await page.screenshot({
-        path: path.join(root, `reports/V02-v2-${name}-failure.png`),
+        path: path.join(root, `test/results/V02S-${name}-failure.png`),
         fullPage: true,
       });
     } finally {

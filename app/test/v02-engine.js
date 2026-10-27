@@ -23,7 +23,7 @@ const encode = (c) =>
       Math.min(1, c <= 0.0031308 ? 12.92 * c : 1.055 * Math.max(0, c) ** (1 / 2.4) - 0.055),
     ) * 255,
   );
-async function load(source, fgSource, x = 0.68) {
+async function load(source, fgSource, x = 0.68, settings = {}) {
   const image = await decodeImage(source);
   const originalBackground = image.data.slice();
   const base = await preprocessInWorker(image);
@@ -48,7 +48,14 @@ async function load(source, fgSource, x = 0.68) {
     data,
     originalBackground,
     roles: islands.map((i) => i.role),
-    foreground: { ...FOREGROUND_DEFAULTS, x, data: fgData, name: '人物', thumbnail: '' },
+    foreground: {
+      ...FOREGROUND_DEFAULTS,
+      x,
+      ...settings,
+      data: fgData,
+      name: '人物',
+      thumbnail: '',
+    },
   };
   return {
     width: data.metadata.width,
@@ -102,19 +109,27 @@ function verify() {
     ref = renderer(true),
     { data, foreground: fg } = scene;
   const bounds = foregroundBounds(fg.data, data.metadata.width / data.metadata.height, fg);
+  // The renderer resolves nearest-texel boundary roundoff toward the next texel.
+  const foregroundTexel = (x, y) => {
+    const fx = ((x + 0.5) / data.metadata.width - bounds.x) / bounds.width;
+    const fy = ((y + 0.5) / data.metadata.height - bounds.y) / bounds.height;
+    if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return undefined;
+    return (
+      (Math.min(fg.data.height - 1, Math.floor(fy * fg.data.height + 0.001)) * fg.data.width +
+        Math.min(fg.data.width - 1, Math.floor(fx * fg.data.width + 0.001))) *
+      4
+    );
+  };
   const startLight = foregroundLight(data.metadata, scene.roles, data.metadata.palette);
   const expected = new Uint8Array(data.metadata.width * data.metadata.height * 4);
   for (let y = 0; y < data.metadata.height; y++)
     for (let x = 0; x < data.metadata.width; x++) {
       const offset = (y * data.metadata.width + x) * 4;
-      const fx = ((x + 0.5) / data.metadata.width - bounds.x) / bounds.width,
-        fy = ((y + 0.5) / data.metadata.height - bounds.y) / bounds.height;
       const bg = labToLinear(gamutMap(Array.from(data.lab.subarray(offset, offset + 3))));
       let linear = bg,
         alpha = data.alpha[offset / 4] / 255;
-      if (fx >= 0 && fx < 1 && fy >= 0 && fy < 1) {
-        const j =
-          (Math.floor(fy * fg.data.height) * fg.data.width + Math.floor(fx * fg.data.width)) * 4;
+      const j = foregroundTexel(x, y);
+      if (j !== undefined) {
         const a = fg.data.lab[j + 3],
           fgLinear = adaptForeground(
             labToLinear(Array.from(fg.data.lab.subarray(j, j + 3))),
@@ -133,17 +148,13 @@ function verify() {
     adaptation = [];
   let sampleX, sampleY, sampleLab, sampleAlpha;
   for (let y = 0; y < data.metadata.height && sampleY === undefined; y++) {
-    const fy = ((y + 0.5) / data.metadata.height - bounds.y) / bounds.height;
-    if (fy < 0 || fy >= 1) continue;
     for (
       let x = Math.max(0, Math.ceil(bounds.x * data.metadata.width));
       x < Math.min(data.metadata.width, (bounds.x + bounds.width) * data.metadata.width);
       x++
     ) {
-      const fx = ((x + 0.5) / data.metadata.width - bounds.x) / bounds.width;
-      if (fx < 0 || fx >= 1) continue;
-      const j =
-        (Math.floor(fy * fg.data.height) * fg.data.width + Math.floor(fx * fg.data.width)) * 4;
+      const j = foregroundTexel(x, y);
+      if (j === undefined) continue;
       if (fg.data.lab[j + 3] < 0.9) continue;
       sampleX = x;
       sampleY = y;
@@ -351,6 +362,21 @@ async function resizeTest() {
   const data = await loadForeground(canvas.toDataURL());
   return { width: data.width, height: data.height };
 }
+function thumbnail() {
+  const r = renderer();
+  try {
+    pixels(r, PRESETS.day, 0);
+    const canvas = document.createElement('canvas');
+    canvas.width = 96;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(r.gl.canvas, 0, 0, 96, 64);
+    return canvas.toDataURL('image/png').split(',')[1];
+  } finally {
+    r.dispose();
+  }
+}
 window.foregroundTest = {
   load,
   verify,
@@ -359,4 +385,5 @@ window.foregroundTest = {
   getScene: () => scene,
   adaptForeground,
   resizeTest,
+  thumbnail,
 };

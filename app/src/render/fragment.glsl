@@ -91,7 +91,10 @@ void main(){
   if(uHasForeground){
     vec2 fgUV=(uv-uForegroundBounds.xy)/uForegroundBounds.zw;
     if(all(greaterThanEqual(fgUV,vec2(0.)))&&all(lessThanEqual(fgUV,vec2(1.)))){
-      vec4 fg=texture(uForeground,fgUV);
+      // Make nearest-texel ties deterministic; large placements hit integer boundaries.
+      ivec2 fgSize=textureSize(uForeground,0);
+      ivec2 fgPixel=clamp(ivec2(floor(fgUV*vec2(fgSize)+.001)),ivec2(0),fgSize-1);
+      vec4 fg=texelFetch(uForeground,fgPixel,0);
       if(fg.a>0.){
         vec3 fgLinear=clamp(labToLinear(fg.xyz)*(vec3(1.)+
           uForegroundBlend*(uForegroundExposure*uForegroundColor-vec3(1.))),0.,1.);

@@ -80,21 +80,19 @@ export function ForegroundPanel({
           </label>
         </>
       ) : (
-        <>
-          <p className="foreground-description">
-            背景が透けた PNG の人物を重ねられます。人物は色の島に入れず、時刻になじませます。
-          </p>
-          <button
-            ref={add}
-            type="button"
-            className="secondary"
-            disabled={busy || !state.image}
-            onClick={() => input.current?.click()}
-          >
-            人物の絵を重ねる
-          </button>
-        </>
+        <p className="foreground-description">
+          背景が透けた PNG の人物を重ねられます。人物は色の島に入れず、時刻になじませます。
+        </p>
       )}
+      <button
+        ref={add}
+        type="button"
+        className="secondary"
+        disabled={busy || !state.image}
+        onClick={() => input.current?.click()}
+      >
+        {fg ? '人物の絵を替える' : '人物の絵を重ねる'}
+      </button>
       <input
         ref={input}
         className="sr-only"

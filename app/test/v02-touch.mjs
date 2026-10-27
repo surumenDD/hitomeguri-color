@@ -23,6 +23,8 @@ try {
       { timeout: 60000 },
     );
   await ready();
+  await page.getByRole('button', { name: '運河の街', exact: true }).click();
+  await ready();
   await page
     .getByLabel('人物の画像ファイル', { exact: true })
     .setInputFiles(path.join(root, '../assets/showcase/layer/girl.png'));
@@ -56,7 +58,7 @@ try {
   assert.ok(after.left > before.left && after.top < before.top);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await page.screenshot({
-    path: path.join(root, 'reports/V02-v2-touch-mobile.png'),
+    path: path.join(root, 'test/results/V02S-touch-mobile.png'),
     fullPage: true,
   });
   await writeFile(

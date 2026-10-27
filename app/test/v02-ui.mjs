@@ -17,7 +17,7 @@ export async function foregroundOperations(page, { root, name, activate, tabTo, 
     );
   const capture = (state) =>
     page.screenshot({
-      path: path.join(root, `reports/V02-v2-${name}-${state}.png`),
+      path: path.join(root, `test/results/V02S-${name}-${state}.png`),
       fullPage: true,
     });
   await capture('empty');

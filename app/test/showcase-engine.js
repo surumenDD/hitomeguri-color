@@ -51,6 +51,10 @@ async function load(source, overrides = {}, foregroundOptions) {
     foregroundSource = foregroundOptions.source;
   }
   const sample = SAMPLES.find((s) => s.id === source);
+  if (!foregroundOptions && sample?.foreground) {
+    settings = foregroundSettings(sample.foreground);
+    foregroundSource = sample.foreground.url;
+  }
   const base = await preprocessInWorker(await decodeImage(sample ? sample.url : source));
   const islands = curate(sample ? sample.id : '', base.metadata);
   for (const [k, role] of Object.entries(overrides)) islands[Number(k)].role = role;
@@ -59,7 +63,10 @@ async function load(source, overrides = {}, foregroundOptions) {
     foreground = {
       ...settings,
       data: await loadForeground(foregroundSource),
-      name: foregroundName(foregroundSource),
+      name:
+        !foregroundOptions && sample?.foreground
+          ? sample.foreground.name
+          : foregroundName(foregroundSource),
       thumbnail: '',
     };
   return scene.roles;
