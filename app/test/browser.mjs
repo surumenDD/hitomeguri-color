@@ -441,6 +441,41 @@ async function videoNoticeChecks(context, origin) {
   return rows;
 }
 
+// Choose a file in the task that mounts the input, before React's passive effect opens the
+// first sample. The visitor's picture must win (the live WebKit site lost it 3 times in 5).
+async function earlyPickCheck(context, origin) {
+  const page = await context.newPage();
+  try {
+    await page.addInitScript(() => {
+      new MutationObserver((_, observer) => {
+        const input = document.querySelector('input[aria-label="画像ファイル"]');
+        if (!input) return;
+        observer.disconnect();
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 1;
+        const bytes = Uint8Array.from(atob(canvas.toDataURL('image/png').split(',')[1]), (c) =>
+          c.charCodeAt(0),
+        );
+        const files = new DataTransfer();
+        files.items.add(new File([bytes], 'early-pick.png', { type: 'image/png' }));
+        input.files = files.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }).observe(document, { childList: true, subtree: true });
+    });
+    await page.goto(origin);
+    await page.waitForFunction(() =>
+      document.querySelector('.sr-only[role="status"]')?.textContent.includes('準備できました'),
+    );
+    await page.waitForTimeout(1000);
+    const label = await page.locator('.picture canvas').getAttribute('aria-label');
+    assert.equal(label, 'early-pickの色の台本');
+    console.log('Early pick: a picture chosen before the first sample opens is kept.');
+    return { label };
+  } finally {
+    await page.close();
+  }
+}
+
 try {
   server = await createServer({
     root,
@@ -472,6 +507,7 @@ try {
   report.pngExport = await pngExportChecks(harness);
   report.tinyVideoExport = await tinyVideoExportChecks(harness);
   report.videoNotices = await videoNoticeChecks(context, origin);
+  report.earlyPick = await earlyPickCheck(context, origin);
   report.pngExportCrossBrowser = {};
   for (const [name, launcher] of Object.entries({ firefox, webkit })) {
     const engine = await launcher.launch();

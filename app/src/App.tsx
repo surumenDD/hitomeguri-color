@@ -64,7 +64,9 @@ export function App() {
     let player: Player | undefined;
     try {
       if (canvas.current) player = new Player(canvas.current, store);
-      void store.load(SAMPLES[0].url, SAMPLES[0].name, SAMPLES[0].id);
+      // A picture chosen or dropped before this effect runs must not be replaced by the sample.
+      const { loading, image } = store.getState();
+      if (!loading && !image) void store.load(SAMPLES[0].url, SAMPLES[0].name, SAMPLES[0].id);
     } catch (error) {
       store.fail(error);
     }
