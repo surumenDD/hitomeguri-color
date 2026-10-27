@@ -1,5 +1,6 @@
-// Exports one day of each picture as a 960x640 MP4 with the app's exporter, for the README loop.
-// Usage: node test/showcase-render.mjs <outDir> <name>=<sample id | image path>:<preset>[@<island>=<role>,...][#foreground=<image path>&x=0.68&y=1&size=0.7&blend=0.8] ...
+// Exports one day of each picture as an MP4 with the app's exporter, for the README loop.
+// Usage: node test/showcase-render.mjs [--size=<width>x<height>] <outDir> <name>=<sample id | image path>:<preset>[@<island>=<role>,...][#foreground=<image path>&x=0.68&y=1&size=0.7&blend=0.8] ...
+// --size defaults to 960x640; the exporter takes even sizes up to 1920 on the long edge.
 // The optional @ list overrides the automatic role of an island (by palette index).
 // The optional # suffix adds a cut-out foreground over the moving background. x and y are its
 // bottom-centre in picture coordinates (x 0..1, y 0.2..1+size/2), size is 0.2..1.2 of the picture
@@ -14,7 +15,10 @@ import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 import { chromium } from '../../tools/visual-qa/node_modules/playwright-core/index.mjs';
 
-const [out, ...jobs] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const sizeArg = args.find((a) => a.startsWith('--size='));
+const [width, height] = (sizeArg?.slice('--size='.length) ?? '960x640').split('x').map(Number);
+const [out, ...jobs] = args.filter((a) => a !== sizeArg);
 const root = fileURLToPath(new URL('..', import.meta.url));
 const sources = path.join(root, 'test/results/showcase-src');
 await mkdir(out, { recursive: true });
@@ -120,8 +124,8 @@ try {
       );
     } else await page.evaluate(([s, o]) => window.showcase.load(s, o), [source, overrides]);
     const video = await page.evaluate(
-      (p) => window.showcase.video(p, { width: 960, height: 640 }),
-      preset,
+      ([p, w, h]) => window.showcase.video(p, { width: w, height: h }),
+      [preset, width, height],
     );
     await writeFile(path.join(out, `${name}.mp4`), Buffer.from(video.base64, 'base64'));
     console.log(name, preset, video.frames, 'frames');
