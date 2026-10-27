@@ -13,6 +13,7 @@
     "lint": "biome check .",
     "check": "tsc --noEmit && npm run lint && npm test && npm run test:production && npm run licenses",
     "test:browser": "node test/browser.mjs",
+    "test:robustness": "node test/robustness.mjs",
     "test:production": "npm run build && node test/production.mjs",
     "test:compat": "node test/m4-browser.mjs",
     "test:loading": "node test/m4-loading.mjs",
