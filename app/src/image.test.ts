@@ -43,6 +43,7 @@ describe('image decoding', () => {
 
     expect(fetch).toHaveBeenCalledWith('/large.png');
     expect(createBitmap).toHaveBeenCalledWith(blob, {
+      imageOrientation: 'from-image',
       resizeWidth: 2048,
       resizeHeight: 1536,
       resizeQuality: 'high',
@@ -66,6 +67,7 @@ describe('image decoding', () => {
       originalSize: { width: 300, height: 6000 },
     });
     expect(createBitmap).toHaveBeenCalledWith(expect.anything(), {
+      imageOrientation: 'from-image',
       resizeWidth: 102,
       resizeHeight: 2048,
       resizeQuality: 'high',
@@ -111,6 +113,7 @@ describe('image decoding', () => {
     try {
       await decodeImage(file, { maxEdge: 2048, resize: true });
       expect(createBitmap).toHaveBeenCalledWith(file, {
+        imageOrientation: 'from-image',
         resizeWidth: 2048,
         resizeHeight: 1536,
         resizeQuality: 'high',
