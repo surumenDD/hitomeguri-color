@@ -27,9 +27,14 @@ vi.mock('./safety/client', () => ({
 }));
 
 const person: ForegroundData = { width: 1, height: 1, lab: new Float32Array([0.5, 0, 0, 0.5]) };
-const festival = SAMPLES[0],
-  seaside = SAMPLES[1],
-  canal = SAMPLES[2];
+const sample = (id: string) => {
+  const found = SAMPLES.find((s) => s.id === id);
+  if (!found) throw new Error(`missing sample ${id}`);
+  return found;
+};
+const festival = sample('festival'),
+  seaside = sample('seaside'),
+  canal = sample('canal');
 let store: AppStore;
 const open = (sample: (typeof SAMPLES)[number]) => store.load(sample.url, sample.name, sample.id);
 

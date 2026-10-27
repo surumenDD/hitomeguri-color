@@ -26,18 +26,18 @@ export interface Sample {
 
 export const SAMPLES: Sample[] = [
   {
-    id: 'festival',
-    name: 'お祭り',
-    url: festival,
-    thumbnail: festivalThumb,
-    foreground: { url: girlYukata, name: '浴衣の女の子', x: 0.5, y: 1.26, size: 1.05, blend: 0.8 },
-  },
-  {
     id: 'seaside',
     name: '海辺',
     url: seaside,
     thumbnail: seasideThumb,
     foreground: { url: girl, name: '海辺の女の子', x: 0.76, y: 1.6, size: 1.2, blend: 0.8 },
+  },
+  {
+    id: 'festival',
+    name: 'お祭り',
+    url: festival,
+    thumbnail: festivalThumb,
+    foreground: { url: girlYukata, name: '浴衣の女の子', x: 0.5, y: 1.26, size: 1.05, blend: 0.8 },
   },
   { id: 'canal', name: '運河の街', url: canal, thumbnail: canalThumb },
   { id: 'snow', name: '雪の村', url: snow, thumbnail: snowThumb },

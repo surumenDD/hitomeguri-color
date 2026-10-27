@@ -132,19 +132,19 @@ try {
         ).values(),
       ];
       assert.equal(fullImages.length, 2);
-      assert.ok(fullImages.some((r) => /\/festival-/.test(r.name)));
-      assert.ok(fullImages.some((r) => /\/girl-yukata-/.test(r.name)));
+      assert.ok(fullImages.some((r) => /\/seaside-/.test(r.name)));
+      assert.ok(fullImages.some((r) => /\/girl-(?!yukata)/.test(r.name)));
       row.loading.unselectedFullImages = 0;
-      assert.equal(await person(), '浴衣の女の子');
-      assert.equal(await button('お祭り').getAttribute('aria-pressed'), 'true');
-      await assertPlacement(0.5, 1.26, 1.05);
+      assert.equal(await person(), '海辺の女の子');
+      assert.equal(await button('海辺').getAttribute('aria-pressed'), 'true');
+      await assertPlacement(0.76, 1.6, 1.2);
       assert.equal(await page.locator('.when span').textContent(), '0.0 / 24 秒');
       assert.equal(await page.locator('.thumb').count(), 7);
       assert.deepEqual(
         await page
           .locator('.thumb')
           .evaluateAll((nodes) => nodes.map((n) => n.getAttribute('aria-label'))),
-        ['お祭り', '海辺', '運河の街', '雪の村', '灯台の岬', 'オアシス', '港町'],
+        ['海辺', 'お祭り', '運河の街', '雪の村', '灯台の岬', 'オアシス', '港町'],
       );
       assert.ok(
         await page
@@ -157,7 +157,7 @@ try {
       await page
         .locator('.samples')
         .screenshot({ path: path.join(root, `reports/V02S-${name}-samples.png`) });
-      await audit('initial-festival');
+      await audit('initial-seaside');
       await select('海辺');
       assert.equal(await person(), '海辺の女の子');
       await assertPlacement(0.76, 1.6, 1.2);
