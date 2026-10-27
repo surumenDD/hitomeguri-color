@@ -322,6 +322,125 @@ async function imageDecodingChecks(page) {
   return result;
 }
 
+async function tinyVideoExportChecks(page) {
+  const rows = [];
+  for (const edge of [1, 2, 16]) {
+    const result = await page.evaluate(async (edge) => {
+      const { exportVideo, videoExportSupport } = await import('/src/export/video.ts');
+      const { preprocessInWorker } = await import('/src/palette/client.ts');
+      const { Renderer } = await import('/src/render/index.ts');
+      const { DAYLIGHT, inferRoles, rolePaletteAt } = await import('/src/script/index.ts');
+      const pixels = new Uint8ClampedArray(edge * edge * 4);
+      for (let y = 0; y < edge; y++)
+        for (let x = 0; x < edge; x++) {
+          const gray = (x + y) % 2 ? 160 : 64;
+          pixels.set(
+            edge === 1 ? [81, 149, 187, 255] : [gray, gray, gray, 255],
+            (y * edge + x) * 4,
+          );
+        }
+      const data = await preprocessInWorker(new ImageData(pixels, edge, edge));
+      const roles = inferRoles(data.metadata).map((i) => i.role);
+      const renderer = new Renderer(document.createElement('canvas'));
+      let reference,
+        nearestMaxError = 0;
+      try {
+        renderer.upload(data);
+        const palette = rolePaletteAt(data.metadata.palette, roles, 0, DAYLIGHT);
+        renderer.size(edge, edge);
+        renderer.draw(palette);
+        reference = renderer.read();
+        renderer.size(512, 512);
+        renderer.draw(palette, { contain: true });
+        const enlarged = renderer.read();
+        for (let y = 0; y < 512; y++)
+          for (let x = 0; x < 512; x++)
+            for (let c = 0; c < 4; c++)
+              nearestMaxError = Math.max(
+                nearestMaxError,
+                Math.abs(
+                  enlarged[(y * 512 + x) * 4 + c] -
+                    reference[
+                      (Math.floor((y * edge) / 512) * edge + Math.floor((x * edge) / 512)) * 4 + c
+                    ],
+                ),
+              );
+      } finally {
+        renderer.dispose();
+      }
+      const start = performance.now();
+      const output = await exportVideo(data, roles, DAYLIGHT);
+      const elapsedMs = Math.round(performance.now() - start);
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(output.blob);
+      });
+      return {
+        edge,
+        support: await videoExportSupport(edge, edge),
+        width: output.width,
+        height: output.height,
+        frames: output.frames,
+        bytes: output.blob.size,
+        elapsedMs,
+        nearestMaxError,
+        wcag: output.report.wcag.pass,
+        itu: output.report.itu.pass,
+        base64,
+      };
+    }, edge);
+    const { base64, ...row } = result;
+    await writeFile(path.join(out, `tiny-${edge}x${edge}.mp4`), Buffer.from(base64, 'base64'));
+    assert.equal(row.support, 'supported');
+    assert.deepEqual([row.width, row.height, row.frames], [512, 512, 720]);
+    assert.equal(row.nearestMaxError, 0, 'exact nearest-neighbor grid before encoding');
+    assert.ok(row.bytes > 0 && row.wcag && row.itu);
+    rows.push(row);
+    console.log(`Tiny video: ${JSON.stringify(row)}`);
+  }
+  return rows;
+}
+
+async function videoNoticeChecks(context, origin) {
+  const rows = [];
+  for (const missingApi of [false, true]) {
+    const page = await context.newPage();
+    try {
+      await page.addInitScript((missing) => {
+        if (missing) window.VideoEncoder = undefined;
+        // Only this picture's size is refused; an ordinary 1280×720 still encodes.
+        else
+          VideoEncoder.isConfigSupported = async ({ width, height }) => ({
+            supported: width === 1280 && height === 720,
+          });
+      }, missingApi);
+      await page.goto(origin);
+      await page.waitForFunction(() =>
+        document.querySelector('.sr-only[role="status"]')?.textContent.includes('準備できました'),
+      );
+      const expected = missingApi
+        ? 'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。'
+        : 'この絵の大きさでは動画を書き出せません。静止画の保存はこのまま使えます。';
+      assert.equal(await page.locator('.actions [role="alert"]').textContent(), expected);
+      assert.equal(
+        await page.getByRole('button', { name: '動画を書き出す', exact: true }).isEnabled(),
+        false,
+      );
+      assert.equal(
+        await page.getByRole('button', { name: 'この瞬間を画像で保存', exact: true }).isEnabled(),
+        true,
+      );
+      rows.push({ missingApi, guidance: expected, videoEnabled: false, pngEnabled: true });
+    } finally {
+      await page.close();
+    }
+  }
+  console.log('Video notices: missing API and unsupported configuration use distinct guidance.');
+  return rows;
+}
+
 try {
   server = await createServer({
     root,
@@ -351,6 +470,8 @@ try {
   await harness.waitForFunction(() => window.harness);
   report.imageDecoding = await imageDecodingChecks(harness);
   report.pngExport = await pngExportChecks(harness);
+  report.tinyVideoExport = await tinyVideoExportChecks(harness);
+  report.videoNotices = await videoNoticeChecks(context, origin);
   report.pngExportCrossBrowser = {};
   for (const [name, launcher] of Object.entries({ firefox, webkit })) {
     const engine = await launcher.launch();

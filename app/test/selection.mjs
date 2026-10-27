@@ -193,6 +193,9 @@ export async function exportedColours(page, out) {
   await page.waitForFunction(() => !document.querySelector('[role="progressbar"]'), null, {
     timeout: 30000,
   });
+  // The 256×128 fixture is enlarged to the video's minimum long edge of 512.
+  const width = 512,
+    height = 256;
   const { stdout } = await promisify(execFile)(
     'ffmpeg',
     [
@@ -208,11 +211,11 @@ export async function exportedColours(page, out) {
       'rgb24',
       'pipe:1',
     ],
-    { encoding: 'buffer', windowsHide: true, maxBuffer: 256 * 128 * 3 + 4096 },
+    { encoding: 'buffer', windowsHide: true, maxBuffer: width * height * 3 + 4096 },
   );
-  assert.equal(stdout.length, 256 * 128 * 3);
+  assert.equal(stdout.length, width * height * 3);
   const videoPixels = POINTS.map(([x, y]) => {
-    const i = (Math.floor(y * 128) * 256 + Math.floor(x * 256)) * 3;
+    const i = (Math.floor(y * height) * width + Math.floor(x * width)) * 3;
     return [...stdout.subarray(i, i + 3), 255];
   });
   const measured = ratios(before, videoPixels);

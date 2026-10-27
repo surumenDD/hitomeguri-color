@@ -19,6 +19,8 @@ const out = path.join(root, 'test/results');
 const presets = ['1日の光', '長い夕暮れ', '夜の灯り'];
 const videoUnsupported =
   'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。';
+const videoSizeUnsupported =
+  'この絵の大きさでは動画を書き出せません。静止画の保存はこのまま使えます。';
 const fixtures = [
   ['white-person', '白い背景40%・人物の塊', 'person'],
   ['white-border', '白い縁15%', 'white-border'],
@@ -654,7 +656,8 @@ async function testFixture(browser, url, fixture, file, settings) {
       ...(await page.evaluate(async () => {
         const notes = [...document.querySelectorAll('.actions p, .actions [role="alert"]')];
         const canvas = document.querySelector('.picture canvas');
-        const scale = Math.min(1, 1920 / Math.max(canvas.width, canvas.height));
+        const edge = Math.max(canvas.width, canvas.height);
+        const scale = Math.min(1920 / edge, Math.max(1, 512 / edge));
         let configSupported = false;
         try {
           configSupported =
@@ -820,7 +823,8 @@ function problems(result) {
     if (operation.skipped || operation.detail?.skipped)
       issues.push(`${operation.stage}: 未実施（${operation.reason ?? operation.detail?.reason}）`);
     for (const alert of operation.state?.alerts ?? []) {
-      if (alert === videoUnsupported && result.video?.configSupported === false) continue;
+      const guidance = result.video?.videoEncoder ? videoSizeUnsupported : videoUnsupported;
+      if (alert === guidance && result.video?.configSupported === false) continue;
       if (alert !== operation.state.editNote) issues.push(`${operation.stage}: ${alert}`);
     }
   }
@@ -833,11 +837,13 @@ function problems(result) {
     issues.push('動画を書き出せない');
   if (result.video?.configSupported === false) {
     if (result.video.enabled) issues.push('VideoEncoder 非対応なのに動画ボタンが有効');
-    if (!result.video.guidance.length) issues.push('VideoEncoder 非対応の案内が出ない');
+    const guidance = result.video.videoEncoder ? videoSizeUnsupported : videoUnsupported;
+    if (!result.video.guidance.includes(guidance))
+      issues.push('VideoEncoder 非対応の原因に合った案内が出ない');
     if (result.video.initial.enabled)
       issues.push('VideoEncoder 非対応なのに開いた直後の動画ボタンが有効');
-    if (!result.video.initial.guidance.includes(videoUnsupported))
-      issues.push('VideoEncoder 非対応の案内が開いた直後に出ない');
+    if (!result.video.initial.guidance.includes(guidance))
+      issues.push('VideoEncoder 非対応の原因に合った案内が開いた直後に出ない');
   } else if (result.video?.configSupported === true && !result.video.initial.enabled) {
     issues.push('VideoEncoder 対応なのに開いた直後の動画ボタンが無効');
   }

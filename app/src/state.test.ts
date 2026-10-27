@@ -67,6 +67,11 @@ afterEach(() => {
 });
 
 describe('video availability while opening a picture', () => {
+  it('retains the missing API reason for the notice', async () => {
+    vi.stubGlobal('VideoEncoder', undefined);
+    await open(canal);
+    expect(store.getState().videoSupport).toBe('browser-unsupported');
+  });
   it('retains the displayed picture capability when overlapping replacement loads fail', async () => {
     vi.stubGlobal('VideoEncoder', {
       isConfigSupported: vi.fn().mockResolvedValue({ supported: true }),
@@ -88,7 +93,7 @@ describe('video availability while opening a picture', () => {
     expect(store.getState()).toMatchObject({
       image: { id: canal.id },
       loading: false,
-      videoSupported: true,
+      videoSupport: 'supported',
     });
   });
   it('keeps availability pending until the codec query completes', async () => {
@@ -103,10 +108,10 @@ describe('video availability while opening a picture', () => {
     const opening = open(canal);
     await vi.waitFor(() => expect(isConfigSupported).toHaveBeenCalled());
     expect(store.getState().loading).toBe(true);
-    expect(store.getState().videoSupported).toBeUndefined();
+    expect(store.getState().videoSupport).toBeUndefined();
     finish({ supported: true });
     await opening;
-    expect(store.getState()).toMatchObject({ loading: false, videoSupported: true });
+    expect(store.getState()).toMatchObject({ loading: false, videoSupport: 'supported' });
   });
   it('does not publish a stale query after another image opens', async () => {
     let finish!: (value: { supported: boolean }) => void;
@@ -125,7 +130,11 @@ describe('video availability while opening a picture', () => {
     await open(seaside);
     finish({ supported: true });
     await first;
-    expect(store.getState()).toMatchObject({ image: { id: seaside.id }, videoSupported: false });
+    // The newer picture's answer (H.264 refused at every size) wins over the stale 'supported'.
+    expect(store.getState()).toMatchObject({
+      image: { id: seaside.id },
+      videoSupport: 'browser-unsupported',
+    });
   });
 });
 

@@ -20,7 +20,8 @@ export interface ExportOptions {
   foreground?: Foreground;
 }
 export const exportSize = (width: number, height: number, maxEdge = 1920): [number, number] => {
-  const scale = Math.min(1, maxEdge / Math.max(width, height));
+  const edge = Math.max(width, height);
+  const scale = Math.min(maxEdge / edge, Math.max(1, 512 / edge));
   return [
     Math.max(2, Math.floor((width * scale) / 2) * 2),
     Math.max(2, Math.floor((height * scale) / 2) * 2),
@@ -28,6 +29,9 @@ export const exportSize = (width: number, height: number, maxEdge = 1920): [numb
 };
 export const VIDEO_UNSUPPORTED =
   'このブラウザでは動画を書き出せません。Chrome・Edge・Firefox（デスクトップ）・Safari 16.4 以降で開いてください。静止画の保存はこのまま使えます。';
+export const VIDEO_SIZE_UNSUPPORTED =
+  'この絵の大きさでは動画を書き出せません。静止画の保存はこのまま使えます。';
+export type VideoSupport = 'supported' | 'browser-unsupported' | 'size-unsupported';
 const videoConfig = (width: number, height: number): VideoEncoderConfig => ({
   // Baseline has no B-frames: all browsers can feed the muxer in presentation order.
   codec: 'avc1.420033',
@@ -38,13 +42,17 @@ const videoConfig = (width: number, height: number): VideoEncoderConfig => ({
   latencyMode: 'quality',
   avc: { format: 'avc' },
 });
-export async function supportsVideoExport(width: number, height: number): Promise<boolean> {
-  if (typeof VideoEncoder === 'undefined') return false;
+export async function videoExportSupport(width: number, height: number): Promise<VideoSupport> {
+  if (typeof VideoEncoder === 'undefined') return 'browser-unsupported';
   try {
     const [w, h] = exportSize(width, height);
-    return !!(await VideoEncoder.isConfigSupported(videoConfig(w, h))).supported;
+    if ((await VideoEncoder.isConfigSupported(videoConfig(w, h))).supported) return 'supported';
+    // Without H.264 at an ordinary size, the browser is the limit rather than this picture.
+    return (await VideoEncoder.isConfigSupported(videoConfig(1280, 720))).supported
+      ? 'size-unsupported'
+      : 'browser-unsupported';
   } catch {
-    return false;
+    return 'size-unsupported';
   }
 }
 const abort = (signal?: AbortSignal) => {
@@ -120,9 +128,7 @@ export async function exportVideo(
   if (typeof VideoEncoder === 'undefined') throw new Error(VIDEO_UNSUPPORTED);
   const config = videoConfig(width, height);
   if (!(await VideoEncoder.isConfigSupported(config)).supported)
-    throw new Error(
-      'この端末はH.264の動画の書き出しに対応していません。静止画の保存はこのまま使えます。',
-    );
+    throw new Error(VIDEO_SIZE_UNSUPPORTED);
   const report = await checkFrames(data, roles, preset, options);
   const estimate = estimateSetting(data, roles, preset);
   if (!estimate.pass) throw new Error(estimate.reason);

@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { labHex } from './color';
 import { legibleOn } from './color/legible';
-import { VIDEO_UNSUPPORTED } from './export/video';
+import { VIDEO_SIZE_UNSUPPORTED, VIDEO_UNSUPPORTED } from './export/video';
 import { PRODUCT } from './product';
 import { Player } from './render/player';
 import { SAMPLES } from './samples';
@@ -544,7 +544,7 @@ export function App() {
                 disabled={
                   busy ||
                   !image ||
-                  state.videoSupported !== true ||
+                  state.videoSupport !== 'supported' ||
                   !state.estimate?.pass ||
                   !!state.exportError
                 }
@@ -572,8 +572,13 @@ export function App() {
                 この瞬間を画像で保存
               </button>
             )}
-            {state.exportError || state.videoSupported === false ? (
-              <Notice>{state.exportError ?? VIDEO_UNSUPPORTED}</Notice>
+            {state.exportError || (state.videoSupport && state.videoSupport !== 'supported') ? (
+              <Notice>
+                {state.exportError ??
+                  (state.videoSupport === 'size-unsupported'
+                    ? VIDEO_SIZE_UNSUPPORTED
+                    : VIDEO_UNSUPPORTED)}
+              </Notice>
             ) : (
               <p className="note" aria-live="polite">
                 {state.saved ?? '点滅の基準に通った動画だけを書き出します。画像は外へ送りません。'}

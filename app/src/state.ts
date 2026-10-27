@@ -3,7 +3,8 @@ import {
   type ExportProgress,
   exportPng,
   exportVideo,
-  supportsVideoExport,
+  type VideoSupport,
+  videoExportSupport,
 } from './export/video';
 import {
   FOREGROUND_DEFAULTS,
@@ -55,7 +56,7 @@ export interface AppState {
   exportError?: string;
   progress?: ExportProgress;
   exporting: boolean;
-  videoSupported?: boolean;
+  videoSupport?: VideoSupport;
   saved?: string;
   limits: { nightDepth: [number, number]; glow: [number, number]; durationSec: [number, number] };
 }
@@ -139,7 +140,7 @@ export class AppStore {
         sample?.foreground ? loadForeground(sample.foreground.url) : undefined,
       ]);
       if (controller.signal.aborted) return;
-      const videoSupport = supportsVideoExport(pixels.width, pixels.height);
+      const support = videoExportSupport(pixels.width, pixels.height);
       palette = new PaletteClient(controller.signal);
       const base = await palette.preprocess(pixels);
       if (controller.signal.aborted || this.disposed) return;
@@ -151,7 +152,7 @@ export class AppStore {
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
       safety = new SafetyClient(groups);
       const estimate = await safety.evaluate(roles, this.state.preset);
-      const videoSupported = await videoSupport;
+      const videoSupport = await support;
       if (controller.signal.aborted || this.disposed || revision !== this.revision) return;
       this.safety?.dispose();
       this.safety = safety;
@@ -186,7 +187,7 @@ export class AppStore {
         estimate,
         checking: false,
         loading: false,
-        videoSupported,
+        videoSupport,
         seconds: 0,
         selected: -1,
         limits: limits(),
@@ -587,7 +588,7 @@ export class AppStore {
       this.state.exporting ||
       this.state.loading ||
       this.state.foregroundLoading ||
-      this.state.videoSupported !== true ||
+      this.state.videoSupport !== 'supported' ||
       !this.state.estimate?.pass
     )
       return;
